@@ -39,9 +39,8 @@ const Materias = () => {
               key:numero,
               numero:numero+1,
               id:value.id_materia,
-              codigo:<label className="letra-pequeña1">{value.codigo}</label>,
+              id_materia:<label className="letra-pequeña1">{value.id_materia}</label>,
               descripcion:<label className="letra-pequeña1">{value.descripcion}</label>,
-              estado_registro: value.estado === 'A' ? 'Activo' : (value.estado === 'I' ? 'Inactivo' : (value.estado === 'E' ? 'Eliminado' : 'Otra condición')),
               fecha_creacion:
                 <span className="letra-pequeña1">
                   {new Date(value.fecha_creacion).toLocaleDateString('es-ES', {
@@ -50,16 +49,10 @@ const Materias = () => {
                     year: 'numeric',
                   })}
                 </span>,
-                hora_creacion:
-                <span className="letra-pequeña1">
-                  {value.hora_creacion}
-                </span>,
+                
                 fecha_actualizacion:<label className="letra-pequeña1">{value.fecha_actualizacion? new Date(value.fecha_actualizacion).toLocaleDateString('es-ES'): 'Este registro no tiene fecha de actualizacion'}</label>,
-                hora_actualizacion:
-                <span className="letra-pequeña1">
-                  {value.hora_actualizacion ?? "Este registro no tiene hora de actualizacion"}
-                </span>,
-                estado_registro: value.estado === 'A' ? 'Activo' : (value.estado === 'I' ? 'Inactivo' : (value.estado === 'E' ? 'Eliminado' : 'Otra condición')),
+                
+                estado: value.estado === 'A' ? 'Activo' : (value.estado === 'I' ? 'Inactivo' : (value.estado === 'E' ? 'Eliminado' : 'Otra condición')),
 
             }
           })
@@ -113,7 +106,7 @@ const Materias = () => {
     let data_request = {
       method: "POST",
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id_asignatura:dataMateriaEdit.id_asignatura,...value}),
+      body: JSON.stringify({id_materia:dataMateriaEdit.id_materia,...value}),
     }
 
     fetch(`${url}update_asignatura/`,data_request).then((data_json)=>{return data_json.json()})
@@ -158,7 +151,7 @@ const Materias = () => {
         'Content-Type': 'application/json'
       },
       body:JSON.stringify({
-              id_asignatura:values.id
+              id_materia:values.id
             })
     }
     fetch(`${url}delete_asignatura/`,request_backend).then((data_request)=>{return data_request.json()})
@@ -186,11 +179,7 @@ const Materias = () => {
           </Row>
           <Row>
             <Form form={form} onFinish={createAsignatura} layout="vertical" autoComplete="on" align="left">
-              <Row>
-                <Form.Item name="codigo" rules={[{required:true,message:"El codigo es requerido"}]} label="Ingrese el codigo de la materia" >
-                  <Input style={{ width: 450 }}/>
-                </Form.Item>
-              </Row>
+              
               
               <Row>
                 <Form.Item name="descripcion" rules={[{required:true,message:"La descripcion es requerido"}]} label="Ingrese la descripcion" >
@@ -213,11 +202,7 @@ const Materias = () => {
           </Row>
           <Row>
             <Form initialValues={dataMateriaEdit} onFinish={actualizarAsignatura} layout="vertical" autoComplete="on" align="left">
-              <Row>
-                <Form.Item name="codigo" rules={[{required:true,message:"El codigo es requerido"}]} label="Ingrese el codigo de la materia" >
-                  <Input style={{ width: 450 }}/>
-                </Form.Item>
-              </Row>
+              
               
               <Row>
                 <Form.Item name="descripcion" rules={[{required:true,message:"La descripcion es requerido"}]} label="Ingrese la descripcion" >
@@ -265,15 +250,13 @@ const Materias = () => {
                dataSource={dataAsignatura}
               >
               <ColumnGroup title="Registro" align="center">
-                <Column title="Código" dataIndex="codigo" width={50} align="center" />
+                <Column title="id" dataIndex="id_materia" width={50} align="center" />
                 <Column title="Descripción" dataIndex="descripcion" width={80} align="center" />
               </ColumnGroup>
               <ColumnGroup title="Campos de auditoria" bordered={true} align="center">
-                <Column title="Fecha de creacion" dataIndex="fecha_creacion" width={90} align="center" />
-                <Column title="Hora de creacion" dataIndex="hora_creacion" width={75} align="center" />
+                <Column title="fecha de creacion" dataIndex="fecha_creacion" width={90} align="center" />
                 <Column title="Fecha de actualizacion" dataIndex="fecha_actualizacion" width={90} align="center" />
-                <Column title="Hora de actualizacion" dataIndex="hora_actualizacion" width={75} align="center" />
-                <Column title="Estado registro" dataIndex="estado_registro" width={100} align="center" />
+                <Column title="Estado registro" dataIndex="estado" width={100} align="center" />
               </ColumnGroup>
             <Column
             title="Acciones"
