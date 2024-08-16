@@ -104,15 +104,15 @@ const Materias = () => {
   const actualizarAsignatura = (value) => {
     setLoadingButton(true)
     let data_request = {
-      method: "POST",
+      method: "PUT",
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({id_materia:dataMateriaEdit.id_materia,...value}),
     }
 
-    fetch(`${url}update_asignatura/`,data_request).then((data_json)=>{return data_json.json()})
+    fetch(`${url}update_asignatura/${dataMateriaEdit.id_materia}`,data_request).then((data_json)=>{return data_json.json()})
     .then((data)=>{
       if(data.ok){
-        mostrarNotificacion('success','Operacion realizada con exito',data.msg)
+        mostrarNotificacion('success','Modificacion exito',data.msg)
       }else if(data.ok == false){
         mostrarNotificacion('success','A ocurrido un error',data.msg_error)
       }else{
@@ -129,16 +129,13 @@ const Materias = () => {
   }
 
   const handleEditarClick = (childrens) => {
-    
     setDataMateriaEdit({
-      key:childrens.key,
-      id_asignatura:childrens.id,
-      codigo:childrens.codigo.props.children,
-      descripcion:childrens.descripcion.props.children
-    })
-    setIdMateria(childrens.id);
-    setModalOpenEdit(true);
-    formKeyRef.current += 1;
+        key: childrens.key,
+        id_materia: childrens.id, // Cambiado a id_materia para coincidir con la API
+        descripcion: childrens.descripcion.props.children // Asegúrate de que `descripcion` está correctamente pasado
+    });
+    setModalOpenEdit(true); // Asegúrate de que esto se esté llamando correctamente
+    formKeyRef.current += 1; // Esto es correcto para forzar la actualización del formulario
   };
 
 
