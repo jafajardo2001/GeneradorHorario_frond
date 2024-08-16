@@ -142,30 +142,35 @@ const Materias = () => {
   };
 
 
-  const deleteTitulo = (values)=>{
-    console.log("Estoy entrando en la funcion de value")
+  const deleteTitulo = (values) => {
+    console.log("Estoy entrando en la funcion de value");
     console.log(values);
-    let request_backend = {
-      method:"POST",
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body:JSON.stringify({
-              id_materia:values.id
-            })
-    }
-    fetch(`${url}delete_asignatura/`,request_backend).then((data_request)=>{return data_request.json()})
-    .then((data)=>{
-      if(data.ok){
-        mostrarNotificacion("success","Operacion Realizada con exito","La materia " +values.descripcion.props.children +" se elimino con exito");
-      }else if(data.ok == false){
-        mostrarNotificacion("error","A ocurrido un error interno",data.msg);
-      }
-    }).finally(()=>{
-      getAsignatura()
-    })
 
-  }
+    let request_backend = {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            id_materia: values.id  // Asegúrate de que el backend espere este campo
+        })
+    };
+
+    fetch(`${url}delete_asignatura/${values.id}`, request_backend)  // ID incluido en la URL
+        .then((data_request) => data_request.json())
+        .then((data) => {
+            if (data.ok) {
+                mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se eliminó con éxito");
+            } else if (data.ok === false) {
+                mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
+            }
+        })
+        .finally(() => {
+            getAsignatura();
+        });
+};
+
 
   useEffect(()=>{
     getAsignatura();
