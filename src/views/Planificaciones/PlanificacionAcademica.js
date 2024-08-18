@@ -36,13 +36,15 @@ const PlanificacionAcademica = () => {
                 return response.json();
             })
             .then((data) => {
+                console.log("Datos obtenidos:", data); // <- Añadir este log para ver los datos obtenidos
                 let Distribucion = data.data.map((value, index) => {
                     return {
-                        index:index+1,
-                        id: value?.id_disrtribucion,
+                        index: index + 1,
+                        id: value?.id_disrtribucion,  // <- Asegúrate de que esto coincide con la clave en la respuesta
                         educacion_global: value?.educacion_global_nombre,
                         carrera: value?.nombre_carrera,
                         id_usuario: value?.id_usuario,
+                        usuario: value?.coordinador,
                         materia: value?.materia,
                         nivel: value?.nivel,
                         paralelo: value?.paralelo,
@@ -113,6 +115,12 @@ const PlanificacionAcademica = () => {
                         align:"center"
                     },
                     {
+                        dataIndex:"id_usuario",
+                        title:"Usuario",
+                        width:50,
+                        align:"center"
+                    },
+                    {
                         dataIndex:"materia",
                         title:"Materias",
                         width:50,
@@ -138,7 +146,7 @@ const PlanificacionAcademica = () => {
                     },
                     {
                         dataIndex:"hora_inicio",
-                        title:"IHora de Inicio",
+                        title:"Hora de Inicio",
                         width:50,
                         align:"center"
                     },
