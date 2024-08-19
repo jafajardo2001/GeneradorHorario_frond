@@ -139,9 +139,11 @@ const Materias = () => {
   };
 
 
-  const deleteTitulo = (values) => {
-    console.log("Estoy entrando en la funcion de value");
-    console.log(values);
+  const updateEstadoAsignatura = (values) => {
+    console.log("Estado actual:", values.estado); // Verificar el estado actual
+
+    const nuevoEstado = values.estado === 'A' ? 'I' : 'A';
+    console.log("Nuevo estado:", nuevoEstado); // Verificar el nuevo estado
 
     let request_backend = {
         method: "PUT",
@@ -150,15 +152,22 @@ const Materias = () => {
             'Accept': 'application/json',
         },
         body: JSON.stringify({
-            id_materia: values.id  // Asegúrate de que el backend espere este campo
+            id_materia: values.id,
+            estado: nuevoEstado
         })
     };
 
-    fetch(`${url}delete_asignatura/${values.id}`, request_backend)  // ID incluido en la URL
+    fetch(`${url}update_estado_asignatura/${values.id}`, request_backend)  // ID incluido en la URL
         .then((data_request) => data_request.json())
         .then((data) => {
+            console.log("Respuesta del backend:", data); // Verificar la respuesta del backend
             if (data.ok) {
-                mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se eliminó con éxito");
+                // Mostrar notificación dependiendo del nuevo estado
+                if (nuevoEstado === 'A') {
+                    mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se activó con éxito");
+                } else if (nuevoEstado === 'I') {
+                    mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se inactivó con éxito");
+                }
             } else if (data.ok === false) {
                 mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
             }
@@ -166,7 +175,11 @@ const Materias = () => {
         .finally(() => {
             getAsignatura();
         });
-};
+  };
+
+
+
+
 
 
   useEffect(()=>{
@@ -276,7 +289,7 @@ const Materias = () => {
                     okText="Si, realizar"
                     title="Confirmar accion"
                     description="¿Deseas realizar la eliminacion de este registro? Al borrar este registro, todos los usuarios que tengan el título académico de este registro quedarán afectados."
-                    onConfirm={() => { deleteTitulo(record) }}
+                    onConfirm={() => { updateEstadoAsignatura(record) }}
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}>
                     <Button type="primary" danger icon={<DeleteOutlined />}/>
                   </Popconfirm>
