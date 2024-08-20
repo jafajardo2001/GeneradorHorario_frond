@@ -74,59 +74,68 @@ const Materias = () => {
     setLoadingButton(true);
 
     let request_op = {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body:JSON.stringify(value),
-      method:"POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(value),
+        method: "POST",
     }
-    fetch(`${url}create_asignatura/`,request_op).then((json_data)=>{return json_data.json()})
-    .then((info_request)=>{
-      if(info_request.ok){
-        mostrarNotificacion("success","Operacion realizada con exito",info_request.msg);
-      }else if(info_request.ok == false){
-        mostrarNotificacion("error","A ocurrido un error",info_request.msg_error);
-      }else{
-        throw new Error("El error es interno en el servidor , porfavor contactese con el administrador.");
-      } 
-    }).catch((error)=>{
-        mostrarNotificacion("error","A ocurrido un error",error.message);      
-    }).finally(()=>{
-      getAsignatura();
-      form.resetFields();
-      setModalOpen(false);
-      setLoadingButton(false);
+
+    fetch(`${url}create_asignatura/`, request_op)
+        .then((json_data) => json_data.json())
+        .then((info_request) => {
+            if (info_request.ok) {
+                // Muestra la descripción en la notificación
+                mostrarNotificacion("success", "Operación realizada con éxito", info_request.message);
+            } else {
+                mostrarNotificacion("error", "Ha ocurrido un error", info_request.msg_error);
+            }
+        })
+        .catch((error) => {
+            mostrarNotificacion("error", "Ha ocurrido un error", error.message);
+        })
+        .finally(() => {
+            getAsignatura();
+            form.resetFields();
+            setModalOpen(false);
+            setLoadingButton(false);
+        });
+}
+
+
+
+
+const actualizarAsignatura = (value) => {
+  setLoadingButton(true);
+
+  let data_request = {
+    method: "PUT",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id_materia: dataMateriaEdit.id_materia, ...value }),
+  };
+
+  fetch(`${url}update_asignatura/${dataMateriaEdit.id_materia}`, data_request)
+    .then((data_json) => {
+      return data_json.json();
     })
-    
-  }
-
-
-  const actualizarAsignatura = (value) => {
-    setLoadingButton(true)
-    let data_request = {
-      method: "PUT",
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({id_materia:dataMateriaEdit.id_materia,...value}),
-    }
-
-    fetch(`${url}update_asignatura/${dataMateriaEdit.id_materia}`,data_request).then((data_json)=>{return data_json.json()})
-    .then((data)=>{
-      if(data.ok){
-        mostrarNotificacion('success','Modificacion exito',data.msg)
-      }else if(data.ok == false){
-        mostrarNotificacion('success','A ocurrido un error',data.msg_error)
-      }else{
-        throw new Error("El error es interno del servidor contactese con el administrador");
+    .then((data) => {
+      if (data.ok) {
+        mostrarNotificacion('success', 'Modificación exitosa', data.message);
+      } else {
+        // Mostrar notificación de error si la descripción ya existe o cualquier otro error
+        mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
       }
-    }).catch((error)=>{
-      mostrarNotificacion('error','A ocurrido un error',error.message)
-    }).finally(()=>{
+    })
+    .catch((error) => {
+      mostrarNotificacion('error', 'Error', error.message);
+    })
+    .finally(() => {
       setModalOpenEdit(false);
       setLoadingButton(false);
       getAsignatura();
-    })
-    
-  }
+    });
+};
+
 
   const handleEditarClick = (childrens) => {
     setDataMateriaEdit({
@@ -139,11 +148,9 @@ const Materias = () => {
   };
 
 
-  const updateEstadoAsignatura = (values) => {
-    console.log("Estado actual:", values.estado); // Verificar el estado actual
-
-    const nuevoEstado = values.estado === 'A' ? 'I' : 'A';
-    console.log("Nuevo estado:", nuevoEstado); // Verificar el nuevo estado
+  const deleteTitulo = (values) => {
+    console.log("Estoy entrando en la funcion de value");
+    console.log(values);
 
     let request_backend = {
         method: "PUT",
@@ -152,22 +159,15 @@ const Materias = () => {
             'Accept': 'application/json',
         },
         body: JSON.stringify({
-            id_materia: values.id,
-            estado: nuevoEstado
+            id_materia: values.id  // Asegúrate de que el backend espere este campo
         })
     };
 
-    fetch(`${url}update_estado_asignatura/${values.id}`, request_backend)  // ID incluido en la URL
+    fetch(`${url}delete_asignatura/${values.id}`, request_backend)  // ID incluido en la URL
         .then((data_request) => data_request.json())
         .then((data) => {
-            console.log("Respuesta del backend:", data); // Verificar la respuesta del backend
             if (data.ok) {
-                // Mostrar notificación dependiendo del nuevo estado
-                if (nuevoEstado === 'A') {
-                    mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se activó con éxito");
-                } else if (nuevoEstado === 'I') {
-                    mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se inactivó con éxito");
-                }
+                mostrarNotificacion("success", "Operación realizada con éxito", "La materia " + values.descripcion.props.children + " se eliminó con éxito");
             } else if (data.ok === false) {
                 mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
             }
@@ -175,7 +175,7 @@ const Materias = () => {
         .finally(() => {
             getAsignatura();
         });
-  };
+};
 
 
 
@@ -234,18 +234,13 @@ const Materias = () => {
 
 
 
-        <Row align="left">
-          <Flex wrap="wrap" grap="small">
+        <Row align="center">
+          <Flex wrap="wrap" grap="small" >
             <ToolOutlined style={{ fontSize: "25px" }} /><h1>Mantenimiento de Materias</h1>
           </Flex>
         </Row>
 
-        <Row style={{ margin: "2px" }}>
-          <Breadcrumb
-            separator=">"
-            items={[{ title: "Dashboard" }, { title: "Mantenimientos" }, { title: "Materias " }]}
-          />
-        </Row>
+        
         
         <Space direction="vertical" size={20} style={{ width: "100%" }}>
           <Row align="left" layout>
@@ -279,6 +274,7 @@ const Materias = () => {
             width={75}
             dataIndex="acciones"
             align="center"
+            
             render={(childrens, record) => (
               <Space size="small">
                 <Col>
@@ -289,13 +285,14 @@ const Materias = () => {
                     okText="Si, realizar"
                     title="Confirmar accion"
                     description="¿Deseas realizar la eliminacion de este registro? Al borrar este registro, todos los usuarios que tengan el título académico de este registro quedarán afectados."
-                    onConfirm={() => { updateEstadoAsignatura(record) }}
+                    onConfirm={() => { deleteTitulo(record) }}
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}>
                     <Button type="primary" danger icon={<DeleteOutlined />}/>
                   </Popconfirm>
                 </Col>
               </Space>
             )}
+            
           />
             </Table>
           </Row>
