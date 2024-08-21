@@ -6,51 +6,40 @@ const NewPerfil = (props) => {
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
 
-  const openNotification = (type, message, description) => {
-    notification[type]({
-      message: message,
-      description: description,
-      placement: 'topRight',
-    });
-  };
-
-  const handleSuccess = () => {
-    openNotification('success', 'Perfil creado', 'El perfil ha sido creado con éxito.');
-  };
-
-  const handleError = (message) => {
-    openNotification('error', 'Error', message);
-  };
-
-  function createPerfil(value) {
+  const createPerfil = (value) => {
     fetch(`${url}create_rol`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        descripcion: value.descripcion,
-      }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ descripcion: value.descripcion }),
     })
       .then((response) => response.json())
       .then((data) => {
         if (data.ok) {
-          handleSuccess();
+          notification.success({
+            message: "Perfil Creado",
+            description: `El perfil "${value.descripcion}" ha sido creado con éxito.`,
+          });
           props.getRoles();
-          Formulario.current.resetFields();
-          props.handleCloseModal();
         } else {
-          handleError(data.mensaje || 'Error al crear el perfil');
+          notification.error({
+            message: "Error",
+            description: data.message,
+          });
         }
+        Formulario.current.resetFields();
+        props.handleCloseModal();
       })
       .catch((error) => {
-        handleError('Ha ocurrido un error: ' + error.message);
+        notification.error({
+          message: "Error",
+          description: `Ha ocurrido un error: ${error.message}`,
+        });
       });
-  }
+  };
 
   return (
     <Modal
-      onCancel={() => {
-        props.handleCloseModal();
-      }}
+      onCancel={props.handleCloseModal}
       onOk={() => {
         if (Formulario && Formulario.current) {
           Formulario.current.submit();
