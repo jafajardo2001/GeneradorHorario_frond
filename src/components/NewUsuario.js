@@ -1,65 +1,95 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Modal, Form, Input, Row, Col } from "antd";
+import { Modal, Form, Input, Row, Col, notification } from "antd";
 import Select from "react-select";
+
 const NewUsuario = (props) => {
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isRol, setIsRol] = useState([]);
+  const [isTituloAcademico, setIsTituloAcademico] = useState([]);
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
+
   useEffect(() => {
     setIsOpen(props.isOpen);
     getRol();
+    getTituloAcademico();
   }, [props.isOpen]);
 
   function getRol() {
-    fetch(`${url}show_roles`, { method: "GET" })
+    fetch(`${url}show_roles`, { method: 'GET' })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error('Network response was not ok');
         }
         return response.json();
       })
       .then((data) => {
-        let rol = data.data.map((value) => {
-          return {
-            label: value.descripcion,
-            value: value.id_rol,
-          };
-        });
+        let rol = data.data.map((value) => ({
+          label: value.descripcion,
+          value: value.id_rol
+        }));
         setIsRol(rol);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching roles:', error);
+      });
+  }
+
+  function getTituloAcademico() {
+    fetch(`${url}show_data_titulo_academico`, { method: 'GET' })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        let titulos = data.data.map((value) => ({
+          label: value.descripcion,
+          value: value.id_titulo_academico
+        }));
+        setIsTituloAcademico(titulos);
+      })
+      .catch((error) => {
+        console.error('Error fetching titles:', error);
       });
   }
 
   function createUser(value) {
-    console.log("Soy el value");
-    console.log(value);
     fetch(`${url}create_usuario`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cedula: value.cedula,
         nombres: value.nombres,
         apellidos: value.apellidos,
         id_rol: value.perfil.value,
-        estado: "A",
+        id_titulo_academico: value.tituloAcademico.value
       }),
     })
-    .then((response) => response.json())
-    .then((data) => {
-      if (!data.ok) {
-        console.error("Error:", data.message); // Muestra el mensaje de error
-        alert(data.message); // O muestra una alerta con el mensaje de error
-        return;
-      }
-      Formulario.current.resetFields();
-      props.onCloseModal();
-    })
-    .catch((error) => {
-      console.error("A ocurrido un error:", error);
-    });   
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          notification.success({
+            message: 'Éxito',
+            description: data.message || 'Usuario creado con éxito.',
+          });
+          Formulario.current.resetFields();
+          props.onCloseModal();
+        } else {
+          notification.error({
+            message: 'Error',
+            description: data.message || 'Hubo un problema al crear el usuario.',
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('An error occurred:', error);
+        notification.error({
+          message: 'Error',
+          description: 'Error interno en el servidor',
+        });
+      });
   }
 
   return (
@@ -86,12 +116,7 @@ const NewUsuario = (props) => {
           <Col span={24}>
             <Form.Item
               label="Ingrese la cedula"
-              rules={[
-                {
-                  required: true,
-                  message: "El campo de cedula es requerido",
-                },
-              ]}
+              rules={[{ required: true, message: "El campo de cedula es requerido" }]}
               name="cedula"
             >
               <Input />
@@ -102,12 +127,7 @@ const NewUsuario = (props) => {
             <Form.Item
               label="Ingrese los nombres"
               name="nombres"
-              rules={[
-                {
-                  required: true,
-                  message: "El campo de nombres es requerido",
-                },
-              ]}
+              rules={[{ required: true, message: "El campo de nombres es requerido" }]}
             >
               <Input />
             </Form.Item>
@@ -117,26 +137,21 @@ const NewUsuario = (props) => {
             <Form.Item
               label="Ingrese los apellidos"
               name="apellidos"
-              rules={[
-                {
-                  required: true,
-                  message: "El campo de apellidos es requerido",
-                },
-              ]}
+              rules={[{ required: true, message: "El campo de apellidos es requerido" }]}
             >
               <Input />
             </Form.Item>
           </Col>
 
           <Col span={24}>
-            <Form.Item
-              label="Escoja el perfil"
-              name="perfil"
-              rules={[
-                { required: true, message: "El campo de perfil es requerido" },
-              ]}
-            >
+            <Form.Item label="Escoja el perfil" name="perfil">
               <Select options={isRol} />
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item label="Escoja el título académico" name="tituloAcademico">
+              <Select options={isTituloAcademico} />
             </Form.Item>
           </Col>
         </Row>
@@ -144,4 +159,5 @@ const NewUsuario = (props) => {
     </Modal>
   );
 };
+
 export default NewUsuario;
