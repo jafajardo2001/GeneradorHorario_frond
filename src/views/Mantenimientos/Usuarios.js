@@ -126,11 +126,6 @@ const Usuarios = () => {
               width: 20,
             },
             {
-                dataIndex: "perfil",
-                title: "Perfil",
-                width: 20,
-            },
-            {
               dataIndex: "titulo_academico",
               title: "Titulo Academico",
               width: 20,
