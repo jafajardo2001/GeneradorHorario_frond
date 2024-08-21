@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Typography,Row, Card, Space, Col, Button, Table, Dropdown, Menu } from "antd";
+import { Typography,Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined, UserAddOutlined } from "@ant-design/icons";
 const PlanificacionAcademica = () => {
@@ -9,16 +9,62 @@ const PlanificacionAcademica = () => {
     const [dataTable,setDataTable] = useState([]);
     const [distribucionData, setDistribucion] = useState([]);
     const [loading,setLoading] = useState(true);
-    const handleMenuClick = (action, record) => {
-        console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-        if(action === "editar"){
-          
+    const handleMenuClick = async (action, record) => {
+        console.log(`Acción: ${action}, Registro:`, record);
+    // Agrega una verificación del ID
+        if (action === "eliminar") {
+            try {
+                // Verifica que record.id_distribucion esté definido
+                if (!record.id_distribucion) {
+                    console.error('ID de distribución no encontrado en el registro');
+                    return;
+                }
+
+    
+                const response = await fetch(`${url}horario/delete_distribucion/${record.id_distribucion}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+        
+                // Manejo de errores en la respuesta
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${response.status} - ${errorText}`);
+                }
+        
+                // Procesamiento de la respuesta
+                const data = await response.json();
+                if (data.ok) {
+                    notification.success({
+                        message: 'Operacion Éxito',
+                        description: 'Distribución eliminada correctamente.',
+                        placement: 'topRight', // Ubicación de la notificación
+                    });
+                    // Refresca la lista de distribuciones o toma alguna acción adicional
+                    getDistribucion(); // Por ejemplo, refrescar los datos de la tabla
+                } else {
+                    notification.error({
+                        message: 'Error',
+                        description: data.mensaje || 'No se pudo eliminar la distribución.',
+                        placement: 'topRight', // Ubicación de la notificación
+                    });
+                }
+            } catch (error) {
+                notification.error({
+                    message: 'Error',
+                    description: 'Error en la eliminación: ' + error.message,
+                    placement: 'topRight', // Ubicación de la notificación
+                });
+            }
         }
     };
+    
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-            <Menu.Item key="editar"><EditOutlined/></Menu.Item>
-            <Menu.Item key="eliminar"><DeleteOutlined/></Menu.Item>
+            <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
+            <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
         </Menu>
     );
 
@@ -38,8 +84,8 @@ const PlanificacionAcademica = () => {
             .then((data) => {
                 let Distribucion = data.data.map((value, index) => {
                     return {
-                        index:index+1,
-                        id: value?.id_disrtribucion,
+                        index: index + 1,
+                        id_distribucion: value?.id_distribucion,
                         educacion_global: value?.educacion_global_nombre,
                         carrera: value?.nombre_carrera,
                         id_usuario: value?.id_usuario,
@@ -52,6 +98,7 @@ const PlanificacionAcademica = () => {
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
+                        docente: value?.nombre_docente // Asegúrate de que este campo sea el correcto
                     };
                 });
                 setDataTable(Distribucion);
@@ -71,6 +118,7 @@ const PlanificacionAcademica = () => {
         getDistribucion()
     },[])
     return (
+        <Spin spinning={loading} tip="Cargando...">
         <>
         <Row style={{
             display:"flex",
@@ -88,7 +136,7 @@ const PlanificacionAcademica = () => {
                         }} type="primary">Crear una Distribucion de horarios</Button>
                     </Col>
                     <Col>
-                        <Button icon={<SyncOutlined/>} onClick={()=>{}}>Descargar datos</Button>
+                        <Button icon={<SyncOutlined/>} onClick={()=>{getDistribucion()}}>Descargar datos</Button>
                     </Col>
                 </Row>
             </Space>
@@ -119,6 +167,12 @@ const PlanificacionAcademica = () => {
                         align:"center"
                     },
                     {
+                        dataIndex:"docente",
+                        title:"Docente",
+                        width:50,
+                        align:"center"
+                    },
+                    {
                         dataIndex:"nivel",
                         title:"Nivel",
                         width:50,
@@ -138,7 +192,7 @@ const PlanificacionAcademica = () => {
                     },
                     {
                         dataIndex:"hora_inicio",
-                        title:"IHora de Inicio",
+                        title:"Hora de Inicio",
                         width:50,
                         align:"center"
                     },
@@ -171,7 +225,9 @@ const PlanificacionAcademica = () => {
             />
         </Card>
         <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
+      
         </>
+    </Spin>
     );
 }
 

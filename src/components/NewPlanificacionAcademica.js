@@ -253,25 +253,34 @@ const NewPlanificacionAcademica = (props) => {
 
     async function showUser() {
         try {
-            setLoading(true)
+            setLoading(true); // Indicar que los datos están cargando
+    
             let configuraciones = {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json'
                 }
             };
-            let response = await fetch(`${url}show_usuario`, configuraciones);
-            let data = await response.json()
-            if (data.data) {
-                let data_mapeada = data.data.map((value, index) => ({
+    
+            let response = await fetch(`${url}show_docentes`, configuraciones);
+            let data = await response.json();
+    
+            if (response.ok && data.ok) {  // Verifica que la respuesta y el JSON sean correctos
+                let data_mapeada = data.data.map((value) => ({
                     value: value.id_usuario,
-                    label: value.nombres + " " + value.apellidos,
-                }))
-                setUser(data_mapeada)
+                    label: value.nombre_completo, // Usando nombre_completo de la función showDocentes
+                }));
+                setUser(data_mapeada); // Establecer los datos mapeados en el estado user
+            } else {
+                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
             }
-            return true
+    
+            setLoading(false); // Indicar que los datos han terminado de cargar
+            return true;
         } catch (error) {
-            return false
+            console.error("Error al obtener los datos de los docentes:", error);
+            setLoading(false); // Indicar que los datos han terminado de cargar incluso si hay error
+            return false;
         }
     }
     const dias = [
@@ -433,12 +442,14 @@ const NewPlanificacionAcademica = (props) => {
 
     async function createPlanificacionAcademica() {
         try {
-            seguirOpciones(1)
-            let arreglo_obj = []
+            seguirOpciones(1);
+    
+            // Crear un arreglo de objetos con la información mapeada
+            let arreglo_obj = [];
             dataSource.forEach(element => {
                 let mapeoData = element.paralelos.map((valor) => {
                     return {
-                        id_coordinador: userSelect,
+                        id_usuario: userSelect,  // Asegúrate de que este valor es el esperado
                         id_instituto: institucionSelect,
                         id_carrera: carreraSelect,
                         id_materia: element.materia,
@@ -449,37 +460,48 @@ const NewPlanificacionAcademica = (props) => {
                         hora_inicio: element.hora_inicio,
                         hora_termina: element.hora_termina,
                         estado: "A",
-                    }
-                })
-                arreglo_obj.push(mapeoData)
+                    };
+                });
+                arreglo_obj.push(mapeoData);
             });
             const arregloUnido = arreglo_obj.reduce((acc, current) => acc.concat(current), []);
-
-            let response = await fetch(`${url}horario/create_horario`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ "data": arregloUnido }), })
-            let data = await response.json()
+    
+            // Enviar la solicitud POST
+            let response = await fetch(`${url}horario/create_horario`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: arregloUnido,
+                    id_usuario: userSelect // Incluye el ID del usuario aquí
+                })
+            });
+    
+            // Procesar la respuesta del servidor
+            let data = await response.json();
             if (data.ok) {
                 setInformativo({
                     status: "success",
-                    title: "Operacion Realizada con exito",
+                    title: "Operación Realizada con éxito",
                     subTitle: data.message,
-                })
+                });
             } else {
                 setInformativo({
                     status: "warning",
-                    title: "A ocurrido un error",
+                    title: "Ha ocurrido un error",
                     subTitle: data.message,
-                })
+                });
             }
-            //props.getDistribucion()
-        } catch (Error) {
+        } catch (error) {
             setInformativo({
                 status: "warning",
-                title: "A ocurrido un error",
+                title: "Ha ocurrido un error",
                 subTitle: "Error interno en el servidor",
-            })
+            });
+            console.error('Error:', error); // Agrega esto para ver detalles del error
         }
-        seguirOpciones(2)
+        seguirOpciones(2);
     }
+    
 
     useEffect(() => {
         const fetchData = async () => {
@@ -528,10 +550,10 @@ const NewPlanificacionAcademica = (props) => {
                                 }} />
                             </Form.Item>
 
-                            <Form.Item label="Escoja al coordinador de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
+                            <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
                                 <Select
                                     onChange={(value) => {
-                                        setUserSelect(value)
+                                        setUserSelect(value);  // Asegúrate de que esto actualiza el estado correctamente
                                     }}
                                     options={user} name="coor_carrera" disabled={loading} />
                             </Form.Item>

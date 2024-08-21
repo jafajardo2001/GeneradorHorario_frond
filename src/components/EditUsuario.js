@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Form, Col, Row, Input, notification, Select } from 'antd';
+import { Modal, Form, Input, Select, notification } from 'antd';
 
-const UpdateUsuario = ({ open, handleCloseModal, formulario, getUsuarios }) => {
-  const formRef = useRef(null);
-  const [id, setId] = useState(0);
+const EditUsuario = ({ open, handleCloseModal, usuarioId, getUsuarios }) => {
   const [roles, setRoles] = useState([]);
-  const url = "http://localhost:8000/api/istg/"; // Cambia esta URL a tu endpoint
+  const [form] = Form.useForm();
+  const url = "http://localhost:8000/api/istg/";
 
   useEffect(() => {
     // Cargar roles disponibles
-    fetch(`${url}roles`)
+    fetch(`${url}show_roles`)
       .then(response => response.json())
       .then(data => {
         if (data.ok) {
@@ -28,36 +27,47 @@ const UpdateUsuario = ({ open, handleCloseModal, formulario, getUsuarios }) => {
         });
       });
 
-    if (formRef.current) {
-      setId(formulario.id);
-      formRef.current.setFieldsValue({
-        cedula: formulario.cedula,
-        nombres: formulario.nombres,
-        apellidos: formulario.apellidos,
-        perfil: formulario.perfil,
-      });
+    // Cargar datos del usuario a editar
+    if (usuarioId) {
+      fetch(`${url}usuario/${usuarioId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.ok) {
+            form.setFieldsValue(data.usuario);
+          } else {
+            notification.error({
+              message: 'Error',
+              description: 'No se pudieron cargar los datos del usuario.',
+            });
+          }
+        })
+        .catch(error => {
+          notification.error({
+            message: 'Error',
+            description: `Ha ocurrido un error: ${error.message}`,
+          });
+        });
     }
-  }, [formulario]);
+  }, [usuarioId]);
 
-  const update = (values) => {
-    fetch(`${url}update_usuario/${id}`, {
+  const updateUsuario = (values) => {
+    // Generar nombre de usuario basado en las primeras letras del nombre y apellido
+    const usuarioStr = values.nombres.charAt(0).toLowerCase() + values.apellidos.charAt(0).toLowerCase();
+    const updatedValues = { ...values, usuario: usuarioStr };
+
+    fetch(`${url}update_usuario/${usuarioId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
+      body: JSON.stringify(updatedValues),
     })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
         if (data.ok) {
           notification.success({
             message: 'Usuario Actualizado',
-            description: `El usuario "${values.nombres} ${values.apellidos}" ha sido actualizado con éxito.`,
+            description: `El usuario ha sido actualizado con éxito.`,
           });
-          getUsuarios(); // Asegúrate de que esta función esté definida y actualice la lista de usuarios
+          getUsuarios();
           handleCloseModal();
         } else {
           notification.error({
@@ -76,69 +86,45 @@ const UpdateUsuario = ({ open, handleCloseModal, formulario, getUsuarios }) => {
 
   return (
     <Modal
+      visible={open}
       onCancel={handleCloseModal}
       onOk={() => {
-        if (formRef.current) {
-          formRef.current.submit();
-        }
+        form.submit();
       }}
-      open={open}
-      title="Actualizar Usuario"
-      okText="Actualizar"
-      cancelText="Cancelar"
+      title="Editar Usuario"
     >
-      <Form
-        onFinish={update}
-        ref={formRef}
-        layout="vertical"
-      >
-        <Row>
-          <Col span={24}>
-            <Form.Item
-              label="Cédula"
-              rules={[{ required: true, message: 'La cédula es requerida' }]}
-              name="cedula"
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Nombres"
-              rules={[{ required: true, message: 'El nombre es requerido' }]}
-              name="nombres"
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Apellidos"
-              rules={[{ required: true, message: 'Los apellidos son requeridos' }]}
-              name="apellidos"
-            >
-              <Input />
-            </Form.Item>
-          </Col>
-          <Col span={24}>
-            <Form.Item
-              label="Perfil"
-              rules={[{ required: true, message: 'El perfil es requerido' }]}
-              name="perfil"
-            >
-              <Select placeholder="Selecciona un perfil">
-                {roles.map(role => (
-                  <Select.Option key={role.id_rol} value={role.id_rol}>
-                    {role.descripcion}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+      <Form form={form} onFinish={updateUsuario}>
+        <Form.Item
+          name="cedula"
+          label="Cédula"
+          rules={[{ required: true, message: 'La cédula es requerida' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="nombres"
+          label="Nombres"
+          rules={[{ required: true, message: 'El nombre es requerido' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="apellidos"
+          label="Apellidos"
+          rules={[{ required: true, message: 'Los apellidos son requeridos' }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          name="perfil"
+          label="Perfil"
+          rules={[{ required: true, message: 'El perfil es requerido' }]}
+        >
+          <Select options={roles}/>
+        </Form.Item>
       </Form>
     </Modal>
   );
 };
 
-export default UpdateUsuario;
+export default EditUsuario;
