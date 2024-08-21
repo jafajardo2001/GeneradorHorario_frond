@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewPerfil from "../../components/NewPerfil.js";
 import UpdatePerfil from "../../components/UpdatePerfil.js";
@@ -13,12 +13,7 @@ const Perfiles = () => {
   const [isOpeUpdatePerfil, setIsOpenUpdateModal] = useState(false);
   const [formularioEditar, setFormularioEditar] = useState([]);
   const url = "http://localhost:8000/api/istg/";
-  const mostrarNotificacion = (tipo,titulo,mensaje) => {
-    notification[tipo]({
-      message: titulo,
-      description: mensaje,
-    });
-  };
+
   useEffect(() => {
     getPerfiles();
   }, []);
@@ -58,47 +53,14 @@ const Perfiles = () => {
         setLoading(false)
       });
   }
-  
-  const deletePerfil = (record) => {
-    console.log("Eliminando perfil:", record.descripcion);
 
-    let request_backend = {
-        method: "PUT",
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-            id_rol: record.id  // Asegúrate de que el backend espere este campo
-        })
-    };
-
-    fetch(`${url}delete_rol/${record.id}`, request_backend)
-        .then((data_request) => data_request.json())
-        .then((data) => {
-            if (data.ok) {
-                mostrarNotificacion("success", "Operación realizada con éxito", "El perfil " + record.descripcion + " se eliminó con éxito");
-            } else if (data.ok === false) {
-                mostrarNotificacion("error", "Ha ocurrido un error interno", data.message);
-            }
-        })
-        .finally(() => {
-            getPerfiles();  // Refresca la lista de perfiles después de la eliminación
-        });
-  };
-
-
-const handleMenuClick = (action, record) => {
-  console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-  
-  if (action === "editar") {
+  const handleMenuClick = (action, record) => {
+    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
+    if (action === "editar") {
       setIsOpenUpdateModal(true);
       setFormularioEditar(record);
-  } else if (action === "eliminar") {
-      deletePerfil(record);  // Llamar a deletePerfil cuando se selecciona "eliminar"
-  }
-};
-
+    }
+  };
 
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
@@ -108,9 +70,8 @@ const handleMenuClick = (action, record) => {
   );
 
   return (
-    <Spin spinning={loading} tip="Cargando...">
     <>
-    
+    <Spin spinning={loading} tip={mensajeLoading}></Spin>
       <Row style={{ display: "flex", justifyContent: "center" }}>
         <Title level={3}>Mantenimiento de Perfiles</Title>
       </Row>
@@ -181,9 +142,7 @@ const handleMenuClick = (action, record) => {
       <NewPerfil open={isOpeNewPerfil} handleCloseModal={handleCloseModal} getRoles={getPerfiles} />
       <UpdatePerfil open={isOpeUpdatePerfil} handleCloseModal={handleCloseModal} getRoles={getPerfiles} formulario={formularioEditar} loading={setLoading} mensaje={setMensajeLoading} />
     </>
-  </Spin> 
   );
-  
 };
 
 export default Perfiles;
