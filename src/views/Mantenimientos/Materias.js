@@ -92,6 +92,7 @@ const Materias = () => {
   }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     let request_op = {
       headers: {
         'Content-Type': 'application/json'
@@ -158,6 +159,17 @@ const Materias = () => {
       body: JSON.stringify({ id_asignatura: dataMateriaEdit.id_asignatura, ...value }),
     }
 
+=======
+  const actualizarAsignatura = (value) => {
+    setLoadingButton(true);
+
+    const data_request = {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_asignatura: dataMateriaEdit.id_asignatura, ...value }),
+    }
+
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
     fetch(`${url}update_asignatura/`, data_request)
       .then((data_json) => data_json.json())
       .then((data) => {
@@ -178,6 +190,9 @@ const Materias = () => {
   }
 
   const handleEditarClick = (record) => {
+<<<<<<< HEAD
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
+=======
 >>>>>>> parent of 7159411 (Merge branch 'moises_frond')
     setDataMateriaEdit({
       key: record.key,
@@ -189,6 +204,7 @@ const Materias = () => {
     formKeyRef.current += 1;
   };
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   const updateEstadoAsignatura = (values) => {
@@ -260,6 +276,31 @@ const Materias = () => {
 
   useEffect(() => {
 >>>>>>> parent of 7159411 (Merge branch 'moises_frond')
+=======
+  const deleteTitulo = (values) => {
+    const request_backend = {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id_asignatura: values.id })
+    }
+    fetch(`${url}delete_asignatura/`, request_backend)
+      .then((data_request) => data_request.json())
+      .then((data) => {
+        if (data.ok) {
+          mostrarNotificacion("success", "Operación exitosa", "La materia ha sido eliminada con éxito.");
+        } else {
+          mostrarNotificacion("error", "Error al eliminar materia", data.msg_error || 'Error desconocido.');
+        }
+      })
+      .finally(() => {
+        getAsignatura();
+      })
+  }
+
+  useEffect(() => {
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
     getAsignatura();
   }, [])
 
@@ -301,6 +342,7 @@ const Materias = () => {
             </Form>
           </Row>
         </Modal>
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 
@@ -319,6 +361,20 @@ const Materias = () => {
         </Row>
         
 =======
+        <Row align="left">
+          <ToolOutlined style={{ fontSize: "25px" }} /><h1>Mantenimiento de Materias</h1>
+        </Row>
+
+        <Row style={{ margin: "2px" }}>
+          <Breadcrumb
+            separator=">"
+            items={[{ title: "Dashboard" }, { title: "Mantenimientos" }, { title: "Materias " }]}
+          />
+        </Row>
+
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
+=======
+
         <Row align="left">
           <ToolOutlined style={{ fontSize: "25px" }} /><h1>Mantenimiento de Materias</h1>
         </Row>
@@ -356,6 +412,7 @@ const Materias = () => {
                 <Column title="Estado registro" dataIndex="estado_registro" width={100} align="center" />
               </ColumnGroup>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <Column
             title="Acciones"
             fixed="right"
@@ -381,6 +438,8 @@ const Materias = () => {
             )}
           />
 =======
+=======
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
               <Column
                 title="Acciones"
                 fixed="right"
@@ -405,6 +464,9 @@ const Materias = () => {
                   </Space>
                 )}
               />
+<<<<<<< HEAD
+>>>>>>> parent of 7159411 (Merge branch 'moises_frond')
+=======
 >>>>>>> parent of 7159411 (Merge branch 'moises_frond')
             </Table>
           </Row>
