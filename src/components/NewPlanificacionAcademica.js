@@ -283,6 +283,7 @@ const NewPlanificacionAcademica = (props) => {
             return false;
         }
     }
+    
     const dias = [
         {
             value: "Lunes",

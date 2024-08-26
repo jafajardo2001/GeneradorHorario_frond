@@ -1,66 +1,62 @@
 import React, { useEffect, useState } from "react";
-import { Typography,Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal } from "antd";
+import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal, Input } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
-import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined, UserAddOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
+
 const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
     const { Title } = Typography;
-    const [modalIsOpen,setModalIsOpen] = useState(false);
-    const [dataTable,setDataTable] = useState([]);
-    const [distribucionData, setDistribucion] = useState([]);
-    const [loading,setLoading] = useState(true);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [dataTable, setDataTable] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
+
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
-    // Agrega una verificación del ID
         if (action === "eliminar") {
             try {
-                // Verifica que record.id_distribucion esté definido
                 if (!record.id_distribucion) {
                     console.error('ID de distribución no encontrado en el registro');
                     return;
                 }
 
-    
                 const response = await fetch(`${url}horario/delete_distribucion/${record.id_distribucion}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
-        
-                // Manejo de errores en la respuesta
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Error: ${response.status} - ${errorText}`);
                 }
-        
-                // Procesamiento de la respuesta
+
                 const data = await response.json();
                 if (data.ok) {
                     notification.success({
                         message: 'Operacion Éxito',
                         description: 'Distribución eliminada correctamente.',
-                        placement: 'topRight', // Ubicación de la notificación
+                        placement: 'topRight',
                     });
-                    // Refresca la lista de distribuciones o toma alguna acción adicional
-                    getDistribucion(); // Por ejemplo, refrescar los datos de la tabla
+                    getDistribucion();
                 } else {
                     notification.error({
                         message: 'Error',
                         description: data.mensaje || 'No se pudo eliminar la distribución.',
-                        placement: 'topRight', // Ubicación de la notificación
+                        placement: 'topRight',
                     });
                 }
             } catch (error) {
                 notification.error({
                     message: 'Error',
                     description: 'Error en la eliminación: ' + error.message,
-                    placement: 'topRight', // Ubicación de la notificación
+                    placement: 'topRight',
                 });
             }
         }
     };
-    
+
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
             <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
@@ -98,9 +94,17 @@ const PlanificacionAcademica = () => {
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
-                        docente: value?.nombre_docente // Asegúrate de que este campo sea el correcto
+                        docente: value?.nombre_docente
                     };
                 });
+
+                // Filtrar datos según el filtro de docente
+                if (filterDocente) {
+                    Distribucion = Distribucion.filter(item => 
+                        item.docente.toLowerCase().includes(filterDocente.toLowerCase())
+                    );
+                }
+
                 setDataTable(Distribucion);
             })
             .catch((error) => {
@@ -112,11 +116,13 @@ const PlanificacionAcademica = () => {
     }
 
     function handleCloseModal(){
-        setModalIsOpen(false)
+        setModalIsOpen(false);
     }
-    useEffect(()=>{
-        getDistribucion()
-    },[])
+
+    useEffect(() => {
+        getDistribucion();
+    }, [filterDocente]); // Agregar filterDocente como dependencia para actualizar la tabla al cambiar el filtro
+
     return (
         <Spin spinning={loading} tip="Cargando...">
         <>
@@ -131,12 +137,22 @@ const PlanificacionAcademica = () => {
             <Space style={{margin:"5px"}}>
                 <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
                     <Col>
-                        <Button icon={<PlusCircleOutlined/>} onClick={()=>{
-                            setModalIsOpen(true)
-                        }} type="primary">Crear una Distribucion de horarios</Button>
+                        <Button icon={<PlusCircleOutlined />} onClick={() => setModalIsOpen(true)} type="primary">
+                            Crear una Distribucion de horarios
+                        </Button>
                     </Col>
                     <Col>
-                        <Button icon={<SyncOutlined/>} onClick={()=>{getDistribucion()}}>Descargar datos</Button>
+                        <Button icon={<SyncOutlined />} onClick={getDistribucion}>
+                            Descargar datos
+                        </Button>
+                    </Col>
+                    <Col>
+                        <Input 
+                            placeholder="Filtrar por docente" 
+                            value={filterDocente} 
+                            onChange={(e) => setFilterDocente(e.target.value)} 
+                            allowClear 
+                        />
                     </Col>
                 </Row>
             </Space>
