@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal, Input } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
@@ -10,6 +12,7 @@ const PlanificacionAcademica = () => {
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
+    const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
 
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
@@ -64,6 +67,36 @@ const PlanificacionAcademica = () => {
         </Menu>
     );
 
+    const handleGenerateReport = () => {
+        if (!filteredData || filteredData.length === 0) {
+            notification.error({
+                message: 'Error',
+                description: 'No hay datos para generar el reporte.',
+                placement: 'topRight',
+            });
+            return;
+        }
+
+        const doc = new jsPDF();
+        doc.text("INSTITUTO SUPERIOR TECNOLÓGICO", 10, 10);
+        doc.text("GUAYAQUIL", 10, 20);
+
+        doc.autoTable({
+            startY: 50,
+            head: [['Asignatura', 'Carrera', 'Nivel', 'Paralelo', 'Día', 'Horario']],
+            body: filteredData.map(row => [
+                row.materia,
+                row.carrera,
+                row.nivel,
+                row.paralelo,
+                row.dia,
+                row.hora_inicio + "" + row.hora_termina
+            ])
+        });
+
+        doc.save('reporte-distributivo.pdf');
+    };
+
     useEffect(() => {
         getDistribucion();
     }, []);
@@ -106,6 +139,7 @@ const PlanificacionAcademica = () => {
                 }
 
                 setDataTable(Distribucion);
+                setFilteredData(Distribucion); // Actualizar también el estado filteredData
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
@@ -153,6 +187,12 @@ const PlanificacionAcademica = () => {
                             onChange={(e) => setFilterDocente(e.target.value)} 
                             allowClear 
                         />
+                    </Col>
+                    <Col>
+                        <button onClick={handleGenerateReport}>Generar Reporte</button>
+                        <table>
+                            {/* Tu tabla de planificación académica */}
+                        </table>
                     </Col>
                 </Row>
             </Space>
@@ -235,16 +275,27 @@ const PlanificacionAcademica = () => {
                             <Button><MenuOutlined/></Button>
                           </Dropdown>
                         ),
-                      }
+                      },
                 ]}
                 dataSource={dataTable}
+                size="middle"
+                pagination={{
+                    pageSize:10,
+                    showTotal: total => `Total ${total} items`
+                }}
             />
         </Card>
-        <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
-      
+        <Modal
+            title="Registro de Planificacion"
+            open={modalIsOpen}
+            onCancel={handleCloseModal}
+            footer={null}
+        >
+            <NewPlanificacionAcademica/>
+        </Modal>
         </>
-    </Spin>
+        </Spin>
     );
-}
+};
 
 export default PlanificacionAcademica;
