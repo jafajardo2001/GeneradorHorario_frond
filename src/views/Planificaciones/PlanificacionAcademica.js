@@ -4,6 +4,7 @@ import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademic
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { Header } from "antd/es/layout/layout";
 
 const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
@@ -78,21 +79,213 @@ const PlanificacionAcademica = () => {
         }
 
         const doc = new jsPDF();
-        doc.text("INSTITUTO SUPERIOR TECNOLÓGICO", 10, 10);
-        doc.text("GUAYAQUIL", 10, 20);
-
+        
         doc.autoTable({
-            startY: 50,
-            head: [['Asignatura', 'Carrera', 'Nivel', 'Paralelo', 'Día', 'Horario']],
-            body: filteredData.map(row => [
-                row.materia,
-                row.carrera,
-                row.nivel,
-                row.paralelo,
-                row.dia,
-                row.hora_inicio + "" + row.hora_termina
-            ])
+            startY: 40,  // Ajusta esta posición según lo necesites
+            head: [{
+                content: '1. DATOS GENERALES',
+                styles: { fillColor: [60, 179, 113], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] }
+            }],
+            body: [
+                [
+                    { content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: '0923352074' }
+                ],
+                [
+                    { content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'TIGRERO CONTRERAS RICHARD MIGUEL' }
+                ],
+                [
+                    { content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'INGENIERO EN SISTEMAS COMPUTACIONALES' }
+                ],
+                [
+                    { content: 'TÍTULO CUARTO NIVEL::', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: '' }
+                ],
+                [
+                    { content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'rtigrero@istg.edu.ec' }
+                ],
+                [
+                    { content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: '0989007630' }
+                ],
+                [
+                    { content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'PROGRAMACIÓN DE APLICACIONES WEB' }
+                ],
+                [
+                    { content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'TIEMPO COMPLETO' }
+                ],
+                [
+                    { content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: 'TECNOLOGÍA SUPERIOR EN DESARROLLO DE SOFTWARE' }
+                ],
+                [
+                    { content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
+                    { content: '2023-S2' }
+                ]
+            ],
+            columnStyles: {
+                0: { cellWidth: 60 },  // Ajusta el ancho de la primera columna
+                1: { cellWidth: 'auto' },  // Deja el resto de las columnas con ancho automático
+            },
+            styles: {
+                cellPadding: 3,  // Ajusta el espacio interno de las celdas
+                fontSize: 10,  // Tamaño de fuente
+                overflow: 'linebreak'  // Permite el salto de línea dentro de las celdas
+            }
         });
+
+        // Resumen de Horas de Dedicación
+        // Resumen de Horas de Dedicación Semanal
+        doc.autoTable({
+            startY: doc.previousAutoTable.finalY + 5,  // Ajusta la posición vertical de inicio según sea necesario
+            head: [{
+                content: '2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL',
+                styles: { fillColor: [60, 179, 113], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] }
+            }],
+            body: []
+        });
+
+        // Tabla de Resumen de Horas
+        doc.autoTable({
+            startY: doc.previousAutoTable.finalY,  // Inicia justo después del título anterior
+            head: [
+                [
+                    { content: 'Docencia', styles: { halign: 'center'  } },
+                    { content: 'Investigación', styles: { halign: 'center'  } },
+                    { content: 'Prácticas Preprofesionales', styles: { halign: 'center'  } },
+                    { content: 'Gestión Administrativa', styles: { halign: 'center'  } },
+                    { content: 'Total de Horas', styles: { halign: 'center' } }
+                ]
+            ],
+            body: [
+                [
+                    { content: 'Horas Clase: 18', styles: { halign: 'left' } },
+                    { content: 'Director de Investigación: 2', styles: { halign: 'left' } },
+                    { content: 'Director de Proyectos Comunitarios: 4', styles: { halign: 'left' } },
+                    { content: 'Coordinación: 0', styles: { halign: 'left' } },
+                    { content: 'Total: 24', styles: { halign: 'left' } }
+                ],
+                [
+                    { content: 'Tutorías: 1', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } },
+                    { content: 'Tutor de Prácticas Laborales: 4', styles: { halign: 'left' } },
+                    { content: 'Gestoría Institucional: 0', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } }
+                ],
+                [
+                    { content: 'Preparación de Clases: 5', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } },
+                    { content: '', styles: { halign: 'left' } }
+                ]
+            ],
+            columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { cellWidth: 'auto' },
+                4: { cellWidth: 'auto' }
+            },
+            styles: {
+                cellPadding: 3,
+                fontSize: 10,
+                overflow: 'linebreak'
+            },
+        });
+
+        // Título de la sección: Distribución de Actividades Docentes
+        doc.autoTable({
+            startY: doc.previousAutoTable.finalY + 5,  // Ajusta la posición vertical de inicio
+            head: [{
+                content: '3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES',
+                styles: { fillColor: [60, 179, 113], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] }
+            }],
+            body: []
+        });
+
+        // Tabla de Distribución de Actividades Docentes (horarios)
+        doc.autoTable({
+            startY: doc.previousAutoTable.finalY,  // Inicia justo después del título anterior
+            head: [
+                [
+                    { content: 'Horario', styles: { halign: 'center' } },
+                    { content: 'Lunes', styles: { halign: 'center' } },
+                    { content: 'Martes', styles: { halign: 'center' } },
+                    { content: 'Miércoles', styles: { halign: 'center' } },
+                    { content: 'Jueves', styles: { halign: 'center' } },
+                    { content: 'Viernes', styles: { halign: 'center' } },
+                    { content: 'Sábado', styles: { halign: 'center' } }
+                ]
+            ],
+            body: [
+                [
+                    { content: '14H00 – 15H00', styles: { halign: 'center' } },
+                    { content: 'Tutor de Prácticas Laborales', styles: { halign: 'center' } },
+                    { content: 'Tutor de Prácticas Laborales', styles: { halign: 'center' } },
+                    { content: 'Preparación de Clases', styles: { halign: 'center' } },
+                    { content: 'Preparación de Clases', styles: { halign: 'center' } },
+                    { content: 'Director de Proyectos Comunitarios', styles: { halign: 'center' } },
+                    { content: '', styles: { halign: 'center' } }
+                ],
+                [
+                    { content: '15H00 – 16H00', styles: { halign: 'center' } },
+                    { content: 'Director de Proyectos Comunitarios', styles: { halign: 'center' } },
+                    { content: 'Tutor de Prácticas Laborales', styles: { halign: 'center' } },
+                    { content: 'Director de Investigación', styles: { halign: 'center' } },
+                    { content: 'Preparación de Clases', styles: { halign: 'center' } },
+                    { content: 'Director de Proyectos Comunitarios', styles: { halign: 'center' } },
+                    { content: '', styles: { halign: 'center' } }
+                ],
+                // Agrega más filas según sea necesario
+            ],
+            columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { cellWidth: 'auto' },
+                4: { cellWidth: 'auto' },
+                5: { cellWidth: 'auto' },
+                6: { cellWidth: 'auto' }
+            },
+            styles: {
+                cellPadding: 3,
+                fontSize: 10,
+                overflow: 'linebreak'
+            },
+        });
+
+        /*doc.autoTable({
+            startY: 50,
+            head: [['Etiqueta', '']],
+            body: filteredData.flatMap(row => [
+                ['CÉDULA:', row.cedula],
+                ['Apellidos y Nombres:', row.docente],
+                ['TÍTULO TERCER NIVEL:', row.tituloTercerNivel],
+                ['TÍTULO CUARTO NIVEL:', row.tituloCuartoNivel],
+                ['CORREO:', row.correo],
+                ['TELÉFONO:', row.telefono],
+                ['ASIGNATURAS:', row.materia],
+                ['TIEMPO DE DEDICACIÓN:', row.hora_inicio + "-" + row.hora_termina ],
+                ['CARRERA:', row.carrera],
+                ['PERÍODO ACADÉMICO:', row.periodoAcademico]
+            ]),
+            columnStyles: {
+                0: { halign: 'left', cellWidth: '50%' },
+                1: { halign: 'right', cellWidth: '50%' }
+            },
+            styles: {
+                cellPadding: 3,
+                fontSize: 10,
+                overflow: 'linebreak'
+            }
+        });*/
+        
 
         doc.save('reporte-distributivo.pdf');
     };
