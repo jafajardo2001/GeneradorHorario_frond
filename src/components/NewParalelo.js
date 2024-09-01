@@ -1,27 +1,40 @@
 import React,{ useRef } from "react";
-import { Modal,Form,Input,Row,Col } from "antd";
+import { Modal, Form, Input, Row, Col, notification } from "antd";
+
 
 const NewParalelo = (props) => {
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
+
+
+  const mostrarNotificacion = (tipo, titulo, mensaje) => {
+    notification[tipo]({
+      message: titulo,
+      description: mensaje,
+    });
+  };
+
   function createParalelo(value){
-    let configuraciones = {
-      method:"POST",
-      headers:{  
-        'Content-Type': 'application/json'
-      },
-      body:JSON.stringify(value)
-    }
-    fetch(`${url}create_paralelo`,configuraciones).then((response)=>{
-      return response.json();
-    }).then((data)=>{
-      if(data.ok){
-        props.getParalelos()
-      }
-      window.alert(data.message)
-      props.handleCloseModal()
+    fetch(`${url}create_paralelo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value),
     })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          mostrarNotificacion('success', 'Operación exitosa', data.message);
+          props.getParalelos();
+          props.handleCloseModal();
+        } else {
+          mostrarNotificacion('error', 'Error', data.message || 'Error desconocido');
+        }
+      })
+      .catch((error) => {
+        mostrarNotificacion('error', 'Error', 'Ocurrió un error: ' + error.message);
+      });
   }
+
   return (
     <Modal onCancel={() => {
           props.handleCloseModal();

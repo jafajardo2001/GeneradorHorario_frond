@@ -1,21 +1,37 @@
-import React,{ useState,useEffect,useRef } from "react"
-import { Modal,Form,Input,Row,Col } from "antd";
+import React, { useRef } from "react";
+import { Modal, Form, Input, Row, Col, notification } from "antd";
 
 const NewCurso = (props) => {
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
+
+  const mostrarNotificacion = (tipo, titulo, mensaje) => {
+    notification[tipo]({
+      message: titulo,
+      description: mensaje,
+    });
+  };
+
   function createCurso(value){
-    fetch(`${url}create_nivel`, { method: 'POST',headers: {'Content-Type': 'application/json'},body: JSON.stringify(value),
-        }).then((response) => {
-            return response.json();
-          }).then((data) => {
-            window.alert(data.message)
+    fetch(`${url}create_nivel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          mostrarNotificacion('success', 'Operación exitosa', data.message);
             Formulario.current.resetFields();
-            props.handleCloseModal();
             props.getCurso();
-          }).catch((error) => {
-            window.alert('A ocurrido un error:' + error);
-          });
+            props.handleCloseModal();
+        } else {
+          mostrarNotificacion('error', 'Error', data.message || 'Error desconocido');
+        }
+      })
+      .catch((error) => {
+        mostrarNotificacion('error', 'Error', 'Ocurrió un error: ' + error.message);
+      });
 
   }
   return (
