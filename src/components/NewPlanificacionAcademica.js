@@ -1,7 +1,7 @@
 import { CiCircleOutlined, DeleteOutlined, EditOutlined, InfoCircleOutlined, InfoOutlined, InsertRowRightOutlined, LeftOutlined, LoadingOutlined, LogoutOutlined, OrderedListOutlined, RightOutlined, VerifiedOutlined } from "@ant-design/icons";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import { render } from "@testing-library/react";
-import { Button, Form, Modal, Result, Row, Select, Space, Spin, Steps, Table, Tree, Typography, Input, notification } from "antd";
+import { Button, Form, Modal, Result, Row, Select, Space, Spin, Steps, Table, Tree, Typography, Input } from "antd";
 import { useForm } from "antd/es/form/Form";
 import Title from "antd/es/skeleton/Title";
 import React, { useEffect, useRef, useState } from "react";
@@ -17,28 +17,28 @@ const NewPlanificacionAcademica = (props) => {
     const [paralelos, setParalelos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
-    const [institucionSelect, setInstitucionSelect] = useState([]);
+    const [institucionSelect, setInstitucionSelect] = useState([])
     const [carreraSelect, setCarreraSelect] = useState([]);
     const [userSelect, setUserSelect] = useState({});
     const formulario = useRef(null);
-    const [informativo, setInformativo] = useState({});
-    const [modalIsOpen, setIsOpen] = useState(props.open);
+    const [informativo, setInformativo] = useState({})
+    const [modalIsOpen, setIsOpen] = useState(props.open)
     const [user, setUser] = useState([]);
     const url = "http://localhost:8000/api/istg/";
     const [pasos, setPasos] = useState([
         {
-            title: "parametros",
-            status: "proces",
+            title: 'parametros',
+            status: 'proces',
             icon: <EditOutlined />,
         },
         {
-            title: "orden",
-            status: "wait",
+            title: 'orden',
+            status: 'wait',
             icon: <OrderedListOutlined />,
         },
         {
-            title: "finalizar",
-            status: "wait",
+            title: 'finalizar',
+            status: 'wait',
             icon: <VerifiedOutlined />,
         }
     ])
@@ -48,19 +48,21 @@ const NewPlanificacionAcademica = (props) => {
             title: "Escoja la Materia",
             align: "center",
             width: 20,
-            render: (text, record, index) => <Select defaultValue={text}></Select>,
-        },
+            render: (text, record, index) => (
+                <Select defaultValue={text}></Select>
+            )
+        }
     ]);
 
     useEffect(() => {
-        setIsOpen(props.open);
-    }, [props.open]);
+        setIsOpen(props.open)
+    }, [props.open])
     const addRow = () => {
         const newRow = {
             key: dataSource.length + 1,
             materia: "", // Dejar vacío para que se seleccione
             curso: "",
-            paralelos: "",
+            paralelos: ""
         };
         setDataSource([...dataSource, newRow]);
     };
@@ -87,18 +89,18 @@ const NewPlanificacionAcademica = (props) => {
             console.log("entro en el segudno if")
             setPasos([
                 {
-                    title: "parametros",
-                    status: "proces",
+                    title: 'parametros',
+                    status: 'proces',
                     icon: <EditOutlined />,
                 },
                 {
-                    title: "Validando informacion",
-                    status: "proces",
+                    title: 'Validacion realizada',
+                    status: 'proces',
                     icon: <OrderedListOutlined />,
                 },
                 {
-                    title: "Respuesta",
-                    status: "wait",
+                    title: 'Respuesta',
+                    status: 'proces',
                     icon: <VerifiedOutlined />,
                 }]);
         }
@@ -281,7 +283,6 @@ const NewPlanificacionAcademica = (props) => {
             return false;
         }
     }
-    
     const dias = [
         {
             value: "Lunes",
