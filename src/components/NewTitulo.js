@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Modal, Form, Input, Row, Col } from "antd";
+import { Modal, Form, Input, Row, Col, notification } from "antd";
 
 const NewTitulo = (props) => {
   const [isOpen, setIsOpen] = useState(props.open);
@@ -20,13 +20,28 @@ const NewTitulo = (props) => {
     })
       .then((response) => response.json())
       .then((data) => {
+        if (data.ok) {
+          notification.success({
+            message: 'Éxito',
+            description: data.mensaje,
+          });
         props.getTitulos();
         Formulario.current.resetFields();
         props.handleCloseModal();
-      })
-      .catch((error) => {
-        console.error('A ocurrido un error:', error);
+      } else {
+        notification.error({
+          message: 'Error',
+          description: data.mensaje,
+        });
+      }
+    })
+    .catch((error) => {
+      notification.error({
+        message: 'Error',
+        description: 'Ocurrió un error inesperado.',
       });
+      console.error('Ha ocurrido un error:', error);
+    });
   };
 
   return (

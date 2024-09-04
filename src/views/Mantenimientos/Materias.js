@@ -23,6 +23,7 @@ const Materias = () => {
     notification[tipo]({
       message: titulo,
       description: mensaje,
+      placement: 'topRight',
     });
   };
 
@@ -73,28 +74,28 @@ const Materias = () => {
   const createAsignatura = (value) => {
     setLoadingButton(true);
 
-    let request_op = {
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(value),
-        method: "POST",
+    const request_op = {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(value),
+      method: "POST",
     }
 
     fetch(`${url}create_asignatura/`, request_op)
         .then((json_data) => json_data.json())
         .then((info_request) => {
             if (info_request.ok) {
-                // Muestra la descripción en la notificación
-                mostrarNotificacion("success", "Operación realizada con éxito", info_request.message);
+              mostrarNotificacion("success", "Operación exitosa", "La materia ha sido creada con éxito.");
             } else {
-                mostrarNotificacion("error", "Ha ocurrido un error", info_request.msg_error);
+                // Asegúrate de que `info_request.msg_error` está correctamente definido en el backend.
+                mostrarNotificacion("error", "Error al crear materia", info_request.msg_error || 'Error desconocido.');
             }
-        })
-        .catch((error) => {
-            mostrarNotificacion("error", "Ha ocurrido un error", error.message);
-        })
-        .finally(() => {
+          })
+          .catch((error) => {
+            mostrarNotificacion("error", "Error en la solicitud", error.message);
+          })
+          .finally(() => {
             getAsignatura();
             form.resetFields();
             setModalOpen(false);
