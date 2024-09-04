@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal, Input } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
+import Exportar from "../../components/Exportar";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
+import Calendario from "../Mantenimientos/Calendario"; // Importar el calendario
 
 const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
@@ -10,6 +12,7 @@ const PlanificacionAcademica = () => {
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
+    const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
 
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
@@ -63,6 +66,7 @@ const PlanificacionAcademica = () => {
             <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
         </Menu>
     );
+    
 
     useEffect(() => {
         getDistribucion();
@@ -94,7 +98,9 @@ const PlanificacionAcademica = () => {
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
-                        docente: value?.nombre_docente
+                        docente: value?.nombre_docente,
+                        cedula: value?.cedula_docente,
+                        titulo_academico: value?.titulo_academico_docente,
                     };
                 });
 
@@ -106,6 +112,7 @@ const PlanificacionAcademica = () => {
                 }
 
                 setDataTable(Distribucion);
+                setFilteredData(Distribucion); // Actualizar también el estado filteredData
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
@@ -154,6 +161,9 @@ const PlanificacionAcademica = () => {
                             allowClear 
                         />
                     </Col>
+                    <Col>
+                        <Exportar filteredData={filteredData} />
+                    </Col>
                 </Row>
             </Space>
             <Table
@@ -183,8 +193,20 @@ const PlanificacionAcademica = () => {
                         align:"center"
                     },
                     {
+                        dataIndex:"cedula",
+                        title:"Cedula Docente",
+                        width:50,
+                        align:"center"
+                    },
+                    {
                         dataIndex:"docente",
                         title:"Docente",
+                        width:50,
+                        align:"center"
+                    },
+                    {
+                        dataIndex:"titulo_academico",
+                        title:"Titulo Academico",
                         width:50,
                         align:"center"
                     },
@@ -238,10 +260,19 @@ const PlanificacionAcademica = () => {
                       }
                 ]}
                 dataSource={dataTable}
+                size="middle"
+                pagination={{
+                    pageSize:10,
+                    showTotal: total => `Total ${total} items`
+                }}
             />
         </Card>
         <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
-      
+        <Row style={{ marginTop: "20px" }}>
+            <Col span={24}>
+                <Calendario evetns={filteredData} />
+            </Col>
+        </Row>
         </>
     </Spin>
     );
