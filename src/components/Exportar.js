@@ -7,6 +7,10 @@ const GenerarReporte = ({ filteredData }) => {
     const url = "http://localhost:8000/api/istg/";
     const [loading, setLoading] = useState(true);
     const [filterDocente, setFilterDocente] = useState("");
+
+    const formatearHora = (hora) => {
+        return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
+    };
     
     const getDistribucion = async () => {
         setLoading(true);
@@ -24,8 +28,8 @@ const GenerarReporte = ({ filteredData }) => {
                 nivel: value?.nivel,
                 paralelo: value?.paralelo,
                 dia: value?.dia,
-                hora_inicio: value?.hora_inicio,
-                hora_termina: value?.hora_termina,
+                hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
+                hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término
                 fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                 usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                 estado: value?.estado,
@@ -73,11 +77,11 @@ const GenerarReporte = ({ filteredData }) => {
                 [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
             ],
             columnStyles: {
-                0: { cellWidth: 60 },
+                0: { cellWidth: 'auto' },
                 1: { cellWidth: 'auto' }
             },
             styles: {
-                cellPadding: 3,
+                cellPadding: 5,
                 fontSize: 10,
                 overflow: 'linebreak'
             }
@@ -109,30 +113,41 @@ const GenerarReporte = ({ filteredData }) => {
                 4: { cellWidth: 'auto' }
             },
             styles: {
-                cellPadding: 3,
+                cellPadding: 4,
                 fontSize: 10,
                 overflow: 'linebreak'
             }
         });
 
-        // Agrupación de actividades por horario y día
-        const horariosPorDia = {};
+        const normalizarDia = (dia) => {
+            const diasSemana = {
+                'lunes': 'Lunes',
+                'martes': 'Martes',
+                'miércoles': 'Miércoles',
+                'jueves': 'Jueves',
+                'viernes': 'Viernes',
+                'sábado': 'Sábado'
+            };
+            return diasSemana[dia.toLowerCase()] || dia;
+        };
+        
         filteredData.forEach(row => {
             const horario = `${row.hora_inicio} - ${row.hora_termina}`;
-            if (!horariosPorDia[horario]) {
-                horariosPorDia[horario] = { 'Lunes': '', 'Martes': '', 'Miércoles': '', 'Jueves': '', 'Viernes': '', 'Sábado': '' };
+            const diaNormalizado = normalizarDia(row.dia);
+            if (!normalizarDia[horario]) {
+                normalizarDia[horario] = { 'Lunes': '', 'Martes': '', 'Miércoles': '', 'Jueves': '', 'Viernes': '', 'Sábado': '' };
             }
-            horariosPorDia[horario][row.dia] += (horariosPorDia[horario][row.dia] ? ', ' : '') + row.materia;
+            normalizarDia[horario][diaNormalizado] += (normalizarDia[horario][diaNormalizado] ? ', ' : '') + row.materia;
         });
 
-        const tablaDistribucion = Object.keys(horariosPorDia).map(horario => [
+        const tablaDistribucion = Object.keys(normalizarDia).map(horario => [
             horario, 
-            horariosPorDia[horario]['Lunes'], 
-            horariosPorDia[horario]['Martes'], 
-            horariosPorDia[horario]['Miércoles'], 
-            horariosPorDia[horario]['Jueves'], 
-            horariosPorDia[horario]['Viernes'], 
-            horariosPorDia[horario]['Sábado']
+            normalizarDia[horario]['Lunes'], 
+            normalizarDia[horario]['Martes'], 
+            normalizarDia[horario]['Miércoles'], 
+            normalizarDia[horario]['Jueves'], 
+            normalizarDia[horario]['Viernes'], 
+            normalizarDia[horario]['Sábado']
         ]);
 
         // Sección 3: Distribución de Actividades Docentes
@@ -159,7 +174,7 @@ const GenerarReporte = ({ filteredData }) => {
                 6: { cellWidth: 'auto' }
             },
             styles: {
-                cellPadding: 3,
+                cellPadding: 2,
                 fontSize: 10,
                 overflow: 'linebreak'
             }
