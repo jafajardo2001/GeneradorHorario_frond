@@ -261,7 +261,6 @@ const actualizarAsignatura = (value) => {
                dataSource={dataAsignatura}
               >
               <ColumnGroup title="Registro" align="center">
-                <Column title="id" dataIndex="id_materia" width={50} align="center" />
                 <Column title="Descripción" dataIndex="descripcion" width={80} align="center" />
               </ColumnGroup>
               <ColumnGroup title="Campos de auditoria" bordered={true} align="center">

@@ -104,6 +104,8 @@ const PlanificacionAcademica = () => {
                         estado: value?.estado,
                         docente: value?.nombre_docente,
                         cedula: value?.cedula_docente,
+                        correo: value?.correo_docente,
+                        telefono: value?.telefono_docente,
                         titulo_academico: value?.titulo_academico_docente,
                     };
                 });
@@ -193,12 +195,6 @@ const PlanificacionAcademica = () => {
                     {
                         dataIndex:"materia",
                         title:"Materias",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"cedula",
-                        title:"Cedula Docente",
                         width:50,
                         align:"center"
                     },
