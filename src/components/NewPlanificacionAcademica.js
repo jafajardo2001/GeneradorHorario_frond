@@ -265,11 +265,12 @@ const NewPlanificacionAcademica = (props) => {
             let response = await fetch(`${url}show_docentes`, configuraciones);
             let data = await response.json();
     
-            if (response.ok && data.ok) {  // Verifica que la respuesta y el JSON sean correctos
+            if (response.ok && data.ok) {
                 let data_mapeada = data.data.map((value) => ({
                     value: value.id_usuario,
-                    label: value.nombre_completo, // Usando nombre_completo de la función showDocentes
+                    label: value.nombre_completo + "  " + value.titulo_academico, // Usando nombre_completo de la función showDocentes
                 }));
+                console.log('Data mapeada de usuarios:', data_mapeada); // Verificar datos mapeados
                 setUser(data_mapeada); // Establecer los datos mapeados en el estado user
             } else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
@@ -557,6 +558,7 @@ const NewPlanificacionAcademica = (props) => {
                                     }}
                                     options={user} name="coor_carrera" disabled={loading} />
                             </Form.Item>
+
 
                             <Button onClick={addRow} icon={<InsertRowRightOutlined />}>Agregar Fila</Button>
                             <Table

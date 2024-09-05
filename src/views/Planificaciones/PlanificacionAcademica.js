@@ -66,6 +66,10 @@ const PlanificacionAcademica = () => {
             <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
         </Menu>
     );
+
+    const formatearHora = (hora) => {
+        return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
+    };
     
 
     useEffect(() => {
@@ -93,8 +97,8 @@ const PlanificacionAcademica = () => {
                         nivel: value?.nivel,
                         paralelo: value?.paralelo,
                         dia: value?.dia,
-                        hora_inicio: value?.hora_inicio,
-                        hora_termina: value?.hora_termina,
+                        hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
+                        hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
