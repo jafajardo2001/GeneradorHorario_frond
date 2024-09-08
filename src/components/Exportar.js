@@ -99,39 +99,6 @@ const GenerarReporte = ({ filteredData }) => {
 
         // Sección 1: Datos Generales
         const docente = filteredData[0]; // Usar el primer registro para los datos generales
-<<<<<<< HEAD
-    doc.autoTable({
-        startY: 40,
-        head: [['1. DATOS GENERALES']],
-        headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-        body: [], // Deja el cuerpo vacío para solo mostrar el encabezado
-    });
-
-    doc.autoTable({
-        startY: doc.previousAutoTable.finalY + 5, // Ajusta la posición vertical
-        body: [
-            [{ content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.cedula || ''],
-            [{ content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.docente || ''],
-            [{ content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.titulo_academico || ''],
-            [{ content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'aaaaaaa'],
-            [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'rtigrero@istg.edu.ec'],
-            [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '0989007630'],
-            [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia || ''],
-            [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'TIEMPO COMPLETO'],
-            [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global || ''],
-            [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
-        ],
-        columnStyles: {
-            0: { cellWidth: 'auto' },
-            1: { cellWidth: 'auto' }
-        },
-        styles: {
-            cellPadding: 5,
-            fontSize: 10,
-            overflow: 'linebreak'
-        }
-    });
-=======
         doc.autoTable({
             startY: 40,
             head: [["1. DATOS GENERALES"]],
@@ -163,18 +130,12 @@ const GenerarReporte = ({ filteredData }) => {
                 overflow: 'linebreak'
             }
         });
->>>>>>> FajardoG
 
         // Sección 2: Resumen de Horas de Dedicación Semanal
         doc.autoTable({
             startY: doc.previousAutoTable.finalY + 5,
-<<<<<<< HEAD
-            head: [['2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL']],
-        headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-=======
             head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
             headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
->>>>>>> FajardoG
             body: []
 
         });
@@ -239,13 +200,8 @@ const GenerarReporte = ({ filteredData }) => {
         // Sección 3: Distribución de Actividades Docentes
         doc.autoTable({
             startY: doc.previousAutoTable.finalY + 5,
-<<<<<<< HEAD
-            head: [['3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES']],
-        headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-=======
             head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
             headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
->>>>>>> FajardoG
             body: []
         });
 
