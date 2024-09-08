@@ -49,6 +49,8 @@ const Usuarios = () => {
           usuarios: value.usuario,
           nombres: value.nombres,
           apellidos: value.apellidos,
+          correo: value.correo,
+          telefono: value.telefono,
           perfil: value.rol_descripcion,
           titulo_academico: value.descripcion,
           estado: value.estado,
@@ -118,6 +120,16 @@ const Usuarios = () => {
             {
               dataIndex: "apellidos",
               title: "Apellidos",
+              width: 30,
+            },
+            {
+              dataIndex: "correo",
+              title: "Correo",
+              width: 30,
+            },
+            {
+              dataIndex: "telefono",
+              title: "Telefono",
               width: 30,
             },
             {

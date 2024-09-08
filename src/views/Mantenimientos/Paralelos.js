@@ -1,5 +1,5 @@
 import React,{ useState,useEffect } from "react";
-import { Button, Collapse, Input,Row,Col,Space, Table,Typography,Menu,Card,Dropdown, Spin } from "antd";
+import { Button, Collapse, Input,Row,Col,Space, Table,Typography,Menu,Card,Dropdown, Spin, notification } from "antd";
 import { SyncOutlined, PlusCircleOutlined,ClearOutlined,SearchOutlined,EditOutlined,DeleteOutlined,MenuOutlined } from "@ant-design/icons";
 import NewParalelo from "../../components/NewParalelo.js"
 const Paralelos = () => {
@@ -8,7 +8,16 @@ const Paralelos = () => {
   const [mensajeLoading,setMensajeLoading] = useState("cargando...");
   const [OpenNewModal,setIsOpenNewModal] = useState(false);
   const [dataTabla,setDataTabla] = useState([]);
+  const [formularioEditar, setFormularioEditar] = useState([]);
+  const [isOpeUpdatePerfil, setIsOpenUpdateModal] = useState(false);
   const url = "http://localhost:8000/api/istg/";
+
+  const mostrarNotificacion = (tipo,titulo,mensaje) => {
+    notification[tipo]({
+      message: titulo,
+      description: mensaje,
+    });
+  };
   
   function getParalelos(){
     setLoading(true)
@@ -45,20 +54,52 @@ const Paralelos = () => {
 
   }
 
+  const deleteParalelo = (values) => {
+    console.log("Estoy entrando en la funcion de value");
+    console.log(values);
+
+    let request_backend = {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            id_paralelo: values.id  // Asegúrate de que el backend espere este campo
+        })
+    };
+
+    fetch(`${url}delete_paralelo/${values.id}`, request_backend)  // ID incluido en la URL
+        .then((data_request) => data_request.json())
+        .then((data) => {
+            if (data.ok) {
+                mostrarNotificacion("success", "Operación realizada con éxito", "El paralelo " + values.paralelo.props.children + " se eliminó con éxito");
+            } else if (data.ok === false) {
+                mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
+            }
+        })
+        .finally(() => {
+            getParalelos();
+        });
+};
+
   function handleCloseModal(){
     setIsOpenNewModal(false)
   }
   const handleMenuClick = (action, record) => {
     console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-    if(action == "eliminar"){
-      /*setIsOpenUpdateModal(true)
-      setFormularioEditar(record)*/
-    }
+    if (action === "editar") {
+      setIsOpenUpdateModal(true);
+      setFormularioEditar(record);
+  } else if (action === "eliminar") {
+      deleteParalelo(record);  // Llamar a deleteParalelo cuando se selecciona "eliminar"
+  }
   };
 
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-      <Menu.Item key="eliminar"><DeleteOutlined/></Menu.Item>
+      <Menu.Item key="editar"><EditOutlined /></Menu.Item>
+      <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
     </Menu>
   );
   useEffect(()=>{

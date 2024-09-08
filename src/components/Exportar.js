@@ -12,36 +12,76 @@ const GenerarReporte = ({ filteredData }) => {
         return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
     };
     
-    const getDistribucion = async () => {
+    function getDistribucion() {
         setLoading(true);
-        try {
-            const response = await fetch(`${url}horario/show_dist_horarios`, { method: 'GET' });
-            if (!response.ok) throw new Error('Network response was not ok ' + response.statusText);
-            const data = await response.json();
-            const distribucion = data.data.map((value, index) => ({
-                index: index + 1,
-                id_distribucion: value?.id_distribucion,
-                educacion_global: value?.educacion_global_nombre,
-                carrera: value?.nombre_carrera,
-                id_usuario: value?.id_usuario,
-                materia: value?.materia,
-                nivel: value?.nivel,
-                paralelo: value?.paralelo,
-                dia: value?.dia,
-                hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
-                hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término
-                fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
-                usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
-                estado: value?.estado,
-                docente: value?.nombre_docente,
-                cedula: value?.cedula_docente,
-                titulo: value?.titulo_academico_docente
-            }));
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
-            setLoading(false);
-        }
+        fetch(`${url}horario/show_dist_horarios`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let Distribucion = data.data.map((value, index) => {
+                    return {
+                        index: index + 1,
+                        id_distribucion: value?.id_distribucion,
+                        educacion_global: value?.educacion_global_nombre,
+                        carrera: value?.nombre_carrera,
+                        id_usuario: value?.id_usuario,
+                        materia: value?.materia,
+                        nivel: value?.nivel,
+                        paralelo: value?.paralelo,
+                        dia: value?.dia,
+                        hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
+                        hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término
+                        fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
+                        usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
+                        estado: value?.estado,
+                        docente: value?.nombre_docente,
+                        cedula: value?.cedula_docente,
+                        correo: value?.correo_docente,
+                        telefono: value?.telefono_docente,
+                        titulo_academico: value?.titulo_academico_docente,
+                    };
+                });
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    const calcularHoras = (datos) => {
+        let horasDocencia = 0;
+        let horasInvestigacion = 0;
+        let horasPracticas = 0;
+        let horasGestion = 0;
+    
+        datos.forEach(item => {
+            const horasPorClase = item.hora_termina && item.hora_inicio ? 
+                (new Date(`1970-01-01T${item.hora_termina}:00`) - new Date(`1970-01-01T${item.hora_inicio}:00`)) / 3600000 : 0;
+    
+            if (item.tipo_actividad === 'Docencia') {
+                horasDocencia += horasPorClase;
+            } else if (item.tipo_actividad === 'Investigación') {
+                horasInvestigacion += horasPorClase;
+            } else if (item.tipo_actividad === 'Prácticas Preprofesionales') {
+                horasPracticas += horasPorClase;
+            } else if (item.tipo_actividad === 'Gestión Administrativa') {
+                horasGestion += horasPorClase;
+            }
+        });
+    
+        return {
+            horasDocencia: horasDocencia.toFixed(2),
+            horasInvestigacion: horasInvestigacion.toFixed(2),
+            horasPracticas: horasPracticas.toFixed(2),
+            horasGestion: horasGestion.toFixed(2),
+            totalHoras: (horasDocencia + horasInvestigacion + horasPracticas + horasGestion).toFixed(2),
+        };
     };
 
     const handleGenerateReport = () => {
@@ -54,10 +94,12 @@ const GenerarReporte = ({ filteredData }) => {
             return;
         }
 
+        const horas = calcularHoras(filteredData);
         const doc = new jsPDF();
 
         // Sección 1: Datos Generales
         const docente = filteredData[0]; // Usar el primer registro para los datos generales
+<<<<<<< HEAD
     doc.autoTable({
         startY: 40,
         head: [['1. DATOS GENERALES']],
@@ -89,13 +131,52 @@ const GenerarReporte = ({ filteredData }) => {
             overflow: 'linebreak'
         }
     });
+=======
+        doc.autoTable({
+            startY: 40,
+            head: [["1. DATOS GENERALES"]],
+            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+            body: []
+        });
+
+        doc.autoTable({
+            startY: doc.previousAutoTable.finalY,
+            body: [
+                [{ content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.cedula],
+                [{ content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.docente],
+                [{ content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.titulo_academico],
+                [{ content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, ''],
+                [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.correo],
+                [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.telefono],
+                [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia],
+                [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'TIEMPO COMPLETO'],
+                [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global],
+                [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
+            ],
+            columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' }
+            },
+            styles: {
+                cellPadding: 5,
+                fontSize: 10,
+                overflow: 'linebreak'
+            }
+        });
+>>>>>>> FajardoG
 
         // Sección 2: Resumen de Horas de Dedicación Semanal
         doc.autoTable({
             startY: doc.previousAutoTable.finalY + 5,
+<<<<<<< HEAD
             head: [['2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL']],
         headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+=======
+            head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
+            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+>>>>>>> FajardoG
             body: []
+
         });
 
         doc.autoTable({
@@ -104,10 +185,11 @@ const GenerarReporte = ({ filteredData }) => {
             headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
 
             body: [
-                ['Horas Clase: 18', 'Director de Investigación: 2', 'Director de Proyectos Comunitarios: 4', 'Coordinación: 0', 'Total: 24'],
-                ['Tutorías: 1', '', 'Tutor de Prácticas Laborales: 4', 'Gestoría Institucional: 0', ''],
-                ['Preparación de Clases: 5', '', '', '', '']
+                [ `Horas Clase: ${horas.horasDocencia}`, `Director de Investigación: ${horas.horasInvestigacion}`, `Director de Proyectos Comunitarios: ${horas.horasPracticas}`, `Coordinación: ${horas.horasGestion}`, `Total: ${horas.totalHoras}` ],
+                [ `Tutorías: 1`, '', `Tutor de Prácticas Laborales: 4`, `Gestoría Institucional: 0`, '' ],
+                [ `Preparación de Clases: 5`, '', '', '', '' ]
             ],
+            
             columnStyles: {
                 0: { cellWidth: 'auto' },
                 1: { cellWidth: 'auto' },
@@ -135,7 +217,8 @@ const GenerarReporte = ({ filteredData }) => {
         };
         
         filteredData.forEach(row => {
-            const horario = `${row.hora_inicio} - ${row.hora_termina}`;
+            const horario = `${row.hora_inicio}
+            ${row.hora_termina}`;
             const diaNormalizado = normalizarDia(row.dia);
             if (!normalizarDia[horario]) {
                 normalizarDia[horario] = { 'Lunes': '', 'Martes': '', 'Miércoles': '', 'Jueves': '', 'Viernes': '', 'Sábado': '' };
@@ -156,8 +239,13 @@ const GenerarReporte = ({ filteredData }) => {
         // Sección 3: Distribución de Actividades Docentes
         doc.autoTable({
             startY: doc.previousAutoTable.finalY + 5,
+<<<<<<< HEAD
             head: [['3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES']],
         headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+=======
+            head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
+            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+>>>>>>> FajardoG
             body: []
         });
 

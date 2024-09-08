@@ -1,31 +1,52 @@
-import React,{useRef,useEffect,useState} from "react";
-import { Modal, Form, Col, Row, Input } from "antd";
-import { SyncOutlined, PlusCircleOutlined,ClearOutlined,SearchOutlined,EditOutlined,DeleteOutlined,MenuOutlined } from "@ant-design/icons";
+import React, { useRef, useEffect, useState } from "react";
+import { Modal, Form, Col, Row, Input, notification } from "antd";
+import { SyncOutlined, PlusCircleOutlined, ClearOutlined, SearchOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 
 const UpdateCurso = (props) => {
   const formRef = useRef(null);
-  const [id,setId] = useState(0);
+  const [id, setId] = useState(0);
   const url = "http://localhost:8000/api/istg/";
 
-  function update(value){
-    fetch(`${url}update_nivel/${id}`, { method: 'PUT',headers: {'Content-Type': 'application/json'},body: JSON.stringify(value),
-        }).then((response) => {
-            return response.json();
-          }).then((data) => {
-            window.alert(data.message)
-            formRef.current.resetFields();
-            props.handleCloseModal();
-            props.getCurso();
-          }).catch((error) => {
-            window.alert('A ocurrido un error:' + error);
+  const update = (value) => {
+    fetch(`${url}update_nivel/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(value),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          notification.success({
+            message: 'Actualización Exitosa',
+            description: data.message || 'Curso actualizado correctamente.',
+            placement: 'topRight',
           });
-  }
+          formRef.current.resetFields();
+          props.handleCloseModal();
+          props.getCurso();
+        } else {
+          notification.error({
+            message: 'Error',
+            description: data.message || 'No se pudo actualizar el curso.',
+            placement: 'topRight',
+          });
+        }
+      })
+      .catch((error) => {
+        notification.error({
+          message: 'Error',
+          description: 'Ocurrió un error al actualizar el curso: ' + error.message,
+          placement: 'topRight',
+        });
+      });
+  };
 
   useEffect(() => {
     if (formRef.current) {
-      setId(props.formulario.id)
+      setId(props.formulario.id);
       formRef.current.setFieldsValue(props.formulario);
-
     }
   }, [props.formulario]);
 
@@ -35,13 +56,11 @@ const UpdateCurso = (props) => {
         onCancel={() => {
           props.handleCloseModal();
         }}
-
-        onOk={()=>{
-          if(formRef && formRef.current){
+        onOk={() => {
+          if (formRef && formRef.current) {
             formRef.current.submit();
           }
         }}
-
         open={props.open} 
         title="Actualizar el curso" 
         okText="Actualizar" 
@@ -55,50 +74,35 @@ const UpdateCurso = (props) => {
         >
           <Row>
             <Col span={24}>
-              <Form.Item label="Edite el numero" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del numero es requerido"
-                  }
-                ]
-              }
-              name="numero">
-                <Input/>
+              <Form.Item 
+                label="Edite el numero" 
+                rules={[{ required: true, message: "El campo del numero es requerido" }]}
+                name="numero"
+              >
+                <Input />
               </Form.Item>
 
-              <Form.Item label="Edite el nemonico del curso" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del nemonico es requerido"
-                  }
-                ]
-              }
-              name="nemonico">
-                <Input/>
+              <Form.Item 
+                label="Edite el nemonico del curso" 
+                rules={[{ required: true, message: "El campo del nemonico es requerido" }]}
+                name="nemonico"
+              >
+                <Input />
               </Form.Item>
 
-
-              <Form.Item label="Edite el termino del curso" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del termino es requerido"
-                  }
-                ]
-              }
-              name="termino">
-                <Input/>
+              <Form.Item 
+                label="Edite el termino del curso" 
+                rules={[{ required: true, message: "El campo del termino es requerido" }]}
+                name="termino"
+              >
+                <Input />
               </Form.Item>
-
             </Col>
           </Row>
         </Form>
       </Modal>
     </>
-
-    )
+  );
 }
 
 export default UpdateCurso;

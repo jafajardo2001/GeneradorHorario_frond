@@ -63,6 +63,8 @@ const NewUsuario = (props) => {
         cedula: value.cedula,
         nombres: value.nombres,
         apellidos: value.apellidos,
+        correo: value.correo,
+        telefono: value.telefono,
         id_rol: value.perfil.value,
         id_titulo_academico: value.tituloAcademico.value
       }),
@@ -138,6 +140,26 @@ const NewUsuario = (props) => {
               label="Ingrese los apellidos"
               name="apellidos"
               rules={[{ required: true, message: "El campo de apellidos es requerido" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item
+              label="Ingrese el correo"
+              name="correo"
+              rules={[{ required: true, message: "El campo de correo es requerido" }]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+
+          <Col span={24}>
+            <Form.Item
+              label="Ingrese un número de telefono"
+              name="telefono"
+              rules={[{ required: true, message: "El campo de telefono es requerido" }]}
             >
               <Input />
             </Form.Item>
