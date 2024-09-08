@@ -54,6 +54,36 @@ const GenerarReporte = ({ filteredData }) => {
             });
     }
 
+    const calcularHoras = (datos) => {
+        let horasDocencia = 0;
+        let horasInvestigacion = 0;
+        let horasPracticas = 0;
+        let horasGestion = 0;
+    
+        datos.forEach(item => {
+            const horasPorClase = item.hora_termina && item.hora_inicio ? 
+                (new Date(`1970-01-01T${item.hora_termina}:00`) - new Date(`1970-01-01T${item.hora_inicio}:00`)) / 3600000 : 0;
+    
+            if (item.tipo_actividad === 'Docencia') {
+                horasDocencia += horasPorClase;
+            } else if (item.tipo_actividad === 'Investigación') {
+                horasInvestigacion += horasPorClase;
+            } else if (item.tipo_actividad === 'Prácticas Preprofesionales') {
+                horasPracticas += horasPorClase;
+            } else if (item.tipo_actividad === 'Gestión Administrativa') {
+                horasGestion += horasPorClase;
+            }
+        });
+    
+        return {
+            horasDocencia: horasDocencia.toFixed(2),
+            horasInvestigacion: horasInvestigacion.toFixed(2),
+            horasPracticas: horasPracticas.toFixed(2),
+            horasGestion: horasGestion.toFixed(2),
+            totalHoras: (horasDocencia + horasInvestigacion + horasPracticas + horasGestion).toFixed(2),
+        };
+    };
+
     const handleGenerateReport = () => {
         if (!filteredData || filteredData.length === 0) {
             notification.error({
@@ -64,6 +94,7 @@ const GenerarReporte = ({ filteredData }) => {
             return;
         }
 
+        const horas = calcularHoras(filteredData);
         const doc = new jsPDF();
 
         // Sección 1: Datos Generales
@@ -113,10 +144,11 @@ const GenerarReporte = ({ filteredData }) => {
             startY: doc.previousAutoTable.finalY,
             head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
             body: [
-                ['Horas Clase: 18', 'Director de Investigación: 2', 'Director de Proyectos Comunitarios: 4', 'Coordinación: 0', 'Total: 24'],
-                ['Tutorías: 1', '', 'Tutor de Prácticas Laborales: 4', 'Gestoría Institucional: 0', ''],
-                ['Preparación de Clases: 5', '', '', '', '']
+                [ `Horas Clase: ${horas.horasDocencia}`, `Director de Investigación: ${horas.horasInvestigacion}`, `Director de Proyectos Comunitarios: ${horas.horasPracticas}`, `Coordinación: ${horas.horasGestion}`, `Total: ${horas.totalHoras}` ],
+                [ `Tutorías: 1`, '', `Tutor de Prácticas Laborales: 4`, `Gestoría Institucional: 0`, '' ],
+                [ `Preparación de Clases: 5`, '', '', '', '' ]
             ],
+            
             columnStyles: {
                 0: { cellWidth: 'auto' },
                 1: { cellWidth: 'auto' },

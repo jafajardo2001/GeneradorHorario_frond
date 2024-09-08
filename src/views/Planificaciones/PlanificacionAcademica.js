@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal, Input } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
+import UpdateDistribucion from "../../components/UpdateDistribucion";
 import Exportar from "../../components/Exportar";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import Calendario from "../Mantenimientos/Calendario"; // Importar el calendario
@@ -9,40 +10,44 @@ const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
     const { Title } = Typography;
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isOpenUpdateHorario, setIsOpenUpdateModal] = useState(false);
     const [dataTable, setDataTable] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
+    const [formularioEditar, setFormularioEditar] = useState([]);
+    const [mensajeLoading,setMensajeLoading] = useState("cargando...");
 
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
+    
         if (action === "eliminar") {
             try {
                 if (!record.id_distribucion) {
                     console.error('ID de distribución no encontrado en el registro');
                     return;
                 }
-
+    
                 const response = await fetch(`${url}horario/delete_distribucion/${record.id_distribucion}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
-
+    
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Error: ${response.status} - ${errorText}`);
                 }
-
+    
                 const data = await response.json();
                 if (data.ok) {
                     notification.success({
-                        message: 'Operacion Éxito',
+                        message: 'Operación Exitosa',
                         description: 'Distribución eliminada correctamente.',
                         placement: 'topRight',
                     });
-                    getDistribucion();
+                    getDistribucion(); // Refrescar datos después de eliminar
                 } else {
                     notification.error({
                         message: 'Error',
@@ -57,8 +62,13 @@ const PlanificacionAcademica = () => {
                     placement: 'topRight',
                 });
             }
+        } else if (action === "editar") {
+            // Al hacer clic en editar, guardas el registro y abres el modal
+            setFormularioEditar(record); // Guardar el registro a editar
+            setIsOpenUpdateModal(true);   // Abrir el modal de edición
         }
     };
+    
 
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
@@ -130,6 +140,7 @@ const PlanificacionAcademica = () => {
 
     function handleCloseModal(){
         setModalIsOpen(false);
+        setIsOpenUpdateModal(false);
     }
 
     useEffect(() => {
@@ -137,7 +148,7 @@ const PlanificacionAcademica = () => {
     }, [filterDocente]); // Agregar filterDocente como dependencia para actualizar la tabla al cambiar el filtro
 
     return (
-        <Spin spinning={loading} tip="Cargando...">
+        <Spin spinning={loading} tip={mensajeLoading}>
         <>
         <Row style={{
             display:"flex",
@@ -205,14 +216,8 @@ const PlanificacionAcademica = () => {
                         align:"center"
                     },
                     {
-                        dataIndex:"titulo_academico",
-                        title:"Titulo Academico",
-                        width:50,
-                        align:"center"
-                    },
-                    {
                         dataIndex:"nivel",
-                        title:"Nivel",
+                        title:"Curso",
                         width:50,
                         align:"center"
                     },
@@ -267,6 +272,14 @@ const PlanificacionAcademica = () => {
                 }}
             />
         </Card>
+        <UpdateDistribucion
+            open={isOpenUpdateHorario}
+            handleCloseModal={handleCloseModal}
+            distribucion={formularioEditar} // Pasar la distribución seleccionada
+            getData={getDistribucion}
+            loading={setLoading}
+            mensaje={setMensajeLoading}
+        />
         <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
         <Row style={{ marginTop: "20px" }}>
             <Col span={24}>
