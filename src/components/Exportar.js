@@ -97,6 +97,13 @@ const GenerarReporte = ({ filteredData }) => {
         const horas = calcularHoras(filteredData);
         const doc = new jsPDF('landscape');
 
+            // Ordenar los datos por la hora de inicio
+        filteredData.sort((a, b) => {
+            const horaA = new Date(`1970-01-01T${a.hora_inicio}:00`).getTime();
+            const horaB = new Date(`1970-01-01T${b.hora_inicio}:00`).getTime();
+            return horaA - horaB;
+        });
+
         // Sección 1: Datos Generales
         const docente = filteredData[0]; // Usar el primer registro para los datos generales
         doc.autoTable({
