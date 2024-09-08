@@ -95,7 +95,7 @@ const GenerarReporte = ({ filteredData }) => {
         }
 
         const horas = calcularHoras(filteredData);
-        const doc = new jsPDF();
+        const doc = new jsPDF('landscape');
 
         // Sección 1: Datos Generales
         const docente = filteredData[0]; // Usar el primer registro para los datos generales
