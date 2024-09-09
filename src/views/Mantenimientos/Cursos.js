@@ -1,5 +1,5 @@
 import React,{ useState,useEffect } from "react";
-import { Button, Collapse, Input, Table,Typography,Menu,Dropdown,Row,Col,Space,Card, Spin } from "antd";
+import { Button, Collapse, Input, Table,Typography,Menu,Dropdown,Row,Col,Space,Card, Spin, notification } from "antd";
 import { SyncOutlined, PlusCircleOutlined,ClearOutlined,SearchOutlined,EditOutlined,DeleteOutlined,MenuOutlined } from "@ant-design/icons";
 import NewCurso from "../../components/NewCurso.js"
 import UpdateCurso from "../../components/UpdateCurso.js"
@@ -15,6 +15,12 @@ const Cursos = () => {
   useEffect(()=>{
     getCurso()
   },[])
+  const mostrarNotificacion = (tipo,titulo,mensaje) => {
+    notification[tipo]({
+      message: titulo,
+      description: mensaje,
+    });
+  };
   function getCurso(){
     setLoading(true)
     fetch(`${url}show_nivel`, { method: 'GET' })
@@ -42,8 +48,36 @@ const Cursos = () => {
           }).finally(()=>{
             setLoading(false)
           });
-  }
 
+  }
+  const deleteCurso = (values) => {
+    console.log("Estoy entrando en la funcion de value");
+    console.log(values);
+
+    let request_backend = {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            id_nivel: values.id  // Asegúrate de que el backend espere este campo
+        })
+    };
+
+    fetch(`${url}delete_nivel/${values.id}`, request_backend)  // ID incluido en la URL
+        .then((data_request) => data_request.json())
+        .then((data) => {
+            if (data.ok) {
+                mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.termino + " se eliminó con éxito");
+            } else if (data.ok === false) {
+                mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
+            }
+        })
+        .finally(() => {
+          getCurso();
+        });
+  };
   const menu = (record) => (
             <Menu onClick={({ key }) => handleMenuClick(key, record)}>
                 <Menu.Item key="editar"><EditOutlined/></Menu.Item>
@@ -57,6 +91,9 @@ const Cursos = () => {
           setIsOpenUpdateModal(true)
           setFormularioEditar(record)
         }
+        else if (action === "eliminar") {
+          deleteCurso(record);  // Llamar a deleteParalelo cuando se selecciona "eliminar"
+      }
     };
 
   function handleCloseModal(){
@@ -151,6 +188,6 @@ const Cursos = () => {
     <NewCurso open={isOpenModal} handleCloseModal={handleCloseModal} getCurso={getCurso}/>
     <UpdateCurso open={isOpenUpdateModal} handleCloseModal={handleCloseModal} formulario={formularioEditar} getCurso={getCurso} loading={setLoading} mensaje={setMensajeLoading}/>
     </>
-    )
+  );
 }
 export default Cursos;

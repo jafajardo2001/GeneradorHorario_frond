@@ -73,7 +73,7 @@ const Paralelos = () => {
         .then((data_request) => data_request.json())
         .then((data) => {
             if (data.ok) {
-                mostrarNotificacion("success", "Operación realizada con éxito", "El paralelo " + values.paralelo.props.children + " se eliminó con éxito");
+                mostrarNotificacion("success", "Operación realizada con éxito", "El paralelo " + values.paralelo + " se eliminó con éxito");
             } else if (data.ok === false) {
                 mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
             }
@@ -81,7 +81,7 @@ const Paralelos = () => {
         .finally(() => {
             getParalelos();
         });
-};
+  };
 
   function handleCloseModal(){
     setIsOpenNewModal(false)

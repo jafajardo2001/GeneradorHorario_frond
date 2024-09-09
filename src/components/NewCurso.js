@@ -26,7 +26,8 @@ const NewCurso = (props) => {
             props.getCurso();
             props.handleCloseModal();
         } else {
-          mostrarNotificacion('error', 'Error', data.message || 'Error desconocido');
+         // Mostrar notificación de error si la descripción ya existe o cualquier otro error
+        mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
         }
       })
       .catch((error) => {
