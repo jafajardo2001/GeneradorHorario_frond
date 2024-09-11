@@ -55,35 +55,78 @@ const GenerarReporte = ({ filteredData }) => {
     }
 
     const calcularHoras = (datos) => {
-        let horasDocencia = 0;
-        let horasInvestigacion = 0;
-        let horasPracticas = 0;
-        let horasGestion = 0;
+        let horasPorMateria = {};
+        let horasMateriaExcluidas = {
+            'Director de Investigación': 0,
+            'Director de Proyectos Comunitarios': 0,
+            'Coordinación': 0,
+            'Tutorías': 0,
+            'Tutor de Prácticas Laborales': 0,
+            'Gestoría Institucional': 0,
+            'Preparación de Clases': 0,
+            'Horas Clase': 0 // Asegúrate de incluir esta categoría
+        };
     
         datos.forEach(item => {
             const horasPorClase = item.hora_termina && item.hora_inicio ? 
                 (new Date(`1970-01-01T${item.hora_termina}:00`) - new Date(`1970-01-01T${item.hora_inicio}:00`)) / 3600000 : 0;
     
-            if (item.tipo_actividad === 'Docencia') {
-                horasDocencia += horasPorClase;
-            } else if (item.tipo_actividad === 'Investigación') {
-                horasInvestigacion += horasPorClase;
-            } else if (item.tipo_actividad === 'Prácticas Preprofesionales') {
-                horasPracticas += horasPorClase;
-            } else if (item.tipo_actividad === 'Gestión Administrativa') {
-                horasGestion += horasPorClase;
+            // Manejo de categorías excluidas
+            if (item.materia in horasMateriaExcluidas) {
+                horasMateriaExcluidas[item.materia] += horasPorClase;
+            } else {
+                // Manejo de horas clase
+                if (!horasPorMateria[item.materia]) {
+                    horasPorMateria[item.materia] = 0;
+                }
+                horasPorMateria[item.materia] += horasPorClase;
             }
         });
     
+        // Calcular el total de horas para las materias excluidas
+        const totalHorasExcluidas = Object.values(horasMateriaExcluidas).reduce((acc, horas) => acc + horas, 0).toFixed(2);
+    
+        // Calcular el total de horas para las materias restantes
+        const totalHorasRestantes = Object.values(horasPorMateria).reduce((acc, horas) => acc + horas, 0).toFixed(2);
+    
+        // Calcular las sumas por columna
+        const totalHorasClase = totalHorasRestantes['Horas Clase'] || 0;
+        const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
+        const totalHorasPreparacionClases = horasMateriaExcluidas['Preparación de Clases'] || 0;
+        const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Director de Investigación'] || 0;
+        const totalHorasDirectorProyectos = horasMateriaExcluidas['Director de Proyectos Comunitarios'] || 0;
+        const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
+        const totalHorasTutorPracticas = horasMateriaExcluidas['Tutor de Prácticas Laborales'] || 0;
+        const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Gestoría Institucional'] || 0;
+    
+        // Sumar las horas totales
+        const totalDocencia = (parseFloat(totalHorasRestantes) + parseFloat(totalHorasTutorias) + parseFloat(totalHorasPreparacionClases)).toFixed(2);
+        const totalInvestigacion = (parseFloat(totalHorasDirectorInvestigacion) + parseFloat(totalHorasDirectorProyectos) + parseFloat(totalHorasCoordinacion)).toFixed(2);
+        const totalPracticas = (parseFloat(totalHorasTutorPracticas)).toFixed(2);
+        const totalGestion = (parseFloat(totalHorasGestoriaInstitucional)).toFixed(2);
+        const totalGeneral = (parseFloat(totalDocencia) + parseFloat(totalInvestigacion) + parseFloat(totalPracticas) + parseFloat(totalGestion) ).toFixed(2);
+    
         return {
-            horasDocencia: horasDocencia.toFixed(2),
-            horasInvestigacion: horasInvestigacion.toFixed(2),
-            horasPracticas: horasPracticas.toFixed(2),
-            horasGestion: horasGestion.toFixed(2),
-            totalHoras: (horasDocencia + horasInvestigacion + horasPracticas + horasGestion).toFixed(2),
+            horasPorMateria: horasPorMateria,
+            horasMateriaExcluidas: horasMateriaExcluidas,
+            totalHorasExcluidas: totalHorasExcluidas,
+            totalHorasRestantes: totalHorasRestantes,
+            totalHorasClase: totalHorasClase,
+            totalHorasTutorias: totalHorasTutorias,
+            totalHorasPreparacionClases: totalHorasPreparacionClases,
+            totalHorasDirectorInvestigacion: totalHorasDirectorInvestigacion,
+            totalHorasDirectorProyectos: totalHorasDirectorProyectos,
+            totalHorasCoordinacion: totalHorasCoordinacion,
+            totalHorasTutorPracticas: totalHorasTutorPracticas,
+            totalHorasGestoriaInstitucional: totalHorasGestoriaInstitucional,
+            totalDocencia: totalDocencia,
+            totalInvestigacion: totalInvestigacion,
+            totalPracticas: totalPracticas,
+            totalGestion: totalGestion,
+            totalGeneral: totalGeneral
         };
     };
-
+    
     const handleGenerateReport = () => {
         if (!filteredData || filteredData.length === 0) {
             notification.error({
@@ -93,10 +136,37 @@ const GenerarReporte = ({ filteredData }) => {
             });
             return;
         }
-
-        const horas = calcularHoras(filteredData);
+    
+        const {
+            horasPorMateria,
+            horasMateriaExcluidas,
+            totalHorasExcluidas,
+            totalHorasRestantes,
+            totalHorasClase,
+            totalHorasTutorias,
+            totalHorasPreparacionClases,
+            totalHorasDirectorInvestigacion,
+            totalHorasDirectorProyectos,
+            totalHorasCoordinacion,
+            totalHorasTutorPracticas,
+            totalHorasGestoriaInstitucional,
+            totalDocencia,
+            totalInvestigacion,
+            totalPracticas,
+            totalGestion,
+            totalGeneral
+        } = calcularHoras(filteredData);
+        
         const doc = new jsPDF();
 
+        // Ordenar los datos por la hora de inicio
+        filteredData.sort((a, b) => {
+            const horaA = new Date(`1970-01-01T${a.hora_inicio}:00`).getTime();
+            const horaB = new Date(`1970-01-01T${b.hora_inicio}:00`).getTime();
+            return horaA - horaB;
+        });
+
+        
         // Sección 1: Datos Generales
         const docente = filteredData[0]; // Usar el primer registro para los datos generales
         doc.autoTable({
@@ -143,13 +213,12 @@ const GenerarReporte = ({ filteredData }) => {
         doc.autoTable({
             startY: doc.previousAutoTable.finalY,
             head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
-            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-
-            body: [
-                [ `Horas Clase: ${horas.horasDocencia}`, `Director de Investigación: ${horas.horasInvestigacion}`, `Director de Proyectos Comunitarios: ${horas.horasPracticas}`, `Coordinación: ${horas.horasGestion}`, `Total: ${horas.totalHoras}` ],
-                [ `Tutorías: 1`, '', `Tutor de Prácticas Laborales: 4`, `Gestoría Institucional: 0`, '' ],
-                [ `Preparación de Clases: 5`, '', '', '', '' ]
-            ],
+        body: [
+            [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
+            [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, '', '', '' ],
+            [ `Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', '' ], // Fila vacía eliminada
+            [ `Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}` ]
+        ],
             
             columnStyles: {
                 0: { cellWidth: 'auto' },
@@ -165,69 +234,104 @@ const GenerarReporte = ({ filteredData }) => {
             }
         });
 
-        const normalizarDia = (dia) => {
-            const diasSemana = {
-                'lunes': 'Lunes',
-                'martes': 'Martes',
-                'miércoles': 'Miércoles',
-                'jueves': 'Jueves',
-                'viernes': 'Viernes',
-                'sábado': 'Sábado'
-            };
-            return diasSemana[dia.toLowerCase()] || dia;
-        };
-        
-        filteredData.forEach(row => {
-            const horario = `${row.hora_inicio}
-            ${row.hora_termina}`;
-            const diaNormalizado = normalizarDia(row.dia);
-            if (!normalizarDia[horario]) {
-                normalizarDia[horario] = { 'Lunes': '', 'Martes': '', 'Miércoles': '', 'Jueves': '', 'Viernes': '', 'Sábado': '' };
-            }
-            normalizarDia[horario][diaNormalizado] += (normalizarDia[horario][diaNormalizado] ? ', ' : '') + row.materia;
-        });
-
-        const tablaDistribucion = Object.keys(normalizarDia).map(horario => [
-            horario, 
-            normalizarDia[horario]['Lunes'], 
-            normalizarDia[horario]['Martes'], 
-            normalizarDia[horario]['Miércoles'], 
-            normalizarDia[horario]['Jueves'], 
-            normalizarDia[horario]['Viernes'], 
-            normalizarDia[horario]['Sábado']
-        ]);
-
         // Sección 3: Distribución de Actividades Docentes
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY + 5,
-            head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
-            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-            body: []
-        });
-
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY,
-            head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
-            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-            body: tablaDistribucion,
-            columnStyles: {
-                0: { cellWidth: 'auto' },
-                1: { cellWidth: 'auto' },
-                2: { cellWidth: 'auto' },
-                3: { cellWidth: 'auto' },
-                4: { cellWidth: 'auto' },
-                5: { cellWidth: 'auto' },
-                6: { cellWidth: 'auto' }
-            },
-            styles: {
-                cellPadding: 2,
-                fontSize: 10,
-                overflow: 'linebreak'
-            }
-        });
-
-        doc.save('reporte.pdf');
+    const normalizarDia = (dia) => {
+        const diasSemana = {
+            'lunes': 'Lunes',
+            'martes': 'Martes',
+            'miércoles': 'Miércoles',
+            'jueves': 'Jueves',
+            'viernes': 'Viernes',
+            'sábado': 'Sábado'
+        };
+        return diasSemana[dia.toLowerCase()] || dia;
     };
+
+    let distribucionHorarios = {};
+    let horasPorDia = {
+        'Lunes': 0,
+        'Martes': 0,
+        'Miércoles': 0,
+        'Jueves': 0,
+        'Viernes': 0,
+        'Sábado': 0
+    };
+
+    filteredData.forEach(row => {
+        const horario = `${row.hora_inicio} - ${row.hora_termina}`;
+        const diaNormalizado = normalizarDia(row.dia);
+
+        if (!distribucionHorarios[horario]) {
+            distribucionHorarios[horario] = {
+                'Lunes': '',
+                'Martes': '',
+                'Miércoles': '',
+                'Jueves': '',
+                'Viernes': '',
+                'Sábado': ''
+            };
+        }
+        distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia;
+
+        const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
+        const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
+        const duracionHoras = (horaFin - horaInicio) / 3600000;
+        horasPorDia[diaNormalizado] += duracionHoras;
+    });
+
+    const tablaDistribucion = Object.keys(distribucionHorarios).map(horario => [
+        horario,
+        distribucionHorarios[horario]['Lunes'] || '',
+        distribucionHorarios[horario]['Martes'] || '',
+        distribucionHorarios[horario]['Miércoles'] || '',
+        distribucionHorarios[horario]['Jueves'] || '',
+        distribucionHorarios[horario]['Viernes'] || '',
+        distribucionHorarios[horario]['Sábado'] || ''
+    ]);
+
+    // Agregar la fila de totales al final de la tabla
+    const tablaDistribucionConTotales = [
+        ...tablaDistribucion,
+        [
+            'Total Horas por Día',
+            `${horasPorDia['Lunes'].toFixed(2)} h`,
+            `${horasPorDia['Martes'].toFixed(2)} h`,
+            `${horasPorDia['Miércoles'].toFixed(2)} h`,
+            `${horasPorDia['Jueves'].toFixed(2)} h`,
+            `${horasPorDia['Viernes'].toFixed(2)} h`,
+            `${horasPorDia['Sábado'].toFixed(2)} h`
+        ]
+    ];
+
+    doc.autoTable({
+        startY: doc.previousAutoTable.finalY + 5,
+        head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
+        headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+        body: []
+    });
+
+    doc.autoTable({
+        startY: doc.previousAutoTable.finalY,
+        head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
+        body: tablaDistribucionConTotales,
+        columnStyles: {
+            0: { cellWidth: 'auto' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'auto' },
+            3: { cellWidth: 'auto' },
+            4: { cellWidth: 'auto' },
+            5: { cellWidth: 'auto' },
+            6: { cellWidth: 'auto' }
+        },
+        styles: {
+            cellPadding: 2,
+            fontSize: 10,
+            overflow: 'linebreak'
+        }
+    });
+
+    doc.save('reporte.pdf');
+};
 
     useEffect(() => {
         getDistribucion();

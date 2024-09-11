@@ -304,6 +304,10 @@ const NewPlanificacionAcademica = (props) => {
         {
             value: "Viernes",
             label: "Viernes"
+        },
+        {
+            value: "Sábado",
+            label: "Sábado"
         }
     ]
 
@@ -483,13 +487,19 @@ const NewPlanificacionAcademica = (props) => {
                 setInformativo({
                     status: "success",
                     title: "Operación Realizada con éxito",
-                    subTitle: data.message,
+                    subTitle: data.mensaje,
+                });
+            } else if (data.mensaje_error.includes("límite de materias")) {  // Validar si el error es por límite
+                setInformativo({
+                    status: "warning",
+                    title: "Límite de materias alcanzado",
+                    subTitle: data.mensaje_error,  // Mostrar el mensaje específico del límite
                 });
             } else {
                 setInformativo({
                     status: "warning",
                     title: "Ha ocurrido un error",
-                    subTitle: data.message,
+                    subTitle: data.mensaje_error,
                 });
             }
         } catch (error) {
