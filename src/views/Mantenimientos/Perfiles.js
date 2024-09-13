@@ -88,16 +88,16 @@ const Perfiles = () => {
   };
 
 
-const handleMenuClick = (action, record) => {
-  console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-  
-  if (action === "editar") {
-      setIsOpenUpdateModal(true);
-      setFormularioEditar(record);
-  } else if (action === "eliminar") {
-      deletePerfil(record);  // Llamar a deletePerfil cuando se selecciona "eliminar"
-  }
-};
+  const handleMenuClick = (action, record) => {
+    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
+    
+    if (action === "editar") {
+        setIsOpenUpdateModal(true);
+        setFormularioEditar(record);
+    } else if (action === "eliminar") {
+        deletePerfil(record);  // Llamar a deletePerfil cuando se selecciona "eliminar"
+    }
+  };
 
 
   const menu = (record) => (

@@ -45,6 +45,7 @@ const Aside = ({ children }) => {
     getItem('Mantenimientos', 'subManetenimiento', <SettingOutlined />, [
       //getItem('EducacionGlobal', '7', '', '', '/Mantenimientos/educacionGobal'),
       getItem('Perfiles', '3', '', '', '/Mantenimientos/perfiles'),
+      getItem('Tiempo laboral', '12', '', '', '/Mantenimientos/tiempojob'),
       getItem('Usuarios', '4', '', '', '/Mantenimientos/usuarios'),
       getItem('Materias', '8', '', '', '/Mantenimientos/materias'),
       getItem('Cursos', '5', '', '', '/Mantenimientos/cursos'),

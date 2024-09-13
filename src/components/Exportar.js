@@ -166,172 +166,188 @@ const GenerarReporte = ({ filteredData }) => {
             return horaA - horaB;
         });
 
-        
-        // Sección 1: Datos Generales
-        const docente = filteredData[0]; // Usar el primer registro para los datos generales
-        doc.autoTable({
-            startY: 40,
-            head: [["1. DATOS GENERALES"]],
-            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-            body: []
-        });
+        // Crear una promesa para asegurar que la imagen se cargue antes de continuar con la generación del PDF
+        const img = new Image();
+        img.src = '/logo-istg-2.png';  // Ruta del logo en la carpeta public
 
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY,
-            body: [
-                [{ content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.cedula],
-                [{ content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.docente],
-                [{ content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.titulo_academico],
-                [{ content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, ''],
-                [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.correo],
-                [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.telefono],
-                [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia],
-                [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'TIEMPO COMPLETO'],
-                [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global],
-                [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
-            ],
-            columnStyles: {
-                0: { cellWidth: 'auto' },
-                1: { cellWidth: 'auto' }
-            },
-            styles: {
-                cellPadding: 5,
-                fontSize: 10,
-                overflow: 'linebreak'
-            }
-        });
-
-        // Sección 2: Resumen de Horas de Dedicación Semanal
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY + 5,
-            head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
-            headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-            body: []
-
-        });
-
-        doc.autoTable({
-            startY: doc.previousAutoTable.finalY,
-            head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
-        body: [
-            [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
-            [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, '', '', '' ],
-            [ `Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', '' ], // Fila vacía eliminada
-            [ `Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}` ]
-        ],
+        img.onload = function () {
+            doc.addImage(img, 'PNG', 50 , 20, 100, 20);  // Ajustar posición y tamaño del logo
             
-            columnStyles: {
-                0: { cellWidth: 'auto' },
-                1: { cellWidth: 'auto' },
-                2: { cellWidth: 'auto' },
-                3: { cellWidth: 'auto' },
-                4: { cellWidth: 'auto' }
-            },
-            styles: {
-                cellPadding: 4,
-                fontSize: 10,
-                overflow: 'linebreak'
-            }
-        });
+            // Agregar el resto del contenido después de cargar la imagen
+            doc.setFontSize(16);
+            doc.text("Distribución de la Jornada de Trabajo Semanal del Docente", 30, 50);
+ 
+            // Sección 1: Datos Generales
+            const docente = filteredData[0]; // Usar el primer registro para los datos generales
+            doc.autoTable({
+                startY: 40,
+                head: [["1. DATOS GENERALES"]],
+                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                body: []
+            });
 
-        // Sección 3: Distribución de Actividades Docentes
-    const normalizarDia = (dia) => {
-        const diasSemana = {
-            'lunes': 'Lunes',
-            'martes': 'Martes',
-            'miércoles': 'Miércoles',
-            'jueves': 'Jueves',
-            'viernes': 'Viernes',
-            'sábado': 'Sábado'
-        };
-        return diasSemana[dia.toLowerCase()] || dia;
-    };
+            doc.autoTable({
+                startY: doc.previousAutoTable.finalY,
+                body: [
+                    [{ content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.cedula],
+                    [{ content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.docente],
+                    [{ content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.titulo_academico],
+                    [{ content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, ''],
+                    [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.correo],
+                    [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.telefono],
+                    [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia],
+                    [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'TIEMPO COMPLETO'],
+                    [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global],
+                    [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
+                ],
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' }
+                },
+                styles: {
+                    cellPadding: 5,
+                    fontSize: 10,
+                    overflow: 'linebreak',
+                    lineColor: [0, 0, 0], // Color de las líneas de la tabla
+                    lineWidth: 0.2 // Grosor de las líneas
+                }
+            });
 
-    let distribucionHorarios = {};
-    let horasPorDia = {
-        'Lunes': 0,
-        'Martes': 0,
-        'Miércoles': 0,
-        'Jueves': 0,
-        'Viernes': 0,
-        'Sábado': 0
-    };
+            // Sección 2: Resumen de Horas de Dedicación Semanal
+            doc.autoTable({
+                startY: doc.previousAutoTable.finalY + 5,
+                head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
+                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                body: []
 
-    filteredData.forEach(row => {
-        const horario = `${row.hora_inicio} - ${row.hora_termina}`;
-        const diaNormalizado = normalizarDia(row.dia);
+            });
 
-        if (!distribucionHorarios[horario]) {
-            distribucionHorarios[horario] = {
-                'Lunes': '',
-                'Martes': '',
-                'Miércoles': '',
-                'Jueves': '',
-                'Viernes': '',
-                'Sábado': ''
+            doc.autoTable({
+                startY: doc.previousAutoTable.finalY,
+                head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
+            body: [
+                [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
+                [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, '', '', '' ],
+                [ `Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', '' ], // Fila vacía eliminada
+                [ `Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}` ]
+            ],
+                
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 'auto' },
+                    4: { cellWidth: 'auto' }
+                },
+                styles: {
+                    cellPadding: 4,
+                    fontSize: 10,
+                    overflow: 'linebreak',
+                    lineColor: [0, 0, 0], // Color de las líneas de la tabla
+                    lineWidth: 0.2 // Grosor de las líneas
+                }
+            });
+
+            // Sección 3: Distribución de Actividades Docentes
+            const normalizarDia = (dia) => {
+                const diasSemana = {
+                    'lunes': 'Lunes',
+                    'martes': 'Martes',
+                    'miércoles': 'Miércoles',
+                    'jueves': 'Jueves',
+                    'viernes': 'Viernes',
+                    'sábado': 'Sábado'
+                };
+                return diasSemana[dia.toLowerCase()] || dia;
             };
-        }
-        distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia;
 
-        const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
-        const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
-        const duracionHoras = (horaFin - horaInicio) / 3600000;
-        horasPorDia[diaNormalizado] += duracionHoras;
-    });
+            let distribucionHorarios = {};
+            let horasPorDia = {
+                'Lunes': 0,
+                'Martes': 0,
+                'Miércoles': 0,
+                'Jueves': 0,
+                'Viernes': 0,
+                'Sábado': 0
+            };
 
-    const tablaDistribucion = Object.keys(distribucionHorarios).map(horario => [
-        horario,
-        distribucionHorarios[horario]['Lunes'] || '',
-        distribucionHorarios[horario]['Martes'] || '',
-        distribucionHorarios[horario]['Miércoles'] || '',
-        distribucionHorarios[horario]['Jueves'] || '',
-        distribucionHorarios[horario]['Viernes'] || '',
-        distribucionHorarios[horario]['Sábado'] || ''
-    ]);
+            filteredData.forEach(row => {
+                const horario = `${row.hora_inicio} - ${row.hora_termina}`;
+                const diaNormalizado = normalizarDia(row.dia);
 
-    // Agregar la fila de totales al final de la tabla
-    const tablaDistribucionConTotales = [
-        ...tablaDistribucion,
-        [
-            'Total Horas por Día',
-            `${horasPorDia['Lunes'].toFixed(2)} h`,
-            `${horasPorDia['Martes'].toFixed(2)} h`,
-            `${horasPorDia['Miércoles'].toFixed(2)} h`,
-            `${horasPorDia['Jueves'].toFixed(2)} h`,
-            `${horasPorDia['Viernes'].toFixed(2)} h`,
-            `${horasPorDia['Sábado'].toFixed(2)} h`
-        ]
-    ];
+                if (!distribucionHorarios[horario]) {
+                    distribucionHorarios[horario] = {
+                        'Lunes': '',
+                        'Martes': '',
+                        'Miércoles': '',
+                        'Jueves': '',
+                        'Viernes': '',
+                        'Sábado': ''
+                    };
+                }
+                distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia;
 
-    doc.autoTable({
-        startY: doc.previousAutoTable.finalY + 5,
-        head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
-        headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
-        body: []
-    });
+                const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
+                const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
+                const duracionHoras = (horaFin - horaInicio) / 3600000;
+                horasPorDia[diaNormalizado] += duracionHoras;
+            });
 
-    doc.autoTable({
-        startY: doc.previousAutoTable.finalY,
-        head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
-        body: tablaDistribucionConTotales,
-        columnStyles: {
-            0: { cellWidth: 'auto' },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 'auto' },
-            3: { cellWidth: 'auto' },
-            4: { cellWidth: 'auto' },
-            5: { cellWidth: 'auto' },
-            6: { cellWidth: 'auto' }
-        },
-        styles: {
-            cellPadding: 2,
-            fontSize: 10,
-            overflow: 'linebreak'
-        }
-    });
+            const tablaDistribucion = Object.keys(distribucionHorarios).map(horario => [
+                horario,
+                distribucionHorarios[horario]['Lunes'] || '',
+                distribucionHorarios[horario]['Martes'] || '',
+                distribucionHorarios[horario]['Miércoles'] || '',
+                distribucionHorarios[horario]['Jueves'] || '',
+                distribucionHorarios[horario]['Viernes'] || '',
+                distribucionHorarios[horario]['Sábado'] || ''
+            ]);
 
-    doc.save('reporte.pdf');
-};
+            // Agregar la fila de totales al final de la tabla
+            const tablaDistribucionConTotales = [
+                ...tablaDistribucion,
+                [
+                    'Total Horas por Día',
+                    `${horasPorDia['Lunes'].toFixed(2)} h`,
+                    `${horasPorDia['Martes'].toFixed(2)} h`,
+                    `${horasPorDia['Miércoles'].toFixed(2)} h`,
+                    `${horasPorDia['Jueves'].toFixed(2)} h`,
+                    `${horasPorDia['Viernes'].toFixed(2)} h`,
+                    `${horasPorDia['Sábado'].toFixed(2)} h`
+                ]
+            ];
+
+            doc.autoTable({
+                startY: doc.previousAutoTable.finalY + 5,
+                head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
+                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                body: []
+            });
+
+            doc.autoTable({
+                startY: doc.previousAutoTable.finalY,
+                head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
+                body: tablaDistribucionConTotales,
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 'auto' },
+                    4: { cellWidth: 'auto' },
+                    5: { cellWidth: 'auto' },
+                    6: { cellWidth: 'auto' }
+                },
+                styles: {
+                    cellPadding: 2,
+                    fontSize: 10,
+                    overflow: 'linebreak',
+                    lineColor: [0, 0, 0], // Color de las líneas de la tabla
+                    lineWidth: 0.2 // Grosor de las líneas
+                }
+            });
+            doc.save('reporte.pdf');
+        };
+    };
 
     useEffect(() => {
         getDistribucion();
