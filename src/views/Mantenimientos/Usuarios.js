@@ -52,8 +52,9 @@ const Usuarios = () => {
           correo: value.correo,
           telefono: value.telefono,
           perfil: value.rol_descripcion,
-          titulo_academico: value.descripcion,
+          titulo_academico: value.titulo_academico_descripcion,
           estado: value.estado,
+          job_descripcion:value.job_descripcion,
           maquina_creacion: value.ip_creacion,
           maquina_actualiso: value.ip_actualizacion,
         }));
@@ -74,8 +75,9 @@ const Usuarios = () => {
   }, []);
 
   return (
+    <Spin spinning={loading} tip="Cargando...">
     <>
-      <Spin spinning={loading} tip={mensajeLoading} />
+      
       <Row style={{ display: "flex", justifyContent: "center" }}>
         <Title level={3}>Mantenimiento de usuarios</Title>
       </Row>
@@ -133,6 +135,11 @@ const Usuarios = () => {
               width: 30,
             },
             {
+              dataIndex: "job_descripcion",
+              title: "tiempo laboral",
+              width: 30,
+            },
+            {
               dataIndex: "usuarios",
               title: "Usuario",
               width: 20,
@@ -159,8 +166,15 @@ const Usuarios = () => {
           scroll={{ x: 100 }}  // Asegúrate de ajustar el scroll si es necesario
         />
       </Card>
-      <NewUsuario isOpen={isOpenModal} onCloseModal={handleCloseModal} getUser={getUser} loading={setLoading} mensaje={setMensajeLoading} />
+      <NewUsuario 
+      isOpen={isOpenModal} 
+      onCloseModal={handleCloseModal} 
+      getUser={getUser}  // Aquí estás pasando la función getUser
+      loading={setLoading} 
+      mensaje={setMensajeLoading} 
+    />
     </>
+  </Spin>
   );
 };
 

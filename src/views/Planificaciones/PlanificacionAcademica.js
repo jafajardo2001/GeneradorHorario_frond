@@ -114,6 +114,7 @@ const PlanificacionAcademica = () => {
                         estado: value?.estado,
                         docente: value?.nombre_docente,
                         cedula: value?.cedula_docente,
+                        job_descripcion: value?.job_descripcion,
                         correo: value?.correo_docente,
                         telefono: value?.telefono_docente,
                         titulo_academico: value?.titulo_academico_docente,

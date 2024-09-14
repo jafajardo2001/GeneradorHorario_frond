@@ -38,6 +38,7 @@ const GenerarReporte = ({ filteredData }) => {
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
+                        job_descripcion: value?.job_descripcion,
                         docente: value?.nombre_docente,
                         cedula: value?.cedula_docente,
                         correo: value?.correo_docente,
@@ -196,7 +197,7 @@ const GenerarReporte = ({ filteredData }) => {
                     [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.correo],
                     [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.telefono],
                     [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia],
-                    [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 'TIEMPO COMPLETO'],
+                    [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.job_descripcion],
                     [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global],
                     [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
                 ],
