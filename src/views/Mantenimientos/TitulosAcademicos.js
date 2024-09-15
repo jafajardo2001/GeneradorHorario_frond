@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Row, Col, Space, Table, Typography, Menu, Dropdown, Spin } from "antd";
+import { Button, Card, Row, Col, Space, Table, Typography, Menu, Dropdown, Spin, Input } from "antd";
 import { SyncOutlined, FileAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewTitulo from "../../components/NewTitulo.js";
 import UpdateTitulo from "../../components/UpdateTitulo.js";
@@ -12,11 +12,13 @@ const TitulosAcademicos = () => {
   const [isOpenNewTitulo, setIsOpenNewModal] = useState(false);
   const [isOpenUpdateTitulo, setIsOpenUpdateModal] = useState(false);
   const [formularioEditar, setFormularioEditar] = useState([]);
+  const [filterTitulo, setFilterTitulo] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
 
   useEffect(() => {
     getTitulos();
-  }, []);
+  }, [filterTitulo]);
 
   const handleCloseModal = () => {
     setIsOpenNewModal(false);
@@ -39,7 +41,14 @@ const TitulosAcademicos = () => {
                 estado: value?.estado === 'A' ? 'Activo' : 'Inactivo'
               }
             });
+            // Filtrar datos 
+            if (filterTitulo) {
+              titulos = titulos.filter(item => 
+                  item.descripcion.toLowerCase().includes(filterTitulo.toLowerCase())
+              );
+            }
             setTitulos(titulos);
+            setFilteredData(titulos);
           }
       }).catch(()=>{
         setTitulos([])
@@ -97,6 +106,14 @@ const TitulosAcademicos = () => {
               <Button icon={<SyncOutlined />} onClick={getTitulos}>
                 Descargar datos
               </Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por Titulo"
+                value={filterTitulo}
+                onChange={(e) => setFilterTitulo(e.target.value)}
+                allowClear
+              />
             </Col>
           </Row>
         </Space>

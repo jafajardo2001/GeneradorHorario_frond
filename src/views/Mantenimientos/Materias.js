@@ -19,6 +19,8 @@ const Materias = () => {
   const [modalOpenTitulo,setModalOpenTitulo] = useState(false);
   const [dataMateriaEdit,setDataMateriaEdit] = useState({});
   const [id_materia,setIdMateria] = useState(0);
+  const [filterMateria, setFilterMateria] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const mostrarNotificacion = (tipo,titulo,mensaje) => {
     notification[tipo]({
       message: titulo,
@@ -27,49 +29,73 @@ const Materias = () => {
     });
   };
 
-  const getAsignatura = ()=>{
+  const getAsignatura = () => {
     setLoading(true);
-    fetch(`${url}show_data_asignatura/`).then((response)=>{return response.json()})
-    .then((data_request)=>{
-      console.log("Soy la data request")
-      console.log(data_request)
-      if(data_request.ok){
-        if(data_request.data){
-          let data = data_request.data.map((value,numero)=>{
-            return {
-              key:numero,
-              numero:numero+1,
-              id:value.id_materia,
-              id_materia:<label className="letra-pequeña1">{value.id_materia}</label>,
-              descripcion:<label className="letra-pequeña1">{value.descripcion}</label>,
-              fecha_creacion:
-                <span className="letra-pequeña1">
-                  {new Date(value.fecha_creacion).toLocaleDateString('es-ES', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                  })}
-                </span>,
-                
-                fecha_actualizacion:<label className="letra-pequeña1">{value.fecha_actualizacion? new Date(value.fecha_actualizacion).toLocaleDateString('es-ES'): 'Este registro no tiene fecha de actualizacion'}</label>,
-                
-                estado: value.estado === 'A' ? 'Activo' : (value.estado === 'I' ? 'Inactivo' : (value.estado === 'E' ? 'Eliminado' : 'Otra condición')),
-
+    fetch(`${url}show_data_asignatura/`)
+      .then((response) => response.json())
+      .then((data_request) => {
+        console.log("Soy la data request");
+        console.log(data_request);
+        if (data_request.ok) {
+          if (data_request.data) {
+            let data = data_request.data.map((value, numero) => ({
+              key: numero,
+              numero: numero + 1,
+              id: value.id_materia,
+              id_materia: value.id_materia, // Guardar ID sin JSX
+              descripcion: value.descripcion, // Guardar descripción sin JSX
+              fecha_creacion: new Date(value.fecha_creacion).toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              }),
+              fecha_actualizacion: value.fecha_actualizacion
+                ? new Date(value.fecha_actualizacion).toLocaleDateString('es-ES')
+                : 'Este registro no tiene fecha de actualizacion',
+              estado: value.estado === 'A'
+                ? 'Activo'
+                : value.estado === 'I'
+                ? 'Inactivo'
+                : value.estado === 'E'
+                ? 'Eliminado'
+                : 'Otra condición',
+            }));
+  
+            // Aplicar filtro en los datos sin JSX
+            if (filterMateria) {
+              data = data.filter((item) =>
+                item.descripcion.toLowerCase().includes(filterMateria.toLowerCase())
+              );
             }
-          })
-          setDataAsignatura(data)
-        }else{
-          setDataAsignatura([]);
+  
+            // Transformar datos a JSX para la tabla
+            const dataConJSX = data.map((item) => ({
+              ...item,
+              id_materia: <label className="letra-pequeña1">{item.id_materia}</label>,
+              descripcion: <label className="letra-pequeña1">{item.descripcion}</label>,
+              fecha_creacion: <span className="letra-pequeña1">{item.fecha_creacion}</span>,
+              fecha_actualizacion: (
+                <label className="letra-pequeña1">{item.fecha_actualizacion}</label>
+              ),
+            }));
+  
+            setDataAsignatura(dataConJSX);
+            setFilteredData(dataConJSX);
+          } else {
+            setDataAsignatura([]);
+          }
+        } else if (!data_request.ok) {
+          mostrarNotificacion('error', 'A ocurrido un error', 'A ocurrido un error al obtener la informacion');
         }
-      }else if(data_request.ok == false){
-        mostrarNotificacion('error','A ocurrido un error','A ocurrido un error al obtener la informacion');
-      }
-    }).finally(()=>{
-      setLoading(false);
-    }).catch(()=>{
-      mostrarNotificacion('error','A ocurrido un error','Error interno en el servidor');
-    })
-  }
+      })
+      .finally(() => {
+        setLoading(false);
+      })
+      .catch(() => {
+        mostrarNotificacion('error', 'A ocurrido un error', 'Error interno en el servidor');
+      });
+  };
+  
   
   const createAsignatura = (value) => {
     setLoadingButton(true);
@@ -185,7 +211,7 @@ const actualizarAsignatura = (value) => {
 
   useEffect(()=>{
     getAsignatura();
-  },[])
+  },[filterMateria])
   return (
     <Spin spinning={loading} tip="Cargando...">
       <>
@@ -252,6 +278,14 @@ const actualizarAsignatura = (value) => {
               <Col>
                 <Button style={{ color: "green", border: "1px solid green" }} icon={<SyncOutlined />} onClick={()=>{getAsignatura()}}>Sincronizar datos</Button>
               </Col>
+              <Col>
+                        <Input 
+                            placeholder="Filtrar por Materia" 
+                            value={filterMateria} 
+                            onChange={(e) => setFilterMateria(e.target.value)} 
+                            allowClear 
+                        />
+                    </Col>
             </Space>
 
           </Row>

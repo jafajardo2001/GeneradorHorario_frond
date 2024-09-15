@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewPerfil from "../../components/NewPerfil.js";
 import UpdatePerfil from "../../components/UpdatePerfil.js";
@@ -12,6 +12,8 @@ const Perfiles = () => {
   const [isOpeNewPerfil, setIsOpenNewModal] = useState(false);
   const [isOpeUpdatePerfil, setIsOpenUpdateModal] = useState(false);
   const [formularioEditar, setFormularioEditar] = useState([]);
+  const [filterPerfil, setFilterPerfil] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
   const mostrarNotificacion = (tipo,titulo,mensaje) => {
     notification[tipo]({
@@ -21,7 +23,7 @@ const Perfiles = () => {
   };
   useEffect(() => {
     getPerfiles();
-  }, []);
+  }, [filterPerfil]);
 
   function handleCloseModal() {
     setIsOpenNewModal(false);
@@ -50,7 +52,14 @@ const Perfiles = () => {
             estado: value.estado,
           };
         });
+        // Filtrar datos 
+        if (filterPerfil) {
+          perfiles = perfiles.filter(item => 
+              item.descripcion.toLowerCase().includes(filterPerfil.toLowerCase())
+          );
+        }
         setPerfiles(perfiles);
+        setFilteredData(perfiles);
       })
       .catch((error) => {
         console.error("Error fetching data:", error); // Debugging line
@@ -123,6 +132,14 @@ const Perfiles = () => {
             </Col>
             <Col>
               <Button icon={<SyncOutlined />} onClick={getPerfiles}>Descargar datos</Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por Perfil"
+                value={filterPerfil}
+                onChange={(e) => setFilterPerfil(e.target.value)}
+                allowClear
+              />
             </Col>
           </Row>
         </Space>

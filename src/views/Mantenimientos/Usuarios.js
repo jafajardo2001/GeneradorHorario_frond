@@ -14,6 +14,8 @@ const Usuarios = () => {
   const [isOpenModal, setIsOpen] = useState(false);
   const [dataTabla, setDataTabla] = useState([]);
   const [cantidadRegistro, setCantidadRegistro] = useState(0);
+  const [filterUsuario, setFilterUsuario] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
 
   const handleCloseModal = () => {
@@ -54,13 +56,19 @@ const Usuarios = () => {
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
           estado: value.estado,
-          job_descripcion:value.job_descripcion,
+          job_descripcion: value.job_descripcion,
           maquina_creacion: value.ip_creacion,
           maquina_actualiso: value.ip_actualizacion,
         }));
-        
+        // Filtrar datos 
+        if (filterUsuario) {
+          informacion = informacion.filter(item => 
+            `${item.nombres} ${item.apellidos} ${item.perfil} ${item.cedula} ${item.correo}`.toLowerCase().includes(filterUsuario.toLowerCase())
+          );
+        }
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
+        setFilteredData(informacion); // Opcional si planeas usar este estado en el futuro
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -72,7 +80,7 @@ const Usuarios = () => {
 
   useEffect(() => {
     getUser();
-  }, []);
+  }, [filterUsuario]);
 
   return (
     <Spin spinning={loading} tip="Cargando...">
@@ -93,6 +101,14 @@ const Usuarios = () => {
               <Button icon={<SyncOutlined />} onClick={() => { getUser(); }}>
                 Descargar datos
               </Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por usuario"
+                value={filterUsuario}
+                onChange={(e) => setFilterUsuario(e.target.value)}
+                allowClear
+              />
             </Col>
             <Col>
               <Button icon={<ClearOutlined />}>Limpiar</Button>

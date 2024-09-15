@@ -11,10 +11,12 @@ const Cursos = () => {
   const [isOpenUpdateModal,setIsOpenUpdateModal] = useState(false);
   const [cursoData,setCursoData] = useState([]);
   const [formularioEditar,setFormularioEditar] = useState([]);
+  const [filterCurso, setFilterCurso] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
   useEffect(()=>{
     getCurso()
-  },[])
+  },[filterCurso])
   const mostrarNotificacion = (tipo,titulo,mensaje) => {
     notification[tipo]({
       message: titulo,
@@ -40,8 +42,14 @@ const Cursos = () => {
                 estado:value.estado
               }
             })
-
-            setCursoData(curso)
+            // Filtrar datos 
+          if (filterCurso) {
+            curso = curso.filter(item => 
+              `${item.numero} ${item.nemonico} ${item.perfil} ${item.termino}`.toLowerCase().includes(filterCurso.toLowerCase())
+            );
+          }
+            setCursoData(curso);
+            setFilteredData(curso); // Opcional si planeas usar este estado en el futuro
 
           }).catch((error) => {
             console.error("Error fetching data:", error); // Debugging line
@@ -122,6 +130,14 @@ const Cursos = () => {
               <Button icon={<SyncOutlined/>} onClick={()=>{
                 getCurso()
               }}>Descargar datos</Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por curso"
+                value={filterCurso}
+                onChange={(e) => setFilterCurso(e.target.value)}
+                allowClear
+              />
             </Col>
           </Row>
       

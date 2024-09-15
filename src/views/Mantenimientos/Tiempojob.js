@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewJob from "../../components/NewJob.js";
 
@@ -10,6 +10,8 @@ const Tiempo = () => {
     const [jobsData, setJobs] = useState([]);
     const [isOpeNewJob, setIsOpenNewModal] = useState(false);
     const [formularioEditar, setFormularioEditar] = useState([]);
+    const [filterDedicacion, setFilterDedicacion] = useState(""); // Nuevo estado para el filtro
+    const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
     const url = "http://localhost:8000/api/istg/";
     const mostrarNotificacion = (tipo,titulo,mensaje) => {
       notification[tipo]({
@@ -20,7 +22,7 @@ const Tiempo = () => {
     
     useEffect(() => {
         getJobs();
-    }, []);
+    }, [filterDedicacion]);
 
     function handleCloseModal() {
         setIsOpenNewModal(false);
@@ -48,7 +50,14 @@ const Tiempo = () => {
                     estado: value.estado,
                 };
             });
+             // Filtrar datos 
+        if (filterDedicacion) {
+          jobs = jobs.filter(item => 
+              item.descripcion.toLowerCase().includes(filterDedicacion.toLowerCase())
+          );
+        }
             setJobs(jobs);
+            setFilteredData(jobs);
         })
         .catch((error) => {
          console.error("Error fetching data:", error); // Debugging line
@@ -89,6 +98,14 @@ const Tiempo = () => {
                 <Col>
                   <Button icon={<SyncOutlined />} onClick={getJobs}>Descargar datos</Button>
                 </Col>
+                <Col>
+              <Input
+                placeholder="Filtrar por Perfil"
+                value={filterDedicacion}
+                onChange={(e) => setFilterDedicacion(e.target.value)}
+                allowClear
+              />
+            </Col>
               </Row>
             </Space>
             <Row>
