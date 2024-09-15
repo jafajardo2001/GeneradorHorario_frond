@@ -114,6 +114,7 @@ const PlanificacionAcademica = () => {
                         estado: value?.estado,
                         docente: value?.nombre_docente,
                         cedula: value?.cedula_docente,
+                        job_descripcion: value?.job_descripcion,
                         correo: value?.correo_docente,
                         telefono: value?.telefono_docente,
                         titulo_academico: value?.titulo_academico_docente,
@@ -123,7 +124,7 @@ const PlanificacionAcademica = () => {
                 // Filtrar datos según el filtro de docente
                 if (filterDocente) {
                     Distribucion = Distribucion.filter(item => 
-                        item.docente.toLowerCase().includes(filterDocente.toLowerCase())
+                        `${item.docente} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}`.toLowerCase().includes(filterDocente.toLowerCase())
                     );
                 }
 

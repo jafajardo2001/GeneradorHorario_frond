@@ -1,6 +1,7 @@
 import { Route, Routes,BrowserRouter as Router } from "react-router-dom";
 import Usuarios from "./views/Mantenimientos/Usuarios";
 import Perfiles from "./views/Mantenimientos/Perfiles";
+import Tiempojob from "./views/Mantenimientos/Tiempojob";
 import Cursos from "./views/Mantenimientos/Cursos";
 import Paralelos from "./views/Mantenimientos/Paralelos";
 import Materias from "./views/Mantenimientos/Materias";
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/Mantenimientos/usuarios" element={<Usuarios />}/>
           <Route path="/Mantenimientos/perfiles" element={<Perfiles />}/>
+          <Route path="/Mantenimientos/tiempojob" element={<Tiempojob />}/>
           <Route path="/Mantenimientos/cursos" element={<Cursos />}/>
           <Route path="/Mantenimientos/paralelos" element={<Paralelos />}/>
           <Route path="/Mantenimientos/educacionGobal" element={<EducacionGlobal />}/>

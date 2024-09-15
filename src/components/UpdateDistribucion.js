@@ -7,6 +7,7 @@ const { Option } = Select;
 const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) => {
     const [form] = Form.useForm();
     const [docentes, setDocentes] = useState([]);
+    const [materias, setMaterias] = useState([]);
 
     useEffect(() => {
         // Cargar la lista de docentes al montar el componente
@@ -31,7 +32,28 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
 
         fetchDocentes();
     }, []);
-
+    const fetchMaterias = async () => {
+        try {
+            const response = await fetch("http://localhost:8000/api/istg/show_data_asignatura"); // Asegúrate de usar la URL correcta para obtener las carreras
+            const data = await response.json();
+    
+            if (response.ok && data.ok) {
+                const data_mapeada = data.data.map((value) => ({
+                    value: value.id_materia,
+                    label: value.descripcion, // Ajusta el campo según la respuesta de tu API
+                }));
+                setMaterias(data_mapeada);
+            } else {
+                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
+            }
+        } catch (error) {
+            console.error("Error al obtener los datos de las materias:", error);
+        }
+    };
+    
+    useEffect(() => {
+        fetchMaterias(); // Llama a la función fetchCarreras al cargar el componente
+    }, []);
     useEffect(() => {
         if (distribucion) {
             // Cargar los datos de la distribución seleccionada en el formulario
@@ -58,6 +80,7 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
                     ...values,
                     hora_inicio: values.hora_inicio.format("HH:mm"),
                     hora_termina: values.hora_termina.format("HH:mm"),
+                    id_materia: values.materia,
                 }),
             });
 
@@ -115,9 +138,15 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
                 <Form.Item
                     label="Materia"
                     name="materia"
-                    rules={[{ required: true, message: 'Por favor ingrese la materia' }]}
+                    rules={[{ required: true, message: 'Por favor seleccione una materia' }]}
                 >
-                    <Input />
+                    <Select placeholder="Seleccione una materia">
+                        {materias.map(materia => (
+                            <Option key={materia.value} value={materia.value}>
+                                {materia.label}
+                            </Option>
+                        ))}
+                    </Select>
                 </Form.Item>
 
                 <Form.Item

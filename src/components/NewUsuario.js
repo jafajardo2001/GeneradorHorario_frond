@@ -5,7 +5,10 @@ import Select from "react-select";
 const NewUsuario = (props) => {
   const [isOpen, setIsOpen] = useState(props.isOpen);
   const [isRol, setIsRol] = useState([]);
+
   const [isTituloAcademico, setIsTituloAcademico] = useState([]);
+  const [isJob, setIsJob] = useState([]);
+
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
 
@@ -13,6 +16,7 @@ const NewUsuario = (props) => {
     setIsOpen(props.isOpen);
     getRol();
     getTituloAcademico();
+    getJobs();
   }, [props.isOpen]);
 
   function getRol() {
@@ -34,7 +38,25 @@ const NewUsuario = (props) => {
         console.error('Error fetching roles:', error);
       });
   }
-
+  function getJobs() {
+    fetch(`${url}show_jobs/`, { method: 'GET' })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        let horas = data.data.map((value) => ({
+          label: value.descripcion,
+          value: value.id_job
+        }));
+        setIsJob(horas);
+      })
+      .catch((error) => {
+        console.error('Error fetching titles:', error);
+      });
+  }
   function getTituloAcademico() {
     fetch(`${url}show_data_titulo_academico`, { method: 'GET' })
       .then((response) => {
@@ -56,43 +78,46 @@ const NewUsuario = (props) => {
   }
 
   function createUser(value) {
-    fetch(`${url}create_usuario`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        cedula: value.cedula,
-        nombres: value.nombres,
-        apellidos: value.apellidos,
-        correo: value.correo,
-        telefono: value.telefono,
-        id_rol: value.perfil.value,
-        id_titulo_academico: value.tituloAcademico.value
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.ok) {
-          notification.success({
-            message: 'Éxito',
-            description: data.message || 'Usuario creado con éxito.',
-          });
-          Formulario.current.resetFields();
-          props.onCloseModal();
-        } else {
-          notification.error({
-            message: 'Error',
-            description: data.message || 'Hubo un problema al crear el usuario.',
-          });
-        }
-      })
-      .catch((error) => {
-        console.error('An error occurred:', error);
+  fetch(`${url}create_usuario`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cedula: value.cedula,
+      nombres: value.nombres,
+      apellidos: value.apellidos,
+      correo: value.correo,
+      telefono: value.telefono,
+      id_rol: value.perfil.value,
+      id_titulo_academico: value.tituloAcademico.value,
+      id_job: value.job.value
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.ok) {
+        notification.success({
+          message: 'Éxito',
+          description: data.message || 'Usuario creado con éxito.',
+        });
+        Formulario.current.resetFields();
+        props.onCloseModal();
+        props.getUser();  // Aquí llamamos a getUser para refrescar la lista
+      } else {
         notification.error({
           message: 'Error',
-          description: 'Error interno en el servidor',
+          description: data.message || 'Hubo un problema al crear el usuario.',
         });
+      }
+    })
+    .catch((error) => {
+      console.error('An error occurred:', error);
+      notification.error({
+        message: 'Error',
+        description: 'Error interno en el servidor',
       });
-  }
+    });
+}
+
 
   return (
     <Modal
@@ -170,7 +195,11 @@ const NewUsuario = (props) => {
               <Select options={isRol} />
             </Form.Item>
           </Col>
-
+          <Col span={24}>
+            <Form.Item label="Escoja las horas" name="job">
+              <Select options={isJob} />
+            </Form.Item>
+          </Col>
           <Col span={24}>
             <Form.Item label="Escoja el título académico" name="tituloAcademico">
               <Select options={isTituloAcademico} />

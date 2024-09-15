@@ -14,6 +14,8 @@ const Usuarios = () => {
   const [isOpenModal, setIsOpen] = useState(false);
   const [dataTabla, setDataTabla] = useState([]);
   const [cantidadRegistro, setCantidadRegistro] = useState(0);
+  const [filterUsuario, setFilterUsuario] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
 
   const handleCloseModal = () => {
@@ -52,14 +54,21 @@ const Usuarios = () => {
           correo: value.correo,
           telefono: value.telefono,
           perfil: value.rol_descripcion,
-          titulo_academico: value.descripcion,
+          titulo_academico: value.titulo_academico_descripcion,
           estado: value.estado,
+          job_descripcion: value.job_descripcion,
           maquina_creacion: value.ip_creacion,
           maquina_actualiso: value.ip_actualizacion,
         }));
-        
+        // Filtrar datos 
+        if (filterUsuario) {
+          informacion = informacion.filter(item => 
+            `${item.nombres} ${item.apellidos} ${item.perfil} ${item.cedula} ${item.correo}`.toLowerCase().includes(filterUsuario.toLowerCase())
+          );
+        }
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
+        setFilteredData(informacion); // Opcional si planeas usar este estado en el futuro
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -71,11 +80,12 @@ const Usuarios = () => {
 
   useEffect(() => {
     getUser();
-  }, []);
+  }, [filterUsuario]);
 
   return (
+    <Spin spinning={loading} tip="Cargando...">
     <>
-      <Spin spinning={loading} tip={mensajeLoading} />
+      
       <Row style={{ display: "flex", justifyContent: "center" }}>
         <Title level={3}>Mantenimiento de usuarios</Title>
       </Row>
@@ -91,6 +101,14 @@ const Usuarios = () => {
               <Button icon={<SyncOutlined />} onClick={() => { getUser(); }}>
                 Descargar datos
               </Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por usuario"
+                value={filterUsuario}
+                onChange={(e) => setFilterUsuario(e.target.value)}
+                allowClear
+              />
             </Col>
             <Col>
               <Button icon={<ClearOutlined />}>Limpiar</Button>
@@ -133,6 +151,11 @@ const Usuarios = () => {
               width: 30,
             },
             {
+              dataIndex: "job_descripcion",
+              title: "tiempo laboral",
+              width: 30,
+            },
+            {
               dataIndex: "usuarios",
               title: "Usuario",
               width: 20,
@@ -159,8 +182,15 @@ const Usuarios = () => {
           scroll={{ x: 100 }}  // Asegúrate de ajustar el scroll si es necesario
         />
       </Card>
-      <NewUsuario isOpen={isOpenModal} onCloseModal={handleCloseModal} getUser={getUser} loading={setLoading} mensaje={setMensajeLoading} />
+      <NewUsuario 
+      isOpen={isOpenModal} 
+      onCloseModal={handleCloseModal} 
+      getUser={getUser}  // Aquí estás pasando la función getUser
+      loading={setLoading} 
+      mensaje={setMensajeLoading} 
+    />
     </>
+  </Spin>
   );
 };
 

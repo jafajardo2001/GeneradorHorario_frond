@@ -1,5 +1,5 @@
 import React,{ useState,useEffect } from "react";
-import { Button, Collapse, Input, Table,Typography,Menu,Dropdown,Row,Col,Space,Card, Spin } from "antd";
+import { Button, Collapse, Input, Table,Typography,Menu,Dropdown,Row,Col,Space,Card, Spin, notification } from "antd";
 import { SyncOutlined, PlusCircleOutlined,ClearOutlined,SearchOutlined,EditOutlined,DeleteOutlined,MenuOutlined } from "@ant-design/icons";
 import NewCurso from "../../components/NewCurso.js"
 import UpdateCurso from "../../components/UpdateCurso.js"
@@ -11,10 +11,18 @@ const Cursos = () => {
   const [isOpenUpdateModal,setIsOpenUpdateModal] = useState(false);
   const [cursoData,setCursoData] = useState([]);
   const [formularioEditar,setFormularioEditar] = useState([]);
+  const [filterCurso, setFilterCurso] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
   useEffect(()=>{
     getCurso()
-  },[])
+  },[filterCurso])
+  const mostrarNotificacion = (tipo,titulo,mensaje) => {
+    notification[tipo]({
+      message: titulo,
+      description: mensaje,
+    });
+  };
   function getCurso(){
     setLoading(true)
     fetch(`${url}show_nivel`, { method: 'GET' })
@@ -34,16 +42,50 @@ const Cursos = () => {
                 estado:value.estado
               }
             })
-
-            setCursoData(curso)
+            // Filtrar datos 
+          if (filterCurso) {
+            curso = curso.filter(item => 
+              `${item.numero} ${item.nemonico} ${item.perfil} ${item.termino}`.toLowerCase().includes(filterCurso.toLowerCase())
+            );
+          }
+            setCursoData(curso);
+            setFilteredData(curso); // Opcional si planeas usar este estado en el futuro
 
           }).catch((error) => {
             console.error("Error fetching data:", error); // Debugging line
           }).finally(()=>{
             setLoading(false)
           });
-  }
 
+  }
+  const deleteCurso = (values) => {
+    console.log("Estoy entrando en la funcion de value");
+    console.log(values);
+
+    let request_backend = {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            id_nivel: values.id  // Asegúrate de que el backend espere este campo
+        })
+    };
+
+    fetch(`${url}delete_nivel/${values.id}`, request_backend)  // ID incluido en la URL
+        .then((data_request) => data_request.json())
+        .then((data) => {
+            if (data.ok) {
+                mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.termino + " se eliminó con éxito");
+            } else if (data.ok === false) {
+                mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
+            }
+        })
+        .finally(() => {
+          getCurso();
+        });
+  };
   const menu = (record) => (
             <Menu onClick={({ key }) => handleMenuClick(key, record)}>
                 <Menu.Item key="editar"><EditOutlined/></Menu.Item>
@@ -57,6 +99,9 @@ const Cursos = () => {
           setIsOpenUpdateModal(true)
           setFormularioEditar(record)
         }
+        else if (action === "eliminar") {
+          deleteCurso(record);  // Llamar a deleteParalelo cuando se selecciona "eliminar"
+      }
     };
 
   function handleCloseModal(){
@@ -85,6 +130,14 @@ const Cursos = () => {
               <Button icon={<SyncOutlined/>} onClick={()=>{
                 getCurso()
               }}>Descargar datos</Button>
+            </Col>
+            <Col>
+              <Input
+                placeholder="Filtrar por curso"
+                value={filterCurso}
+                onChange={(e) => setFilterCurso(e.target.value)}
+                allowClear
+              />
             </Col>
           </Row>
       
@@ -151,6 +204,6 @@ const Cursos = () => {
     <NewCurso open={isOpenModal} handleCloseModal={handleCloseModal} getCurso={getCurso}/>
     <UpdateCurso open={isOpenUpdateModal} handleCloseModal={handleCloseModal} formulario={formularioEditar} getCurso={getCurso} loading={setLoading} mensaje={setMensajeLoading}/>
     </>
-    )
+  );
 }
 export default Cursos;
