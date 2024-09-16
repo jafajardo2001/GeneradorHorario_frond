@@ -12,10 +12,12 @@ import Calendario from "./views/Mantenimientos/Calendario";
 import NewEducacionGlobal from "./views/Formularios/NewEducacionGlobal";
 import Aside from "./components/Aside";
 import PlanificacionAcademica from "./views/Planificaciones/PlanificacionAcademica";
+import Login from "./views/externos/Login";
 function App() {
 
   return (
     <Router>
+      <Routes><Route path="/" element={<Login />}/></Routes>
       <Aside>
         <Routes>
           <Route path="/Mantenimientos/usuarios" element={<Usuarios />}/>
