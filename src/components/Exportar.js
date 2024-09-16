@@ -158,7 +158,7 @@ const GenerarReporte = ({ filteredData }) => {
             totalGeneral
         } = calcularHoras(filteredData);
         
-        const doc = new jsPDF();
+        const doc = new jsPDF('landscape');
 
         // Ordenar los datos por la hora de inicio
         filteredData.sort((a, b) => {
@@ -172,7 +172,7 @@ const GenerarReporte = ({ filteredData }) => {
         img.src = '/logo-istg-2.png';  // Ruta del logo en la carpeta public
 
         img.onload = function () {
-            doc.addImage(img, 'PNG', 50 , 20, 100, 20);  // Ajustar posición y tamaño del logo
+            doc.addImage(img, 'PNG', 30 , 10, 100, 20);  // Ajustar posición y tamaño del logo
             
             // Agregar el resto del contenido después de cargar la imagen
             doc.setFontSize(16);
@@ -181,7 +181,7 @@ const GenerarReporte = ({ filteredData }) => {
             // Sección 1: Datos Generales
             const docente = filteredData[0]; // Usar el primer registro para los datos generales
             doc.autoTable({
-                startY: 40,
+                startY: 30,
                 head: [["1. DATOS GENERALES"]],
                 headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
                 body: []
@@ -190,24 +190,46 @@ const GenerarReporte = ({ filteredData }) => {
             doc.autoTable({
                 startY: doc.previousAutoTable.finalY,
                 body: [
-                    [{ content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.cedula],
-                    [{ content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.docente],
-                    [{ content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.titulo_academico],
-                    [{ content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, ''],
-                    [{ content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.correo],
-                    [{ content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.telefono],
-                    [{ content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.materia],
-                    [{ content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.job_descripcion],
-                    [{ content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, docente.educacion_global],
-                    [{ content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, '2023-S2']
+                    [
+                        { content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.cedula,
+                        { content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.titulo_academico
+                    ],
+                    [
+                        { content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.docente,
+                        { content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        '' // Deja vacío si no hay información
+                    ],
+                    [
+                        { content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.correo,
+                        { content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.telefono
+                    ],
+                    [
+                        { content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.materia,
+                        { content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.job_descripcion
+                    ],
+                    [
+                        { content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        docente.educacion_global,
+                        { content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        '2023-S2'
+                    ]
                 ],
                 columnStyles: {
-                    0: { cellWidth: 'auto' },
-                    1: { cellWidth: 'auto' }
+                    0: { cellWidth: 60 }, // Ajusta el ancho de las celdas de la primera columna
+                    1: { cellWidth: 74 }, // Ajusta el ancho de las celdas de la segunda columna
+                    2: { cellWidth: 60 }, // Ajusta el ancho de las celdas de la tercera columna
+                    3: { cellWidth: 74 }  // Ajusta el ancho de las celdas de la cuarta columna
                 },
                 styles: {
-                    cellPadding: 5,
-                    fontSize: 10,
+                    cellPadding: 1,
+                    fontSize: 8,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
                     lineWidth: 0.2 // Grosor de las líneas
@@ -241,8 +263,8 @@ const GenerarReporte = ({ filteredData }) => {
                     4: { cellWidth: 'auto' }
                 },
                 styles: {
-                    cellPadding: 4,
-                    fontSize: 10,
+                    cellPadding: 2,
+                    fontSize: 8,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
                     lineWidth: 0.2 // Grosor de las líneas
