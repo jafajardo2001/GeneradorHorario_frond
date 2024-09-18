@@ -59,10 +59,10 @@ const GenerarReporte = ({ filteredData }) => {
         let horasPorMateria = {};
         let horasMateriaExcluidas = {
             'Director de Investigación': 0,
-            'Director de Proyectos Comunitarios': 0,
+            'Proyectos Comunitarios': 0,
             'Coordinación': 0,
             'Tutorías': 0,
-            'Tutor de Prácticas Laborales': 0,
+            'Prácticas Laborales': 0,
             'Gestoría Institucional': 0,
             'Preparación de Clases': 0,
             'Horas Clase': 0 // Asegúrate de incluir esta categoría
@@ -95,9 +95,9 @@ const GenerarReporte = ({ filteredData }) => {
         const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
         const totalHorasPreparacionClases = horasMateriaExcluidas['Preparación de Clases'] || 0;
         const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Director de Investigación'] || 0;
-        const totalHorasDirectorProyectos = horasMateriaExcluidas['Director de Proyectos Comunitarios'] || 0;
+        const totalHorasDirectorProyectos = horasMateriaExcluidas['Proyectos Comunitarios'] || 0;
         const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
-        const totalHorasTutorPracticas = horasMateriaExcluidas['Tutor de Prácticas Laborales'] || 0;
+        const totalHorasTutorPracticas = horasMateriaExcluidas['Prácticas Laborales'] || 0;
         const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Gestoría Institucional'] || 0;
     
         // Sumar las horas totales
@@ -249,8 +249,8 @@ const GenerarReporte = ({ filteredData }) => {
                 startY: doc.previousAutoTable.finalY,
                 head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
             body: [
-                [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
-                [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, '', '', '' ],
+                [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
+                [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos: ${totalHorasDirectorProyectos}`, '', '', '' ],
                 [ `Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', '' ], // Fila vacía eliminada
                 [ `Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}` ]
             ],
