@@ -58,7 +58,7 @@ const GenerarReporte = ({ filteredData }) => {
     const calcularHoras = (datos) => {
         let horasPorMateria = {};
         let horasMateriaExcluidas = {
-            'Director de Investigación': 0,
+            'Proyectos de Investigación': 0,
             'Proyectos Comunitarios': 0,
             'Coordinación': 0,
             'Tutorías': 0,
@@ -94,7 +94,7 @@ const GenerarReporte = ({ filteredData }) => {
         const totalHorasClase = totalHorasRestantes['Horas Clase'] || 0;
         const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
         const totalHorasPreparacionClases = horasMateriaExcluidas['Preparación de Clases'] || 0;
-        const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Director de Investigación'] || 0;
+        const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Proyectos de Investigación'] || 0;
         const totalHorasDirectorProyectos = horasMateriaExcluidas['Proyectos Comunitarios'] || 0;
         const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
         const totalHorasTutorPracticas = horasMateriaExcluidas['Prácticas Laborales'] || 0;
@@ -263,7 +263,7 @@ const GenerarReporte = ({ filteredData }) => {
                     4: { cellWidth: 'auto' }
                 },
                 styles: {
-                    cellPadding: 2,
+                    cellPadding: 1,
                     fontSize: 8,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
@@ -308,7 +308,8 @@ const GenerarReporte = ({ filteredData }) => {
                         'Sábado': ''
                     };
                 }
-                distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia;
+                distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
+                + row.nivel + row.paralelo;
 
                 const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
                 const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
@@ -361,8 +362,8 @@ const GenerarReporte = ({ filteredData }) => {
                     6: { cellWidth: 'auto' }
                 },
                 styles: {
-                    cellPadding: 2,
-                    fontSize: 10,
+                    cellPadding: 1,
+                    fontSize: 7,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
                     lineWidth: 0.2 // Grosor de las líneas
