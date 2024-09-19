@@ -3,6 +3,7 @@ import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin,
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
 import UpdateDistribucion from "../../components/UpdateDistribucion";
 import Exportar from "../../components/Exportar";
+import ExportarHorarioPDF  from "../../components/ExportarHorarioPDF";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import Calendario from "../Mantenimientos/Calendario"; // Importar el calendario
 
@@ -17,7 +18,7 @@ const PlanificacionAcademica = () => {
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
     const [formularioEditar, setFormularioEditar] = useState([]);
     const [mensajeLoading,setMensajeLoading] = useState("cargando...");
-
+    
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
     
@@ -182,6 +183,9 @@ const PlanificacionAcademica = () => {
                     <Col>
                         <Exportar filteredData={filteredData} />
                     </Col>
+                    <Col>
+                <ExportarHorarioPDF filteredData={filteredData} />
+            </Col>
                 </Row>
             </Space>
             <Table
