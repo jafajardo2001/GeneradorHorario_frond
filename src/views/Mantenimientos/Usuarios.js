@@ -57,6 +57,7 @@ const Usuarios = () => {
           titulo_academico: value.titulo_academico_descripcion,
           estado: value.estado,
           job_descripcion: value.job_descripcion,
+          carreras: value.carrera_nombre,  // Asegúrate de que esto esté correcto
           maquina_creacion: value.ip_creacion,
           maquina_actualiso: value.ip_actualizacion,
         }));
@@ -66,6 +67,7 @@ const Usuarios = () => {
             `${item.nombres} ${item.apellidos} ${item.perfil} ${item.cedula} ${item.correo}`.toLowerCase().includes(filterUsuario.toLowerCase())
           );
         }
+        console.log("Data recibida:", informacion);  // Revisa en la consola si tienes la información correcta
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
         setFilteredData(informacion); // Opcional si planeas usar este estado en el futuro
@@ -163,6 +165,11 @@ const Usuarios = () => {
             {
               dataIndex: "titulo_academico",
               title: "Titulo Academico",
+              width: 20,
+            },
+            {
+              dataIndex: "carreras",  // Debe coincidir con el campo mapeado en `getUser`
+              title: "Carrera",
               width: 20,
             },
             {

@@ -8,6 +8,7 @@ const NewUsuario = (props) => {
 
   const [isTituloAcademico, setIsTituloAcademico] = useState([]);
   const [isJob, setIsJob] = useState([]);
+  const [isCarreras, setIsCarreras] = useState([]);
 
   const Formulario = useRef(null);
   const url = "http://localhost:8000/api/istg/";
@@ -17,6 +18,7 @@ const NewUsuario = (props) => {
     getRol();
     getTituloAcademico();
     getJobs();
+    getCarreras();
   }, [props.isOpen]);
 
   function getRol() {
@@ -76,6 +78,25 @@ const NewUsuario = (props) => {
         console.error('Error fetching titles:', error);
       });
   }
+  function getCarreras() {
+    fetch(`${url}show_carrera`, { method: 'GET' })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        let carreras = data.data.map((value) => ({
+          label: value.nombre,
+          value: value.id_carrera
+        }));
+        setIsCarreras(carreras);
+      })
+      .catch((error) => {
+        console.error('Error fetching titles:', error);
+      });
+  }
 
   function createUser(value) {
   fetch(`${url}create_usuario`, {
@@ -89,7 +110,8 @@ const NewUsuario = (props) => {
       telefono: value.telefono,
       id_rol: value.perfil.value,
       id_titulo_academico: value.tituloAcademico.value,
-      id_job: value.job.value
+      id_job: value.job.value,
+      id_carrera: value.carreras.value
     }),
   })
     .then((response) => response.json())
@@ -203,6 +225,11 @@ const NewUsuario = (props) => {
           <Col span={24}>
             <Form.Item label="Escoja el título académico" name="tituloAcademico">
               <Select options={isTituloAcademico} />
+            </Form.Item>
+          </Col>
+          <Col span={24}>
+            <Form.Item label="Escoja la carrera" name="carreras">
+              <Select options={isCarreras} />
             </Form.Item>
           </Col>
         </Row>
