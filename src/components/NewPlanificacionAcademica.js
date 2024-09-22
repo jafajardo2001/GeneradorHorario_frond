@@ -5,7 +5,7 @@ import { Button, Form, Modal, Result, Row, Select, Space, Spin, Steps, Table, Tr
 import { useForm } from "antd/es/form/Form";
 import Title from "antd/es/skeleton/Title";
 import React, { useEffect, useRef, useState } from "react";
-
+import { dias, hora_inicio, hora_termina } from './datos';
 
 const NewPlanificacionAcademica = (props) => {
     const { Title } = Typography;
@@ -21,6 +21,8 @@ const NewPlanificacionAcademica = (props) => {
     const [carreraSelect, setCarreraSelect] = useState([]);
     const [userSelect, setUserSelect] = useState({});
     const formulario = useRef(null);
+    const [docentesFiltrados, setDocentesFiltrados] = useState([]);
+
     const [informativo, setInformativo] = useState({})
     const [modalIsOpen, setIsOpen] = useState(props.open)
     const [user, setUser] = useState([]);
@@ -251,6 +253,45 @@ const NewPlanificacionAcademica = (props) => {
         }
     }
 
+    async function obtenerDocentesPorCarrera(idCarrera) {
+        try {
+            setLoading(true); // Indicador de carga
+    
+            // Configuración de la petición
+            let configuraciones = {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+    
+            // Hacer la solicitud a la API, pasando el idCarrera como parámetro
+            let response = await fetch(`${url}obtener_docentes_por_carrera/${idCarrera}`, configuraciones);
+            let data = await response.json();
+    
+            if (response.ok && data.ok) {
+                // Mapeo de los docentes obtenidos
+                let docentesMapeados = data.data.map((docente) => ({
+                    value: docente.id_usuario, // ID del docente
+                    label: `${docente.nombre_completo} - ${docente.titulo_academico}` // Nombre completo y título académico
+                }));
+    
+                setUser(docentesMapeados); // Actualizar el estado con los docentes filtrados
+            } else {
+                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
+            }
+    
+            setLoading(false); // Finalizar la carga
+        } catch (error) {
+            console.error("Error al obtener los docentes por carrera:", error);
+            setLoading(false); // Finalizar la carga en caso de error
+        }
+    }
+    
+    
+    
+
+
     async function showUser() {
         try {
             setLoading(true); // Indicar que los datos están cargando
@@ -284,167 +325,7 @@ const NewPlanificacionAcademica = (props) => {
             return false;
         }
     }
-    const dias = [
-        {
-            value: "Lunes",
-            label: "Lunes"
-        },
-        {
-            value: "Martes",
-            label: "Martes"
-        },
-        {
-            value: "Miercoles",
-            label: "Miercoles"
-        },
-        {
-            value: "Jueves",
-            label: "Jueves"
-        },
-        {
-            value: "Viernes",
-            label: "Viernes"
-        },
-        {
-            value: "Sábado",
-            label: "Sábado"
-        }
-    ]
-
-    const hora_inicio = [
-        {
-            value: "07:00",
-            label: "07:00"
-        },
-        {
-            value: "08:00",
-            label: "08:00"
-        },
-        {
-            value: "09:00",
-            label: "09:00"
-        },
-        {
-            value: "10:00",
-            label: "10:00"
-        },
-        {
-            value: "11:00",
-            label: "11:00"
-        },
-        {
-            value: "12:00",
-            label: "12:00"
-        },
-        {
-            value: "13:00",
-            label: "13:00"
-        },
-        {
-            value: "14:00",
-            label: "14:00"
-        },
-        {
-            value: "15:00",
-            label: "15:00"
-        },
-        {
-            value: "16:00",
-            label: "16:00"
-        },
-        {
-            value: "17:00",
-            label: "17:00"
-        },
-        {
-            value: "18:00",
-            label: "18:00"
-        },
-        {
-            value: "19:00",
-            label: "19:00"
-        },
-        {
-            value: "20:00",
-            label: "20:00"
-        },
-        {
-            value: "21:00",
-            label: "21:00"
-        },
-        {
-            value: "22:00",
-            label: "22:00"
-        }
-    ]
-
-    const hora_termina = [
-        {
-            value: "07:00",
-            label: "07:00"
-        },
-        {
-            value: "08:00",
-            label: "08:00"
-        },
-        {
-            value: "09:00",
-            label: "09:00"
-        },
-        {
-            value: "10:00",
-            label: "10:00"
-        },
-        {
-            value: "11:00",
-            label: "11:00"
-        },
-        {
-            value: "12:00",
-            label: "12:00"
-        },
-        {
-            value: "13:00",
-            label: "13:00"
-        },
-        {
-            value: "14:00",
-            label: "14:00"
-        },
-        {
-            value: "15:00",
-            label: "15:00"
-        },
-        {
-            value: "16:00",
-            label: "16:00"
-        },
-        {
-            value: "17:00",
-            label: "17:00"
-        },
-        {
-            value: "18:00",
-            label: "18:00"
-        },
-        {
-            value: "19:00",
-            label: "19:00"
-        },
-        {
-            value: "20:00",
-            label: "20:00"
-        },
-        {
-            value: "21:00",
-            label: "21:00"
-        },
-        {
-            value: "22:00",
-            label: "22:00"
-        }
-    ]
-
+    
     async function createPlanificacionAcademica() {
         try {
             seguirOpciones(1);
@@ -556,17 +437,28 @@ const NewPlanificacionAcademica = (props) => {
                             </Form.Item>
 
                             <Form.Item label="Escoja las carreras" labelCol={{ span: 5 }} name="carreras">
-                                <Select showSearch options={carrera} name="carrera" disabled={loading} onChange={(value) => {
-                                    setCarreraSelect(value)
-                                }} />
+                                <Select
+                                    showSearch
+                                    options={carrera}
+                                    name="carrera"
+                                    disabled={loading}
+                                    onChange={(value) => {
+                                        setCarreraSelect(value); // Guardar la carrera seleccionada
+                                        obtenerDocentesPorCarrera(value); // Llamar a la función para obtener los docentes filtrados
+                                    }}
+                                />
                             </Form.Item>
 
                             <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
                                 <Select
+                                    showSearch
+                                    options={user} // Aquí se muestran los docentes filtrados
+                                    name="coor_carrera"
+                                    disabled={loading}
                                     onChange={(value) => {
-                                        setUserSelect(value);  // Asegúrate de que esto actualiza el estado correctamente
+                                        setUserSelect(value); // Guardar el docente seleccionado
                                     }}
-                                    options={user} name="coor_carrera" disabled={loading} />
+                                />
                             </Form.Item>
 
 
@@ -633,19 +525,19 @@ const NewPlanificacionAcademica = (props) => {
                                     },
                                     {
                                         dataIndex: "dias",
-                                        title: "dias",
+                                        title: "Días",
                                         align: "center",
                                         width: 250,
                                         render: (text, record, index) => (
                                             <Select
                                                 options={dias}
-                                                defaultValue={"Escoja el dia"}
+                                                value={record.dias || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
                                                     const newData = [...dataSource];
                                                     newData[index]["dias"] = value;
                                                     setDataSource(newData);
                                                 }}
-                                            ></Select>
+                                            />
                                         )
                                     },
                                     {
@@ -656,13 +548,13 @@ const NewPlanificacionAcademica = (props) => {
                                         render: (text, record, index) => (
                                             <Select
                                                 options={hora_inicio}
-                                                defaultValue={"Selecciona la hora"}
+                                                value={record.hora_inicio || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
                                                     const newData = [...dataSource];
                                                     newData[index]["hora_inicio"] = value;
                                                     setDataSource(newData);
                                                 }}
-                                            ></Select>
+                                            />
                                         )
                                     },
                                     {
@@ -673,13 +565,13 @@ const NewPlanificacionAcademica = (props) => {
                                         render: (text, record, index) => (
                                             <Select
                                                 options={hora_termina}
-                                                defaultValue={"Selecciona la hora"}
+                                                value={record.hora_termina || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
                                                     const newData = [...dataSource];
                                                     newData[index]["hora_termina"] = value;
                                                     setDataSource(newData);
                                                 }}
-                                            ></Select>
+                                            />
                                         )
                                     },
                                     {
