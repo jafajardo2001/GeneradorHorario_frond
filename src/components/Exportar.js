@@ -369,6 +369,37 @@ const GenerarReporte = ({ filteredData }) => {
                     lineWidth: 0.2 // Grosor de las líneas
                 }
             });
+            
+            // Sección de firmas
+            const firmaY = doc.previousAutoTable.finalY + 50; // Aumenta el valor para mover más abajo
+
+            // Firmas en la parte inferior
+            const firmaEspacio = 70; // Espacio entre cada firma
+
+            doc.setFontSize(10);
+
+            // Firma izquierda
+            doc.text("________________________", '25', firmaY); // Línea de subrayado
+            doc.setFont('bold');
+            doc.text(`${docente.docente}`, 25, firmaY + 5); // Aquí irán los nombres de las autoridades
+            doc.text(`COORDINADORA ACADÉMICA`, 25, firmaY + 10);
+            doc.setFont("normal");
+
+            // Firma central
+            doc.text("________________________", 125, firmaY);
+            doc.setFont('bold');
+            doc.text(`${docente.docente}`, 125, firmaY + 5);
+            doc.text(`COORDINADOR DE CARRERA`, 125, firmaY + 10);
+            doc.setFont("normal");
+
+            // Firma derecha
+            doc.text("________________________", 225, firmaY);
+            doc.setFont('bold');
+            doc.text(`${docente.docente}`, 225, firmaY + 5);
+            doc.text(`DOCENTE`, 225, firmaY + 10); 
+            doc.setFont("normal");
+
+
             doc.save('reporte.pdf');
         };
     };
