@@ -32,15 +32,16 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
 
         fetchDocentes();
     }, []);
+
     const fetchMaterias = async () => {
         try {
-            const response = await fetch("http://localhost:8000/api/istg/show_data_asignatura"); // Asegúrate de usar la URL correcta para obtener las carreras
+            const response = await fetch("http://localhost:8000/api/istg/show_data_asignatura"); // Asegúrate de usar la URL correcta para obtener las materias
             const data = await response.json();
-    
+
             if (response.ok && data.ok) {
                 const data_mapeada = data.data.map((value) => ({
-                    value: value.id_materia,
-                    label: value.descripcion, // Ajusta el campo según la respuesta de tu API
+                    value: value.id_materia, // El ID de la materia
+                    label: value.descripcion,
                 }));
                 setMaterias(data_mapeada);
             } else {
@@ -50,17 +51,17 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
             console.error("Error al obtener los datos de las materias:", error);
         }
     };
-    
+
     useEffect(() => {
-        fetchMaterias(); // Llama a la función fetchCarreras al cargar el componente
+        fetchMaterias(); // Llama a la función fetchMaterias al cargar el componente
     }, []);
+
     useEffect(() => {
         if (distribucion) {
-            // Cargar los datos de la distribución seleccionada en el formulario
             form.setFieldsValue({
                 educacion_global: distribucion.educacion_global,
                 carrera: distribucion.carrera,
-                materia: distribucion.materia,
+                materia: distribucion.materia, // Asegúrate de que esto sea el ID
                 docente: distribucion.docente,
                 dia: distribucion.dia,
                 hora_inicio: moment(distribucion.hora_inicio, "HH:mm"),
@@ -80,29 +81,30 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
                     ...values,
                     hora_inicio: values.hora_inicio.format("HH:mm"),
                     hora_termina: values.hora_termina.format("HH:mm"),
-                    id_materia: values.materia,
+                    id_materia: parseInt(values.materia, 10), // Asegúrate de que esto sea un número
                 }),
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error("Error al actualizar la distribución");
+                throw new Error(data.mensaje || "Error al actualizar la distribución");
             }
 
-            const data = await response.json();
             if (data.ok) {
                 notification.success({
                     message: 'Actualización exitosa',
                     description: 'Distribución actualizada correctamente.',
                 });
-                getData(); // Refrescar los datos
-                handleCloseModal(); // Cerrar el modal
+                getData();
+                handleCloseModal();
             } else {
                 throw new Error(data.mensaje || "No se pudo actualizar la distribución.");
             }
         } catch (error) {
             notification.error({
                 message: 'Error',
-                description: 'Error al actualizar la distribución: ' + error.message,
+                description: error.message,
             });
         }
     };
@@ -174,6 +176,7 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
                         <Select.Option value="Miércoles">Miércoles</Select.Option>
                         <Select.Option value="Jueves">Jueves</Select.Option>
                         <Select.Option value="Viernes">Viernes</Select.Option>
+                        <Select.Option value="Sábado">Sábado</Select.Option>
                     </Select>
                 </Form.Item>
 

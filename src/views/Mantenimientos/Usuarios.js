@@ -55,20 +55,14 @@ const Usuarios = () => {
           telefono: value.telefono,
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
-          estado: value.estado,
           job_descripcion: value.job_descripcion,
-          maquina_creacion: value.ip_creacion,
-          maquina_actualiso: value.ip_actualizacion,
+          carreras: value.carreras.map(carrera => carrera.nombre).join(', '),  // Convertimos las carreras en una cadena separada por comas
+          estado: value.estado,
         }));
-        // Filtrar datos 
-        if (filterUsuario) {
-          informacion = informacion.filter(item => 
-            `${item.nombres} ${item.apellidos} ${item.perfil} ${item.cedula} ${item.correo}`.toLowerCase().includes(filterUsuario.toLowerCase())
-          );
-        }
+        
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
-        setFilteredData(informacion); // Opcional si planeas usar este estado en el futuro
+        setFilteredData(informacion);  // Opcional si planeas usar este estado en el futuro
       })
       .catch((error) => {
         console.error('Error fetching data:', error);
@@ -166,6 +160,11 @@ const Usuarios = () => {
               width: 20,
             },
             {
+              dataIndex: "carreras",  // Asegúrate que el campo coincida
+              title: "Carreras",
+              width: 20,
+            },
+            {
               dataIndex: "accion",
               title: "Acciones",
               align: 'center',
@@ -179,7 +178,8 @@ const Usuarios = () => {
           ]}
           dataSource={dataTabla}
           size="small"
-          scroll={{ x: 100 }}  // Asegúrate de ajustar el scroll si es necesario
+          scroll={{ x: 100 }}  
+          // Asegúrate de ajustar el scroll si es necesario
         />
       </Card>
       <NewUsuario 
