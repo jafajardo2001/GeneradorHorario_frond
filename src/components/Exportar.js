@@ -7,11 +7,67 @@ const GenerarReporte = ({ filteredData }) => {
     const url = "http://localhost:8000/api/istg/";
     const [loading, setLoading] = useState(true);
     const [filterDocente, setFilterDocente] = useState("");
+    const [coordinador, setCoordinador] = useState({});
+    const [coordinador2, setCoordinador2] = useState({});
 
     const formatearHora = (hora) => {
         return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
     };
-    
+
+    function getUser() {
+        setLoading(true);
+        fetch(`${url}show_coordinadorc`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let informacion = data.data.map((value) => ({
+                    id: value.id_usuario,
+                    nombre_completo: value.nombre_completo,
+                }));
+
+                if (informacion.length > 0) {
+                    setCoordinador(informacion[0]); // Almacenas el primer coordinador
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    function getUser2() {
+        setLoading(true);
+        fetch(`${url}show_coordinador_a`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let informaciondos = data.data.map((value) => ({
+                    id: value.id_usuario,
+                    nombre_completo: value.nombre_completo,
+                }));
+
+                if (informaciondos.length > 0) {
+                    setCoordinador2(informaciondos[0]); // Almacenas el primer coordinador
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
     function getDistribucion() {
         setLoading(true);
         fetch(`${url}horario/show_dist_horarios`, { method: 'GET' })
@@ -67,11 +123,11 @@ const GenerarReporte = ({ filteredData }) => {
             'Preparación de Clases': 0,
             'Horas Clase': 0 // Asegúrate de incluir esta categoría
         };
-    
+
         datos.forEach(item => {
-            const horasPorClase = item.hora_termina && item.hora_inicio ? 
+            const horasPorClase = item.hora_termina && item.hora_inicio ?
                 (new Date(`1970-01-01T${item.hora_termina}:00`) - new Date(`1970-01-01T${item.hora_inicio}:00`)) / 3600000 : 0;
-    
+
             // Manejo de categorías excluidas
             if (item.materia in horasMateriaExcluidas) {
                 horasMateriaExcluidas[item.materia] += horasPorClase;
@@ -83,13 +139,13 @@ const GenerarReporte = ({ filteredData }) => {
                 horasPorMateria[item.materia] += horasPorClase;
             }
         });
-    
+
         // Calcular el total de horas para las materias excluidas
         const totalHorasExcluidas = Object.values(horasMateriaExcluidas).reduce((acc, horas) => acc + horas, 0).toFixed(2);
-    
+
         // Calcular el total de horas para las materias restantes
         const totalHorasRestantes = Object.values(horasPorMateria).reduce((acc, horas) => acc + horas, 0).toFixed(2);
-    
+
         // Calcular las sumas por columna
         const totalHorasClase = totalHorasRestantes['Horas Clase'] || 0;
         const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
@@ -99,14 +155,14 @@ const GenerarReporte = ({ filteredData }) => {
         const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
         const totalHorasTutorPracticas = horasMateriaExcluidas['Prácticas Laborales'] || 0;
         const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Gestoría Institucional'] || 0;
-    
+
         // Sumar las horas totales
         const totalDocencia = (parseFloat(totalHorasRestantes) + parseFloat(totalHorasTutorias) + parseFloat(totalHorasPreparacionClases)).toFixed(2);
         const totalInvestigacion = (parseFloat(totalHorasDirectorInvestigacion) + parseFloat(totalHorasDirectorProyectos) + parseFloat(totalHorasCoordinacion)).toFixed(2);
         const totalPracticas = (parseFloat(totalHorasTutorPracticas)).toFixed(2);
         const totalGestion = (parseFloat(totalHorasGestoriaInstitucional)).toFixed(2);
-        const totalGeneral = (parseFloat(totalDocencia) + parseFloat(totalInvestigacion) + parseFloat(totalPracticas) + parseFloat(totalGestion) ).toFixed(2);
-    
+        const totalGeneral = (parseFloat(totalDocencia) + parseFloat(totalInvestigacion) + parseFloat(totalPracticas) + parseFloat(totalGestion)).toFixed(2);
+
         return {
             horasPorMateria: horasPorMateria,
             horasMateriaExcluidas: horasMateriaExcluidas,
@@ -127,7 +183,7 @@ const GenerarReporte = ({ filteredData }) => {
             totalGeneral: totalGeneral
         };
     };
-    
+
     const handleGenerateReport = () => {
         if (!filteredData || filteredData.length === 0) {
             notification.error({
@@ -137,7 +193,7 @@ const GenerarReporte = ({ filteredData }) => {
             });
             return;
         }
-    
+
         const {
             horasPorMateria,
             horasMateriaExcluidas,
@@ -157,7 +213,7 @@ const GenerarReporte = ({ filteredData }) => {
             totalGestion,
             totalGeneral
         } = calcularHoras(filteredData);
-        
+
         const doc = new jsPDF('landscape');
 
         // Ordenar los datos por la hora de inicio
@@ -172,12 +228,12 @@ const GenerarReporte = ({ filteredData }) => {
         img.src = '/logo-istg-2.png';  // Ruta del logo en la carpeta public
 
         img.onload = function () {
-            doc.addImage(img, 'PNG', 30 , 10, 100, 20);  // Ajustar posición y tamaño del logo
-            
+            doc.addImage(img, 'PNG', 30, 10, 100, 20);  // Ajustar posición y tamaño del logo
+
             // Agregar el resto del contenido después de cargar la imagen
             doc.setFontSize(16);
             doc.text("Distribución de la Jornada de Trabajo Semanal del Docente", 30, 50);
- 
+
             // Sección 1: Datos Generales
             const docente = filteredData[0]; // Usar el primer registro para los datos generales
             doc.autoTable({
@@ -191,33 +247,33 @@ const GenerarReporte = ({ filteredData }) => {
                 startY: doc.previousAutoTable.finalY,
                 body: [
                     [
-                        { content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'CÉDULA:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.cedula,
-                        { content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'TÍTULO TERCER NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.titulo_academico
                     ],
                     [
-                        { content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'Apellidos y Nombres:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.docente,
-                        { content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'TÍTULO CUARTO NIVEL:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         '' // Deja vacío si no hay información
                     ],
                     [
-                        { content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'CORREO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.correo,
-                        { content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'TELÉFONO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.telefono
                     ],
                     [
-                        { content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'ASIGNATURAS:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.materia,
-                        { content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'TIEMPO DE DEDICACIÓN:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.job_descripcion
                     ],
                     [
-                        { content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.carrera,
-                        { content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } }, 
+                        { content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         '2023-S2'
                     ]
                 ],
@@ -248,13 +304,13 @@ const GenerarReporte = ({ filteredData }) => {
             doc.autoTable({
                 startY: doc.previousAutoTable.finalY,
                 head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
-            body: [
-                [ `Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}` ],
-                [ `Tutorías: ${totalHorasTutorias}`, `Director de Proyectos: ${totalHorasDirectorProyectos}`, '', '', '' ],
-                [ `Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', '' ], // Fila vacía eliminada
-                [ `Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}` ]
-            ],
-                
+                body: [
+                    [`Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}`],
+                    [`Tutorías: ${totalHorasTutorias}`, `Director de Proyectos: ${totalHorasDirectorProyectos}`, '', '', ''],
+                    [`Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', ''], // Fila vacía eliminada
+                    [`Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}`]
+                ],
+
                 columnStyles: {
                     0: { cellWidth: 'auto' },
                     1: { cellWidth: 'auto' },
@@ -309,7 +365,7 @@ const GenerarReporte = ({ filteredData }) => {
                     };
                 }
                 distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
-                + row.nivel + row.paralelo;
+                    + row.nivel + row.paralelo;
 
                 const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
                 const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
@@ -369,7 +425,7 @@ const GenerarReporte = ({ filteredData }) => {
                     lineWidth: 0.2 // Grosor de las líneas
                 }
             });
-            
+
             // Sección de firmas
             const firmaY = doc.previousAutoTable.finalY + 50; // Aumenta el valor para mover más abajo
 
@@ -378,25 +434,25 @@ const GenerarReporte = ({ filteredData }) => {
 
             doc.setFontSize(10);
 
-            // Firma izquierda
-            doc.text("________________________", '25', firmaY); // Línea de subrayado
+            // Firma izquierda (Coordinador Académico)
+            doc.text("________________________", 25, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(`${docente.docente}`, 25, firmaY + 5); // Aquí irán los nombres de las autoridades
-            doc.text(`COORDINADORA ACADÉMICA`, 25, firmaY + 10);
+            doc.text(coordinador2.nombre_completo || '', 25, firmaY + 5); // Nombre del coordinador académico
+            doc.text(`COORDINADOR ACADÉMICO`, 25, firmaY + 10); // Coordinador académico etiqueta
             doc.setFont("normal");
 
-            // Firma central
-            doc.text("________________________", 125, firmaY);
+            // Firma central (Coordinador de Carrera)
+            doc.text("________________________", 125, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(`${docente.docente}`, 125, firmaY + 5);
-            doc.text(`COORDINADOR DE CARRERA`, 125, firmaY + 10);
+            doc.text(coordinador.nombre_completo || '', 125, firmaY + 5); // Nombre del coordinador de carrera
+            doc.text(`COORDINADOR DE CARRERA`, 125, firmaY + 10); // Coordinador de carrera etiqueta
             doc.setFont("normal");
 
-            // Firma derecha
-            doc.text("________________________", 225, firmaY);
+            // Firma derecha (Docente)
+            doc.text("________________________", 225, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(`${docente.docente}`, 225, firmaY + 5);
-            doc.text(`DOCENTE`, 225, firmaY + 10); 
+            doc.text(`${docente.docente}`, 225, firmaY + 5); // Nombre del docente
+            doc.text(`DOCENTE`, 225, firmaY + 10); // Docente etiqueta
             doc.setFont("normal");
 
 
@@ -406,6 +462,8 @@ const GenerarReporte = ({ filteredData }) => {
 
     useEffect(() => {
         getDistribucion();
+        getUser();
+        getUser2();
     }, [filterDocente]);
 
     return (
