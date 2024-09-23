@@ -2,36 +2,52 @@ import Card from "antd/es/card/Card";
 import React, { useState, useEffect } from "react";
 import { Button, Collapse, Input, Table, Typography, Menu, Dropdown, Select, Spin } from "antd";
 import { FilterOutlined, UserOutlined, MenuOutlined, DeleteOutlined, EditOutlined, FolderViewOutlined } from "@ant-design/icons";
-import FormItem from "antd/es/form/FormItem";
 import { Row, Col, Space } from "antd";
 import { UserAddOutlined, ClearOutlined, SearchOutlined, SyncOutlined } from "@ant-design/icons";
 import NewUsuario from "../../components/NewUsuario.js";
+import UpdateUsuario from "../../components/UpdateUsuario.js";
 
 const Usuarios = () => {
   const { Title } = Typography;
   const [loading, setLoading] = useState(true);
   const [mensajeLoading, setMensajeLoading] = useState("cargando...");
-  const [isOpenModal, setIsOpen] = useState(false);
+  const [isOpenModal, setIsOpen] = useState(false); // Para el modal de crear 
   const [dataTabla, setDataTabla] = useState([]);
   const [cantidadRegistro, setCantidadRegistro] = useState(0);
+  const [isOpenUpdateUsuario, setIsOpenUpdateModal] = useState(false); // Para el modal de editar
+  const [selectedUserId, setSelectedUserId] = useState(null);  // Estado para el usuario seleccionado
+  const [selectedUserData, setSelectedUserData] = useState(null); // Para almacenar los datos del usuario seleccionado
   const [filterUsuario, setFilterUsuario] = useState(""); // Nuevo estado para el filtro
   const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/";
 
   const handleCloseModal = () => {
     setIsOpen(false);
+    setIsOpenUpdateModal(false);
   };
 
   const handleMenuClick = (action, record) => {
-    console.log(record);
-    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
+    if (action === "editar") {
+      setSelectedUserId(record.id); // Almacena el ID del usuario seleccionado
+      setSelectedUserData(record);  // Almacena los datos del usuario seleccionado
+      setIsOpenUpdateModal(true);  // Abre el modal de edición
+    } else if (action === "eliminar") {
+      // Lógica para eliminar el usuario
+    }
+    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record.cedula}`);
   };
 
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-      <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-      <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
-      <Menu.Item key="visualizar_informacion"><FolderViewOutlined /></Menu.Item>
+      <Menu.Item key="editar">
+        <EditOutlined /> Editar
+      </Menu.Item>
+      <Menu.Item key="eliminar">
+        <DeleteOutlined /> Eliminar
+      </Menu.Item>
+      <Menu.Item key="visualizar_informacion">
+        <FolderViewOutlined /> Ver Información
+      </Menu.Item>
     </Menu>
   );
 
@@ -59,7 +75,7 @@ const Usuarios = () => {
           carreras: value.carreras.map(carrera => carrera.nombre).join(', '),  // Convertimos las carreras en una cadena separada por comas
           estado: value.estado,
         }));
-        
+
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
         setFilteredData(informacion);  // Opcional si planeas usar este estado en el futuro
@@ -78,119 +94,124 @@ const Usuarios = () => {
 
   return (
     <Spin spinning={loading} tip="Cargando...">
-    <>
-      
-      <Row style={{ display: "flex", justifyContent: "center" }}>
-        <Title level={3}>Mantenimiento de usuarios</Title>
-      </Row>
-      <Card bordered={false}>
-        <Space style={{ margin: "5px" }}>
-          <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
-            <Col>
-              <Button icon={<UserAddOutlined />} onClick={() => { setIsOpen(true); }}>
-                Crear un usuario
-              </Button>
-            </Col>
-            <Col>
-              <Button icon={<SyncOutlined />} onClick={() => { getUser(); }}>
-                Descargar datos
-              </Button>
-            </Col>
-            <Col>
-              <Input
-                placeholder="Filtrar por usuario"
-                value={filterUsuario}
-                onChange={(e) => setFilterUsuario(e.target.value)}
-                allowClear
-              />
-            </Col>
-            <Col>
-              <Button icon={<ClearOutlined />}>Limpiar</Button>
-            </Col>
-            <Col>
-              <Button icon={<SearchOutlined />}>Buscar</Button>
-            </Col>
-          </Row>
-        </Space>
-        <Row>
-          <Title level={5}>Cantidad : {cantidadRegistro}</Title>
+      <>
+
+        <Row style={{ display: "flex", justifyContent: "center" }}>
+          <Title level={3}>Mantenimiento de usuarios</Title>
         </Row>
-        <Table
-          style={{ margin: "5px" }}
-          bordered={false}
-          columns={[
-            {
-              dataIndex: "cedula",
-              title: "Cedula",
-              width: 20,
-            },
-            {
-              dataIndex: "nombres",
-              title: "Nombres",
-              width: 20,
-            },
-            {
-              dataIndex: "apellidos",
-              title: "Apellidos",
-              width: 30,
-            },
-            {
-              dataIndex: "correo",
-              title: "Correo",
-              width: 30,
-            },
-            {
-              dataIndex: "telefono",
-              title: "Telefono",
-              width: 30,
-            },
-            {
-              dataIndex: "job_descripcion",
-              title: "tiempo laboral",
-              width: 30,
-            },
-            {
-              dataIndex: "usuarios",
-              title: "Usuario",
-              width: 20,
-            },
-            {
-              dataIndex: "titulo_academico",
-              title: "Titulo Academico",
-              width: 20,
-            },
-            {
-              dataIndex: "carreras",  // Asegúrate que el campo coincida
-              title: "Carreras",
-              width: 20,
-            },
-            {
-              dataIndex: "accion",
-              title: "Acciones",
-              align: 'center',
-              width: 20,
-              render: (_, record) => (
-                <Dropdown overlay={menu(record)} trigger={['click']}>
-                  <Button><MenuOutlined /></Button>
-                </Dropdown>
-              ),
-            },
-          ]}
-          dataSource={dataTabla}
-          size="small"
-          scroll={{ x: 100 }}  
-          // Asegúrate de ajustar el scroll si es necesario
+        <Card bordered={false}>
+          <Space style={{ margin: "5px" }}>
+            <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
+              <Col>
+                <Button icon={<UserAddOutlined />} onClick={() => { setIsOpen(true); }}>
+                  Crear un usuario
+                </Button>
+              </Col>
+              <Col>
+                <Button icon={<SyncOutlined />} onClick={() => { getUser(); }}>
+                  Descargar datos
+                </Button>
+              </Col>
+              <Col>
+                <Input
+                  placeholder="Filtrar por usuario"
+                  value={filterUsuario}
+                  onChange={(e) => setFilterUsuario(e.target.value)}
+                  allowClear
+                />
+              </Col>
+              <Col>
+                <Button icon={<ClearOutlined />}>Limpiar</Button>
+              </Col>
+              <Col>
+                <Button icon={<SearchOutlined />}>Buscar</Button>
+              </Col>
+            </Row>
+          </Space>
+          <Row>
+            <Title level={5}>Cantidad : {cantidadRegistro}</Title>
+          </Row>
+          <Table
+            style={{ margin: "5px" }}
+            bordered={false}
+            columns={[
+              {
+                dataIndex: "cedula",
+                title: "Cedula",
+                width: 20,
+              },
+              {
+                dataIndex: "nombres",
+                title: "Nombres",
+                width: 20,
+              },
+              {
+                dataIndex: "apellidos",
+                title: "Apellidos",
+                width: 30,
+              },
+              {
+                dataIndex: "correo",
+                title: "Correo",
+                width: 30,
+              },
+              {
+                dataIndex: "telefono",
+                title: "Telefono",
+                width: 30,
+              },
+              {
+                dataIndex: "job_descripcion",
+                title: "Tiempo Laboral",
+                width: 30,
+              },
+              {
+                dataIndex: "usuarios",
+                title: "Usuario",
+                width: 20,
+              },
+              {
+                dataIndex: "titulo_academico",
+                title: "Titulo Academico",
+                width: 20,
+              },
+              {
+                dataIndex: "carreras",  // Asegúrate que el campo coincida
+                title: "Carreras",
+                width: 20,
+              },
+              {
+                dataIndex: "accion",
+                title: "Acciones",
+                align: 'center',
+                width: 20,
+                render: (_, record) => (
+                  <Dropdown overlay={menu(record)} trigger={['click']}>
+                    <Button><MenuOutlined /></Button>
+                  </Dropdown>
+                ),
+              },
+            ]}
+            dataSource={dataTabla}
+            size="small"
+            scroll={{ x: 100 }}
+          />
+        </Card>
+        <NewUsuario
+          isOpen={isOpenModal}
+          onCloseModal={handleCloseModal}
+          getUser={getUser}
+          loading={setLoading}
+          mensaje={setMensajeLoading}
         />
-      </Card>
-      <NewUsuario 
-      isOpen={isOpenModal} 
-      onCloseModal={handleCloseModal} 
-      getUser={getUser}  // Aquí estás pasando la función getUser
-      loading={setLoading} 
-      mensaje={setMensajeLoading} 
-    />
-    </>
-  </Spin>
+        <UpdateUsuario
+          isOpen={isOpenUpdateUsuario}  // Abre el modal de edición
+          onCloseModal={handleCloseModal}
+          userId={selectedUserId}  // Pasa el ID del usuario seleccionado
+          getUser={getUser}  // Refresca los datos después de editar
+        />
+      </>
+    </Spin>
   );
 };
 
