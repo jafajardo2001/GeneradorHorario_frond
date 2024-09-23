@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { SettingOutlined,  DesktopOutlined, FormOutlined } from "@ant-design/icons";
+import { SettingOutlined, DesktopOutlined, FormOutlined } from "@ant-design/icons";
 import { Breadcrumb, Layout, theme, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Content, Footer, Header } from "antd/es/layout/layout";
@@ -46,6 +46,7 @@ const Aside = ({ children }) => {
       //getItem('EducacionGlobal', '7', '', '', '/Mantenimientos/educacionGobal'),
       getItem('Perfiles', '3', '', '', '/Mantenimientos/perfiles'),
       getItem('Tiempo laboral', '12', '', '', '/Mantenimientos/tiempojob'),
+      getItem('Carrera', '13', '', '', '/Mantenimientos/carrera'),
       getItem('Usuarios', '4', '', '', '/Mantenimientos/usuarios'),
       getItem('Materias', '8', '', '', '/Mantenimientos/materias'),
       getItem('Cursos', '5', '', '', '/Mantenimientos/cursos'),
