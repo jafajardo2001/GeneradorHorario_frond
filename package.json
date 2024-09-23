@@ -15,6 +15,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.15.3",
+    "axios": "^1.7.7",
     "google-map-react": "^2.2.1",
     "html2canvas": "^1.4.1",
     "i": "^0.3.7",
