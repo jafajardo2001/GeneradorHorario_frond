@@ -47,6 +47,7 @@ const Aside = ({ children }) => {
       getItem('Perfiles', '3', '', '', '/Mantenimientos/perfiles'),
       getItem('Tiempo laboral', '12', '', '', '/Mantenimientos/tiempojob'),
       getItem('Carrera', '13', '', '', '/Mantenimientos/carrera'),
+      getItem('Jornada', '14', '', '', '/Mantenimientos/jornada'),
       getItem('Usuarios', '4', '', '', '/Mantenimientos/usuarios'),
       getItem('Materias', '8', '', '', '/Mantenimientos/materias'),
       getItem('Cursos', '5', '', '', '/Mantenimientos/cursos'),

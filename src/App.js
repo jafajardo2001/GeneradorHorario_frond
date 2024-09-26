@@ -10,6 +10,7 @@ import TitulosAcademicos from "./views/Mantenimientos/TitulosAcademicos";
 import Horarios from "./views/Mantenimientos/Horarios";
 import Calendario from "./views/Mantenimientos/Calendario";
 import Carrera from "./views/Mantenimientos/Carrera";
+import Jornada from "./views/Mantenimientos/Jornada";
 import NewEducacionGlobal from "./views/Formularios/NewEducacionGlobal";
 import Aside from "./components/Aside";
 import PlanificacionAcademica from "./views/Planificaciones/PlanificacionAcademica";
@@ -24,6 +25,7 @@ function App() {
           <Route path="/Mantenimientos/usuarios" element={<Usuarios />} />
           <Route path="/Mantenimientos/perfiles" element={<Perfiles />} />
           <Route path="/Mantenimientos/tiempojob" element={<Tiempojob />} />
+          <Route path="/Mantenimientos/jornada" element={<Jornada />} />
           <Route path="/Mantenimientos/carrera" element={<Carrera />} />
           <Route path="/Mantenimientos/cursos" element={<Cursos />} />
           <Route path="/Mantenimientos/paralelos" element={<Paralelos />} />
