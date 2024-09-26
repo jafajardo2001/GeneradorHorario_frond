@@ -147,7 +147,7 @@ const Carreras = () => {
                         ]}
                     />
                 </Card>
-                <NewCarrera open={isOpeNewCarrera} handleCloseModal={handleCloseModal} getcarreras={getCarreras} />
+                <NewCarrera open={isOpeNewCarrera} handleCloseModal={handleCloseModal} getCarreras={getCarreras} />
                 <UpdateCarrera open={isOpenUpdateCarrera} handleCloseModal={handleCloseModal} getCarreras={getCarreras} formulario={formularioEditar} loading={setLoading} mensaje={setMensajeLoading} />
             </>
         </Spin>

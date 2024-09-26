@@ -12,7 +12,8 @@ const NewCurso = (props) => {
     });
   };
 
-  function createCurso(value){
+  function createCurso(value) {
+    console.log('Datos enviados:', value); // Debugging line
     fetch(`${url}create_nivel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -22,12 +23,12 @@ const NewCurso = (props) => {
       .then((data) => {
         if (data.ok) {
           mostrarNotificacion('success', 'Operación exitosa', data.message);
-            Formulario.current.resetFields();
-            props.getCurso();
-            props.handleCloseModal();
+          Formulario.current.resetFields();
+          props.getCurso();
+          props.handleCloseModal();
         } else {
-         // Mostrar notificación de error si la descripción ya existe o cualquier otro error
-        mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
+          // Mostrar notificación de error si la descripción ya existe o cualquier otro error
+          mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
         }
       })
       .catch((error) => {
@@ -37,59 +38,59 @@ const NewCurso = (props) => {
   }
   return (
     <Modal onCancel={() => {
-          props.handleCloseModal();
-          Formulario.current.resetFields();
-        }}
-        onOk={()=>{
-          if(Formulario && Formulario.current){
-            Formulario.current.submit();
-          }
-        }}
-        open={props.open} size="large" okText="Guardar" cancelText="Cancelar" title="Nuevo Curso">
-        <Form onFinish={createCurso} ref={Formulario} layout="vertical">
-          <Row>
-            <Col span={24}>
-              <Form.Item label="Ingrese el numero de curso" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del numero es requerido"
-                  }
-                ]
-              }
+      props.handleCloseModal();
+      Formulario.current.resetFields();
+    }}
+      onOk={() => {
+        if (Formulario && Formulario.current) {
+          Formulario.current.submit();
+        }
+      }}
+      open={props.open} size="large" okText="Guardar" cancelText="Cancelar" title="Nuevo Curso">
+      <Form onFinish={createCurso} ref={Formulario} layout="vertical">
+        <Row>
+          <Col span={24}>
+            <Form.Item label="Ingrese el numero de curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del numero es requerido"
+                }
+              ]
+            }
               name="numero">
-                <Input/>
-              </Form.Item>
+              <Input />
+            </Form.Item>
 
-              <Form.Item label="Ingrese el nemonico del curso" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del nemonico es requerido"
-                  }
-                ]
-              }
+            <Form.Item label="Ingrese el nemonico del curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del nemonico es requerido"
+                }
+              ]
+            }
               name="nemonico">
-                <Input/>
-              </Form.Item>
+              <Input />
+            </Form.Item>
 
 
-              <Form.Item label="Ingrese la termino del curso" rules={
-                [
-                  {
-                    required:true,
-                    message:"El campo del termino es requerido"
-                  }
-                ]
-              }
+            <Form.Item label="Ingrese la termino del curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del termino es requerido"
+                }
+              ]
+            }
               name="termino">
-                <Input/>
-              </Form.Item>
+              <Input />
+            </Form.Item>
 
-            </Col>
-          </Row>
-        </Form>
-      </Modal>
+          </Col>
+        </Row>
+      </Form>
+    </Modal>
 
   );
 }

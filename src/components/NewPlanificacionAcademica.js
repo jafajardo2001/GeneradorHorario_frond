@@ -256,7 +256,7 @@ const NewPlanificacionAcademica = (props) => {
     async function obtenerDocentesPorCarrera(idCarrera) {
         try {
             setLoading(true); // Indicador de carga
-    
+
             // Configuración de la petición
             let configuraciones = {
                 method: "GET",
@@ -264,48 +264,48 @@ const NewPlanificacionAcademica = (props) => {
                     'Content-Type': 'application/json',
                 }
             };
-    
+
             // Hacer la solicitud a la API, pasando el idCarrera como parámetro
             let response = await fetch(`${url}obtener_docentes_por_carrera/${idCarrera}`, configuraciones);
             let data = await response.json();
-    
+
             if (response.ok && data.ok) {
                 // Mapeo de los docentes obtenidos
                 let docentesMapeados = data.data.map((docente) => ({
                     value: docente.id_usuario, // ID del docente
                     label: `${docente.nombre_completo} - ${docente.titulo_academico}` // Nombre completo y título académico
                 }));
-    
+
                 setUser(docentesMapeados); // Actualizar el estado con los docentes filtrados
             } else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
             }
-    
+
             setLoading(false); // Finalizar la carga
         } catch (error) {
             console.error("Error al obtener los docentes por carrera:", error);
             setLoading(false); // Finalizar la carga en caso de error
         }
     }
-    
-    
-    
+
+
+
 
 
     async function showUser() {
         try {
             setLoading(true); // Indicar que los datos están cargando
-    
+
             let configuraciones = {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json'
                 }
             };
-    
+
             let response = await fetch(`${url}show_docentes`, configuraciones);
             let data = await response.json();
-    
+
             if (response.ok && data.ok) {
                 let data_mapeada = data.data.map((value) => ({
                     value: value.id_usuario,
@@ -316,7 +316,7 @@ const NewPlanificacionAcademica = (props) => {
             } else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
             }
-    
+
             setLoading(false); // Indicar que los datos han terminado de cargar
             return true;
         } catch (error) {
@@ -325,11 +325,11 @@ const NewPlanificacionAcademica = (props) => {
             return false;
         }
     }
-    
+
     async function createPlanificacionAcademica() {
         try {
             seguirOpciones(1);
-    
+
             // Crear un arreglo de objetos con la información mapeada
             let arreglo_obj = [];
             dataSource.forEach(element => {
@@ -351,7 +351,7 @@ const NewPlanificacionAcademica = (props) => {
                 arreglo_obj.push(mapeoData);
             });
             const arregloUnido = arreglo_obj.reduce((acc, current) => acc.concat(current), []);
-    
+
             // Enviar la solicitud POST
             let response = await fetch(`${url}horario/create_horario`, {
                 method: 'POST',
@@ -361,7 +361,7 @@ const NewPlanificacionAcademica = (props) => {
                     id_usuario: userSelect // Incluye el ID del usuario aquí
                 })
             });
-    
+
             // Procesar la respuesta del servidor
             let data = await response.json();
             if (data.ok) {
@@ -393,7 +393,7 @@ const NewPlanificacionAcademica = (props) => {
         }
         seguirOpciones(2);
     }
-    
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -527,7 +527,7 @@ const NewPlanificacionAcademica = (props) => {
                                         dataIndex: "dias",
                                         title: "Días",
                                         align: "center",
-                                        width: 250,
+                                        width: 350,
                                         render: (text, record, index) => (
                                             <Select
                                                 options={dias}
@@ -544,7 +544,7 @@ const NewPlanificacionAcademica = (props) => {
                                         dataIndex: "hora_inicio",
                                         title: "Inicia",
                                         align: "center",
-                                        width: 250,
+                                        width: 450,
                                         render: (text, record, index) => (
                                             <Select
                                                 options={hora_inicio}
@@ -561,7 +561,7 @@ const NewPlanificacionAcademica = (props) => {
                                         dataIndex: "hora_termina",
                                         title: "Termina",
                                         align: "center",
-                                        width: 250,
+                                        width: 450,
                                         render: (text, record, index) => (
                                             <Select
                                                 options={hora_termina}
