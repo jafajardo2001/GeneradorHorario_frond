@@ -31,7 +31,7 @@ const Carreras = () => {
     }
 
     function getCarreras() {
-        setLoading(true)
+        setLoading(true);
         fetch(`${url}show_carrera`, { method: 'GET' })
             .then((response) => {
                 if (!response.ok) {
@@ -46,10 +46,11 @@ const Carreras = () => {
                         numero: index + 1,
                         id: value.id_carrera,
                         nombre: value.nombre,
-                        estado: value = "A",
+                        estado: value.estado === "A" ? "Activo" : "Inactivo",
+                        jornada: value.descripcion_jornada, // Aquí agregas la jornada desde el backend
                     };
                 });
-                // Filtrar datos 
+                // Filtrar datos
                 if (filterCarrera) {
                     carrera = carrera.filter(item =>
                         item.nombre.toLowerCase().includes(filterCarrera.toLowerCase())
@@ -61,9 +62,11 @@ const Carreras = () => {
             .catch((error) => {
                 console.error("Error fetching data:", error); // Debugging line
             }).finally(() => {
-                setLoading(false)
+                setLoading(false);
             });
     }
+
+
     const handleMenuClick = (action, record) => {
         console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
 
@@ -124,8 +127,14 @@ const Carreras = () => {
                             },
                             {
                                 dataIndex: 'nombre',
-                                title: 'descripcion',
+                                title: 'Descripción',
                                 width: 20
+                            },
+                            {
+                                dataIndex: 'jornada',
+                                title: 'Jornada',  // Nueva columna para mostrar la jornada
+                                width: 20,
+                                align: 'center'
                             },
                             {
                                 dataIndex: 'estado',

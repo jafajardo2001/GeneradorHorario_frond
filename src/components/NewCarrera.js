@@ -1,23 +1,55 @@
-import React, { useRef } from "react";
-import { Modal, Form, Input, Row, Col, Typography, notification } from "antd";
+import React, { useRef, useEffect, useState } from "react";
+import { Modal, Form, Input, Row, Col, Typography, notification, Select } from "antd";
 
 const NewCarrera = (props) => {
     const { Title } = Typography;
     const Formulario = useRef(null);
     const url = "http://localhost:8000/api/istg/";
+    const [loading, setLoading] = useState(true);
+    const [isJornada, setIsJornada] = useState([]);
+
+
+    function getJornada() {
+        setLoading(true);
+        fetch(`${url}show_jornada`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let jornada = data.data.map((value) => {
+                    return {
+                        label: value.descripcion,  // Asignar la descripción como label
+                        value: value.id_jornada,   // Asignar el id_jornada como value
+                    };
+                });
+                setIsJornada(jornada);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
 
     const createCarrera = (value) => {
         fetch(`${url}create_carrera`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre: value.nombre }),
+            body: JSON.stringify({
+                nombre: value.nombre,
+                id_jornada: value.jornada // Aseguramos que id_jornada se envíe
+            }),
         })
             .then((response) => response.json())
             .then((data) => {
                 if (data.ok) {
                     notification.success({
                         message: "Carrera Creada",
-                        nombre: `La carrera "${value.nombre}" ha sido creado con éxito.`,
+                        description: `La carrera "${value.nombre}" ha sido creada con éxito.`,
                     });
                     props.getCarreras();
                 } else {
@@ -36,6 +68,10 @@ const NewCarrera = (props) => {
                 });
             });
     };
+
+    useEffect(() => {
+        getJornada();
+    }, []);
 
     return (
         <Modal
@@ -65,6 +101,21 @@ const NewCarrera = (props) => {
                             name="nombre"
                         >
                             <Input />
+                        </Form.Item>
+                    </Col>
+
+                    <Col span={24}>
+                        <Form.Item
+                            label="Escoja las jornadas"
+                            name="jornada"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Debe seleccionar una jornada",
+                                },
+                            ]}
+                        >
+                            <Select options={isJornada} />
                         </Form.Item>
                     </Col>
                 </Row>
