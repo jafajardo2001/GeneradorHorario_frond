@@ -73,7 +73,7 @@ const NewUsuario = (props) => {
       .then((response) => response.json())
       .then((data) => {
         let carreras = data.data.map((value) => ({
-          label: value.nombre,
+          label: value.nombre +  " (" + value.descripcion_jornada +  ")" ,
           value: value.id_carrera
         }));
         setIsCarreras(carreras);
