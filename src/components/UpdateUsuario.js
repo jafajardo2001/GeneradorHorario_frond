@@ -29,48 +29,47 @@ const UpdateUsuario = (props) => {
     getCarreras();
   }, [props.isOpen, props.userId]);
 
-  // Cargar datos del usuario desde el servidor
   function getUsuarioData(userId) {
     fetch(`${url}usuarios/${userId}`, { method: 'GET' })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.ok) {
-          const usuario = data.data;
-          setSelectedUserData(usuario);
-  
-          // Establecer valores iniciales en el formulario
-          Formulario.current.setFieldsValue({
-            cedula: usuario.cedula,
-            nombres: usuario.nombres,
-            apellidos: usuario.apellidos,
-            correo: usuario.correo,
-            telefono: usuario.telefono,
-            perfil: { label: usuario.rol_descripcion, value: usuario.id_rol },
-            job: { label: usuario.job_descripcion, value: usuario.id_job },
-            tituloAcademico: { label: usuario.titulo_academico_descripcion, value: usuario.id_titulo_academico },
-          });
-  
-          // Convertir las carreras del usuario a un formato compatible con el select
-          setSelectedCarreras(usuario.carreras.map((carrera) => ({
-            label: `${carrera.nombre} - ${carrera.jornada ? carrera.jornada.descripcion : 'Sin jornada'}`,  // Mostrar carrera y jornada
-            value: carrera.id_carrera,
-            jornada: carrera.jornada ? carrera.jornada.id_jornada : null,  // Guardar id_jornada si lo necesitas para otro proceso
-          })));
-        } else {
-          notification.error({
-            message: 'Error',
-            description: 'Error al cargar los datos del usuario.',
-          });
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-        notification.error({
-          message: 'Error',
-          description: 'Error en el servidor al obtener los datos del usuario.',
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.ok) {
+                const usuario = data.data;
+                setSelectedUserData(usuario);
+
+                // Establecer valores iniciales en el formulario
+                Formulario.current.setFieldsValue({
+                    cedula: usuario.cedula,
+                    nombres: usuario.nombres,
+                    apellidos: usuario.apellidos,
+                    correo: usuario.correo,
+                    telefono: usuario.telefono,
+                    perfil: { label: usuario.rol_descripcion, value: usuario.id_rol },
+                    job: { label: usuario.job_descripcion, value: usuario.id_job },
+                    tituloAcademico: { label: usuario.titulo_academico_descripcion, value: usuario.id_titulo_academico },
+                });
+
+                // Convertir las carreras del usuario a un formato compatible con el select
+                setSelectedCarreras(usuario.carreras.map((carrera) => ({
+                    label: `${carrera.nombre} - ${carrera.jornada ? carrera.jornada.descripcion : 'Sin jornada'}`,  // Mostrar carrera y jornada
+                    value: carrera.id_carrera,
+                    id_jornada: carrera.jornada ? carrera.jornada.id_jornada : null,  // Guardar id_jornada si lo necesitas para otro proceso
+                })));
+            } else {
+                notification.error({
+                    message: 'Error',
+                    description: 'Error al cargar los datos del usuario.',
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('Error fetching user data:', error);
+            notification.error({
+                message: 'Error',
+                description: 'Error en el servidor al obtener los datos del usuario.',
+            });
         });
-      });
-  }
+}
   
   
   
@@ -127,83 +126,89 @@ const UpdateUsuario = (props) => {
 
   function getCarreras() {
     fetch(`${url}show_carrera`, { method: 'GET' })
-      .then((response) => response.json())
-      .then((data) => {
-        let carreras = data.data.map((value) => ({
-          label: value.nombre + " (" + value.descripcion_jornada + ")",
-          value: value.id_carrera, // id de la carrera
-          id_jornada: value.id_jornada
-        }));
-        setIsCarreras(carreras);
-      })
-      .catch((error) => {
-        console.error('Error fetching careers:', error);
-      });
-  }
+        .then((response) => response.json())
+        .then((data) => {
+            let carreras = data.data.map((value) => ({
+                label: `${value.nombre} (${value.descripcion_jornada})`,
+                value: value.id_carrera, // id de la carrera
+                id_jornada: value.id_jornada // id de la jornada
+            }));
+            setIsCarreras(carreras);
+        })
+        .catch((error) => {
+            console.error('Error fetching careers:', error);
+        });
+}
+
 
   // Función para manejar la selección de carreras
   function handleCarreraChange(selectedOptions) {
     setSelectedCarreras(selectedOptions || []); // Actualiza las carreras seleccionadas
   }
 
-  // Función para actualizar el usuario
-  function updateUser(value) {
-    console.log({
-        cedula: value.cedula,
-        nombres: value.nombres,
-        apellidos: value.apellidos,
-        correo: value.correo,
-        telefono: value.telefono,
-        id_rol: value.perfil.value,
-        id_titulo_academico: value.tituloAcademico.value,
-        id_job: value.job.value,
-        id_carreras: selectedCarreras.map((carrera) => carrera.value),
-    });
 
-    fetch(`${url}updateUsuario/${props.userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            cedula: value.cedula,
-            nombres: value.nombres,
-            apellidos: value.apellidos,
-            correo: value.correo,
-            telefono: value.telefono,
-            id_rol: value.perfil.value,
-            id_titulo_academico: value.tituloAcademico.value,
-            id_job: value.job.value,
-            carreras_jornadas: selectedCarreras.map(carrera => ({
-              id_carrera: carrera.value,   // id de la carrera
-              id_jornada: carrera.id_jornada // id de la jornada correspondiente
-          })),
-        }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.ok) {
-            notification.success({
-                message: 'Éxito',
-                description: data.message || 'Usuario actualizado con éxito.',
-            });
-            Formulario.current.resetFields();
-            props.onCloseModal();
-            props.getUser();
-            setSelectedCarreras([]);
-        } else {
-            notification.error({
-                message: 'Error',
-                description: data.message || 'Hubo un problema al actualizar el usuario.',
-            });
-        }
-    })
-    .catch((error) => {
-        console.error('An error occurred:', error);
-        notification.error({
-            message: 'Error',
-            description: 'Error interno en el servidor',
-        });
-    });
+  // Función para actualizar el usuario
+function updateUser(value) {
+  // Filtrar y mapear las carreras con sus jornadas
+  const carrerasJornadas = selectedCarreras.map(carrera => ({
+      id_carrera: carrera.value,   // id de la carrera
+      id_jornada: carrera.id_jornada // id de la jornada correspondiente
+  }));
+
+  console.log({
+      cedula: value.cedula,
+      nombres: value.nombres,
+      apellidos: value.apellidos,
+      correo: value.correo,
+      telefono: value.telefono,
+      id_rol: value.perfil.value,
+      id_titulo_academico: value.tituloAcademico.value,
+      id_job: value.job.value,
+      carreras_jornadas: carrerasJornadas,
+  });
+
+  fetch(`${url}updateUsuario/${props.userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          cedula: value.cedula,
+          nombres: value.nombres,
+          apellidos: value.apellidos,
+          correo: value.correo,
+          telefono: value.telefono,
+          id_rol: value.perfil.value,
+          id_titulo_academico: value.tituloAcademico.value,
+          id_job: value.job.value,
+          carreras_jornadas: carrerasJornadas,
+      }),
+  })
+  .then((response) => response.json())
+  .then((data) => {
+      if (data.ok) {
+          notification.success({
+              message: 'Éxito',
+              description: data.message || 'Usuario actualizado con éxito.',
+          });
+          Formulario.current.resetFields();
+          props.onCloseModal();
+          props.getUser();
+          setSelectedCarreras([]);
+      } else {
+          notification.error({
+              message: 'Error',
+              description: data.message || 'Hubo un problema al actualizar el usuario.',
+          });
+      }
+  })
+  .catch((error) => {
+      console.error('An error occurred:', error);
+      notification.error({
+          message: 'Error',
+          description: 'Error interno en el servidor',
+      });
+  });
 }
+
 
 
   return (
