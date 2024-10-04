@@ -72,7 +72,6 @@ const Usuarios = () => {
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
           job_descripcion: value.job_descripcion,
-          carreras: value.carreras.map(carrera => carrera.nombre).join(', '),  // Convertimos las carreras en una cadena separada por comas
           estado: value.estado,
         }));
 

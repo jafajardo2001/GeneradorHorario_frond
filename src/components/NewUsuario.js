@@ -73,8 +73,9 @@ const NewUsuario = (props) => {
       .then((response) => response.json())
       .then((data) => {
         let carreras = data.data.map((value) => ({
-          label: value.nombre +  " (" + value.descripcion_jornada +  ")" ,
-          value: value.id_carrera
+          label: value.nombre + " (" + value.descripcion_jornada + ")",
+          value: value.id_carrera, // id de la carrera
+          id_jornada: value.id_jornada // id de la jornada
         }));
         setIsCarreras(carreras);
       })
@@ -88,6 +89,7 @@ const NewUsuario = (props) => {
     setSelectedCarreras(selectedOptions || []);  // Actualiza el estado con las carreras seleccionadas
   }
 
+  // Función para crear el usuario
   function createUser(value) {
     fetch(`${url}create_usuario`, {
       method: 'POST',
@@ -101,9 +103,14 @@ const NewUsuario = (props) => {
         id_rol: value.perfil.value,
         id_titulo_academico: value.tituloAcademico.value,
         id_job: value.job.value,
-        id_carreras: selectedCarreras.map(carrera => carrera.value)  // Enviamos todas las carreras seleccionadas
+        // Mapeamos las carreras seleccionadas para enviar tanto id_carrera como id_jornada
+        carreras_jornadas: selectedCarreras.map(carrera => ({
+          id_carrera: carrera.value, // id de la carrera
+          id_jornada: carrera.id_jornada // id de la jornada
+        }))
       }),
     })
+    
       .then((response) => response.json())
       .then((data) => {
         if (data.ok) {
