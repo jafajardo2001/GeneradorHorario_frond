@@ -37,7 +37,7 @@ const UpdateUsuario = (props) => {
         if (data.ok) {
           const usuario = data.data;
           setSelectedUserData(usuario);
-
+  
           // Establecer valores iniciales en el formulario
           Formulario.current.setFieldsValue({
             cedula: usuario.cedula,
@@ -49,11 +49,12 @@ const UpdateUsuario = (props) => {
             job: { label: usuario.job_descripcion, value: usuario.id_job },
             tituloAcademico: { label: usuario.titulo_academico_descripcion, value: usuario.id_titulo_academico },
           });
-
+  
           // Convertir las carreras del usuario a un formato compatible con el select
           setSelectedCarreras(usuario.carreras.map((carrera) => ({
-            label: carrera.nombre,
+            label: `${carrera.nombre} - ${carrera.jornada ? carrera.jornada.descripcion : 'Sin jornada'}`,  // Mostrar carrera y jornada
             value: carrera.id_carrera,
+            jornada: carrera.jornada ? carrera.jornada.id_jornada : null,  // Guardar id_jornada si lo necesitas para otro proceso
           })));
         } else {
           notification.error({
@@ -70,6 +71,13 @@ const UpdateUsuario = (props) => {
         });
       });
   }
+  
+  
+  
+
+
+
+
 
   // Funciones para cargar los datos de los selects
   function getRol() {
@@ -122,8 +130,9 @@ const UpdateUsuario = (props) => {
       .then((response) => response.json())
       .then((data) => {
         let carreras = data.data.map((value) => ({
-          label: value.nombre,
-          value: value.id_carrera,
+          label: value.nombre + " (" + value.descripcion_jornada + ")",
+          value: value.id_carrera, // id de la carrera
+          id_jornada: value.id_jornada
         }));
         setIsCarreras(carreras);
       })
@@ -163,7 +172,10 @@ const UpdateUsuario = (props) => {
             id_rol: value.perfil.value,
             id_titulo_academico: value.tituloAcademico.value,
             id_job: value.job.value,
-            id_carreras: selectedCarreras.map((carrera) => carrera.value),
+            carreras_jornadas: selectedCarreras.map(carrera => ({
+              id_carrera: carrera.value,   // id de la carrera
+              id_jornada: carrera.id_jornada // id de la jornada correspondiente
+          })),
         }),
     })
     .then((response) => response.json())
