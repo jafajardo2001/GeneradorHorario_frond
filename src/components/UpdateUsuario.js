@@ -146,7 +146,6 @@ const UpdateUsuario = (props) => {
     setSelectedCarreras(selectedOptions || []); // Actualiza las carreras seleccionadas
   }
 
-
   // Función para actualizar el usuario
 function updateUser(value) {
   // Filtrar y mapear las carreras con sus jornadas
