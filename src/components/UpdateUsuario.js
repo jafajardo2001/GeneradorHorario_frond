@@ -31,7 +31,6 @@ const UpdateUsuario = (props) => {
 
   function getUsuarioData(userId) {
     fetch(`${url}usuarios/${userId}`, { method: 'GET' })
-<<<<<<< HEAD
         .then((response) => response.json())
         .then((data) => {
             if (data.ok) {
@@ -78,46 +77,6 @@ const UpdateUsuario = (props) => {
 
 
 
-=======
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.ok) {
-          const usuario = data.data;
-          setSelectedUserData(usuario);
-
-          // Establecer valores iniciales en el formulario
-          Formulario.current.setFieldsValue({
-            cedula: usuario.cedula,
-            nombres: usuario.nombres,
-            apellidos: usuario.apellidos,
-            correo: usuario.correo,
-            telefono: usuario.telefono,
-            perfil: { label: usuario.rol_descripcion, value: usuario.id_rol },
-            job: { label: usuario.job_descripcion, value: usuario.id_job },
-            tituloAcademico: { label: usuario.titulo_academico_descripcion, value: usuario.id_titulo_academico },
-          });
-
-          // Convertir las carreras del usuario a un formato compatible con el select
-          setSelectedCarreras(usuario.carreras.map((carrera) => ({
-            label: carrera.nombre,
-            value: carrera.id_carrera,
-          })));
-        } else {
-          notification.error({
-            message: 'Error',
-            description: 'Error al cargar los datos del usuario.',
-          });
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching user data:', error);
-        notification.error({
-          message: 'Error',
-          description: 'Error en el servidor al obtener los datos del usuario.',
-        });
-      });
-  }
->>>>>>> parent of b5bc7a3 (funcional e boton de editar de usuario)
 
   // Funciones para cargar los datos de los selects
   function getRol() {
@@ -167,7 +126,6 @@ const UpdateUsuario = (props) => {
 
   function getCarreras() {
     fetch(`${url}show_carrera`, { method: 'GET' })
-<<<<<<< HEAD
         .then((response) => response.json())
         .then((data) => {
             let carreras = data.data.map((value) => ({
@@ -182,20 +140,6 @@ const UpdateUsuario = (props) => {
         });
 }
 
-=======
-      .then((response) => response.json())
-      .then((data) => {
-        let carreras = data.data.map((value) => ({
-          label: value.nombre,
-          value: value.id_carrera,
-        }));
-        setIsCarreras(carreras);
-      })
-      .catch((error) => {
-        console.error('Error fetching careers:', error);
-      });
-  }
->>>>>>> parent of b5bc7a3 (funcional e boton de editar de usuario)
 
   // Función para manejar la selección de carreras
   function handleCarreraChange(selectedOptions) {
@@ -210,7 +154,6 @@ function updateUser(value) {
       id_jornada: carrera.id_jornada // id de la jornada correspondiente
   }));
 
-<<<<<<< HEAD
   console.log({
       cedula: value.cedula,
       nombres: value.nombres,
@@ -263,48 +206,6 @@ function updateUser(value) {
           description: 'Error interno en el servidor',
       });
   });
-=======
-    fetch(`${url}updateUsuario/${props.userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            cedula: value.cedula,
-            nombres: value.nombres,
-            apellidos: value.apellidos,
-            correo: value.correo,
-            telefono: value.telefono,
-            id_rol: value.perfil.value,
-            id_titulo_academico: value.tituloAcademico.value,
-            id_job: value.job.value,
-            id_carreras: selectedCarreras.map((carrera) => carrera.value),
-        }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-        if (data.ok) {
-            notification.success({
-                message: 'Éxito',
-                description: data.message || 'Usuario actualizado con éxito.',
-            });
-            Formulario.current.resetFields();
-            props.onCloseModal();
-            props.getUser();
-            setSelectedCarreras([]);
-        } else {
-            notification.error({
-                message: 'Error',
-                description: data.message || 'Hubo un problema al actualizar el usuario.',
-            });
-        }
-    })
-    .catch((error) => {
-        console.error('An error occurred:', error);
-        notification.error({
-            message: 'Error',
-            description: 'Error interno en el servidor',
-        });
-    });
->>>>>>> parent of b5bc7a3 (funcional e boton de editar de usuario)
 }
 
 
