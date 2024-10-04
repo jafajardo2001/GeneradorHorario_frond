@@ -25,25 +25,24 @@ const NewTitulo = (props) => {
             message: 'Éxito',
             description: data.mensaje,
           });
-          props.getTitulos();
-          Formulario.current.resetFields();
-          props.handleCloseModal();
-        } else {
-          notification.error({
-            message: 'Error',
-            description: data.mensaje,
-          });
-        }
-      })
-      .catch((error) => {
+        props.getTitulos();
+        Formulario.current.resetFields();
+        props.handleCloseModal();
+      } else {
         notification.error({
           message: 'Error',
-          description: 'Ocurrió un error inesperado.',
+          description: data.mensaje,
         });
-        console.error('Ha ocurrido un error:', error);
+      }
+    })
+    .catch((error) => {
+      notification.error({
+        message: 'Error',
+        description: 'Ocurrió un error inesperado.',
       });
+      console.error('Ha ocurrido un error:', error);
+    });
   };
-  
 
   return (
     <Modal

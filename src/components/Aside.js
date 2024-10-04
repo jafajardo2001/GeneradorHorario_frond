@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { SettingOutlined,  DesktopOutlined, FormOutlined } from "@ant-design/icons";
+import { SettingOutlined, DesktopOutlined, FormOutlined } from "@ant-design/icons";
 import { Breadcrumb, Layout, theme, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Content, Footer, Header } from "antd/es/layout/layout";
@@ -45,15 +45,16 @@ const Aside = ({ children }) => {
     getItem('Mantenimientos', 'subManetenimiento', <SettingOutlined />, [
       //getItem('EducacionGlobal', '7', '', '', '/Mantenimientos/educacionGobal'),
       getItem('Perfiles', '3', '', '', '/Mantenimientos/perfiles'),
+      getItem('Tiempo laboral', '12', '', '', '/Mantenimientos/tiempojob'),
+      getItem('Carrera', '13', '', '', '/Mantenimientos/carrera'),
+      getItem('Jornada', '14', '', '', '/Mantenimientos/jornada'),
       getItem('Usuarios', '4', '', '', '/Mantenimientos/usuarios'),
       getItem('Materias', '8', '', '', '/Mantenimientos/materias'),
       getItem('Cursos', '5', '', '', '/Mantenimientos/cursos'),
       getItem('Paralelos', '6', '', '', '/Mantenimientos/paralelos'),
       getItem('TitulosAcademicos', '9', '', '', '/Mantenimientos/tituloacademico'),
-      getItem('Calendario', '13', '', '', '/Mantenimientos/calendario'),
     ]),
     getItem('Planificaciones', 'subPlanificaciones', <FormOutlined />, [
-      getItem('Horario', '10', '', '', '/Mantenimientos/horarios'),
       getItem('Planificacion Academica', '11', '', '', '/Planificaciones/PlanificacionAcademia'),
     ]),
     getItem('Configuraciones', '12', <SettingOutlined />, '', '/settings'),

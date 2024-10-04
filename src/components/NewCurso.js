@@ -13,6 +13,7 @@ const NewCurso = (props) => {
   };
 
   function createCurso(value) {
+    console.log('Datos enviados:', value); // Debugging line
     fetch(`${url}create_nivel`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,68 +27,71 @@ const NewCurso = (props) => {
           props.getCurso();
           props.handleCloseModal();
         } else {
-          mostrarNotificacion('error', 'Error', data.message || 'Error desconocido');
+          // Mostrar notificación de error si la descripción ya existe o cualquier otro error
+          mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
         }
       })
       .catch((error) => {
         mostrarNotificacion('error', 'Error', 'Ocurrió un error: ' + error.message);
       });
-  }
 
+  }
   return (
-    <Modal
-      onCancel={() => {
-        props.handleCloseModal();
-        Formulario.current.resetFields();
-      }}
+    <Modal onCancel={() => {
+      props.handleCloseModal();
+      Formulario.current.resetFields();
+    }}
       onOk={() => {
         if (Formulario && Formulario.current) {
           Formulario.current.submit();
         }
       }}
-      open={props.open}
-      size="large"
-      okText="Guardar"
-      cancelText="Cancelar"
-      title="Nuevo Curso"
-    >
+      open={props.open} size="large" okText="Guardar" cancelText="Cancelar" title="Nuevo Curso">
       <Form onFinish={createCurso} ref={Formulario} layout="vertical">
         <Row>
           <Col span={24}>
-            <Form.Item
-              label="Ingrese el número de curso"
-              rules={[
-                { required: true, message: "El campo del número es requerido" }
-              ]}
-              name="numero"
-            >
+            <Form.Item label="Ingrese el numero de curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del numero es requerido"
+                }
+              ]
+            }
+              name="numero">
               <Input />
             </Form.Item>
 
-            <Form.Item
-              label="Ingrese el nemónico del curso"
-              rules={[
-                { required: true, message: "El campo del nemónico es requerido" }
-              ]}
-              name="nemonico"
-            >
+            <Form.Item label="Ingrese el nemonico del curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del nemonico es requerido"
+                }
+              ]
+            }
+              name="nemonico">
               <Input />
             </Form.Item>
 
-            <Form.Item
-              label="Ingrese el término del curso"
-              rules={[
-                { required: true, message: "El campo del término es requerido" }
-              ]}
-              name="termino"
-            >
+
+            <Form.Item label="Ingrese la termino del curso" rules={
+              [
+                {
+                  required: true,
+                  message: "El campo del termino es requerido"
+                }
+              ]
+            }
+              name="termino">
               <Input />
             </Form.Item>
+
           </Col>
         </Row>
       </Form>
     </Modal>
-  );
-};
 
+  );
+}
 export default NewCurso;

@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Dropdown, Menu } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { Modal, Select } from 'antd';
 import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import listPlugin from '@fullcalendar/list';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
 
+const { Option } = Select;
+
+// Función para convertir un día de la semana en una fecha específica
 const getDayDate = (day) => {
   const today = new Date();
   const currentDay = today.getDay(); // Domingo = 0, Lunes = 1, etc.
@@ -24,41 +21,107 @@ const getDayDate = (day) => {
   return targetDate.toISOString().split('T')[0]; // YYYY-MM-DD
 };
 
+// Componente que renderiza un calendario dinámico basado en los eventos obtenidos del backend
 const MyDynamicCalendar = () => {
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [dataTable, setDataTable] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDocente, setSelectedDocente] = useState(''); // Estado para el docente seleccionado
+  const [docentes, setDocentes] = useState([]); // Estado para la lista de docentes
+  const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
+  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const url = "http://localhost:8000/api/istg/horario/show_dist_horarios";
 
-  useEffect(() => {
+  // Función para obtener distribuciones y filtrarlas
+  function getDistribucion() {
+    setLoading(true);
     fetch(url, { method: 'GET' })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
       .then(data => {
-        console.log(data); // Verifica los datos obtenidos
-        const formattedEvents = data.data.map(item => {
+        let Distribucion = data.data.map((value, index) => ({
+          index: index + 1,
+          id_distribucion: value?.id_distribucion,
+          educacion_global: value?.educacion_global_nombre,
+          carrera: value?.nombre_carrera,
+          id_usuario: value?.id_usuario,
+          materia: value?.materia,
+          nivel: value?.nivel,
+          paralelo: value?.paralelo,
+          dia: value?.dia,
+          hora_inicio: value?.hora_inicio,
+          hora_termina: value?.hora_termina,
+          fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
+          usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
+          estado: value?.estado,
+          docente: value?.nombre_docente
+        }));
+
+        // Filtrar datos según el filtro de docente
+        if (filterDocente) {
+          Distribucion = Distribucion.filter(item => 
+            item.docente.toLowerCase().includes(filterDocente.toLowerCase())
+          );
+        }
+
+        setDataTable(Distribucion);
+        setFilteredData(Distribucion); // Actualizar también el estado filteredData
+
+        // Formatear los eventos para el calendario
+        const formattedEvents = Distribucion.map(item => {
           const date = getDayDate(item.dia);
           if (!date) return null;
 
-          // Ajuste del formato de la hora
           const startTime = item.hora_inicio.replace('24:', '00:');
           const endTime = item.hora_termina.replace('24:', '00:');
 
           return {
+            id: item.id_distribucion,
             title: item.materia,
             start: `${date}T${startTime}`,
             end: `${date}T${endTime}`,
+            allDay: false,
             extendedProps: {
-              instituto: item.educacion_global_nombre,
-              carrera: item.nombre_carrera,
+              docente: item.docente,
+              instituto: item.educacion_global,
+              carrera: item.carrera,
               nivel: item.nivel,
               paralelo: item.paralelo,
               fechaActualizacion: item.fecha_actualizacion
             }
           };
         }).filter(event => event !== null);
+
         setEvents(formattedEvents);
+        setFilteredEvents(formattedEvents);
+
+        // Extraer y setear la lista de docentes
+        const uniqueDocentes = [...new Set(Distribucion.map(item => item.docente))];
+        setDocentes(uniqueDocentes);
       })
-      .catch(error => console.error("Error fetching data:", error));
-  }, []);
+      .catch(error => console.error("Error fetching data:", error))
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    getDistribucion();
+  }, [filterDocente]);
+
+  useEffect(() => {
+    // Filtrar eventos según el docente seleccionado
+    if (selectedDocente) {
+      const filtered = events.filter(event => event.extendedProps.docente === selectedDocente);
+      setFilteredEvents(filtered);
+    } else {
+      setFilteredEvents(events);
+    }
+  }, [selectedDocente, events]);
 
   const handleEventClick = (clickInfo) => {
     setSelectedEvent(clickInfo.event);
@@ -68,77 +131,39 @@ const MyDynamicCalendar = () => {
     setSelectedEvent(null);
   };
 
-  const exportToPDF = () => {
-    const input = document.getElementById('calendar');
-    html2canvas(input).then((canvas) => {
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF();
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save("calendario.pdf");
-    });
-  };
-
-  const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(events.map(event => ({
-      Título: event.title,
-      Inicio: event.start,
-      Fin: event.end,
-      Instituto: event.extendedProps.instituto,
-      Carrera: event.extendedProps.carrera,
-      Nivel: event.extendedProps.nivel,
-      Paralelo: event.extendedProps.paralelo,
-      'Fecha de Actualización': event.extendedProps.fechaActualizacion
-    })));
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Calendario');
-    XLSX.writeFile(workbook, 'calendario.xlsx');
-  };
-
-  const menu = (
-    <Menu>
-      <Menu.Item key="1" onClick={exportToPDF}>
-        Exportar a PDF
-      </Menu.Item>
-      <Menu.Item key="2" onClick={exportToExcel}>
-        Exportar a Excel
-      </Menu.Item>
-    </Menu>
-  );
-
   return (
     <>
-      <Dropdown overlay={menu} style={{ marginBottom: '10px' }}>
-        <Button>
-          Exportar <DownOutlined />
-        </Button>
-      </Dropdown>
+      <Select
+        placeholder="Selecciona un docente"
+        style={{ width: 200, marginBottom: 20 }}
+        onChange={value => {
+          setSelectedDocente(value);
+          setFilterDocente(value); // Actualizar el filtro
+        }}
+      >
+        {docentes.map(docente => (
+          <Option key={docente} value={docente}>{docente}</Option>
+        ))}
+      </Select>
+
       <div id="calendar">
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-          initialView="dayGridMonth"
+          plugins={[timeGridPlugin, interactionPlugin]}
+          initialView="timeGridWeek"
+          headerToolbar={{
+            left: 'prev,next today',
+            center: '',
+            right: 'timeGridWeek,timeGridDay'
+          }}
           views={{
-            dayGridMonth: {
-              buttonText: 'Mes'
-            },
             timeGridWeek: {
               buttonText: 'Semana'
             },
             timeGridDay: {
               buttonText: 'Día'
-            },
-            listWeek: {
-              buttonText: 'Lista'
             }
           }}
-          headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-          }}
-          events={events}
+          events={filteredEvents}
           eventClick={handleEventClick}
         />
       </div>
@@ -151,6 +176,7 @@ const MyDynamicCalendar = () => {
       >
         {selectedEvent ? (
           <>
+            <p><strong>Docente:</strong> {selectedEvent.extendedProps.docente}</p>
             <p><strong>Instituto:</strong> {selectedEvent.extendedProps.instituto}</p>
             <p><strong>Carrera:</strong> {selectedEvent.extendedProps.carrera}</p>
             <p><strong>Nivel:</strong> {selectedEvent.extendedProps.nivel}</p>

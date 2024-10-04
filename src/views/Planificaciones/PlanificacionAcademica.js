@@ -1,26 +1,87 @@
 import React, { useEffect, useState } from "react";
-import { Typography,Row, Card, Space, Col, Button, Table, Dropdown, Menu } from "antd";
+import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin, notification, Modal, Input } from "antd";
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
-import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined, UserAddOutlined } from "@ant-design/icons";
+import UpdateDistribucion from "../../components/UpdateDistribucion";
+import Exportar from "../../components/Exportar";
+import ExportarHorarioPDF  from "../../components/ExportarHorarioPDF";
+import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
+import Calendario from "../Mantenimientos/Calendario"; // Importar el calendario
+
 const PlanificacionAcademica = () => {
     const url = "http://localhost:8000/api/istg/";
     const { Title } = Typography;
-    const [modalIsOpen,setModalIsOpen] = useState(false);
-    const [dataTable,setDataTable] = useState([]);
-    const [distribucionData, setDistribucion] = useState([]);
-    const [loading,setLoading] = useState(true);
-    const handleMenuClick = (action, record) => {
-        console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-        if(action === "editar"){
-          
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isOpenUpdateHorario, setIsOpenUpdateModal] = useState(false);
+    const [dataTable, setDataTable] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
+    const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
+    const [formularioEditar, setFormularioEditar] = useState([]);
+    const [mensajeLoading,setMensajeLoading] = useState("cargando...");
+    
+    const handleMenuClick = async (action, record) => {
+        console.log(`Acción: ${action}, Registro:`, record);
+    
+        if (action === "eliminar") {
+            try {
+                if (!record.id_distribucion) {
+                    console.error('ID de distribución no encontrado en el registro');
+                    return;
+                }
+    
+                const response = await fetch(`${url}horario/delete_distribucion/${record.id_distribucion}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+    
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Error: ${response.status} - ${errorText}`);
+                }
+    
+                const data = await response.json();
+                if (data.ok) {
+                    notification.success({
+                        message: 'Operación Exitosa',
+                        description: 'Distribución eliminada correctamente.',
+                        placement: 'topRight',
+                    });
+                    getDistribucion(); // Refrescar datos después de eliminar
+                } else {
+                    notification.error({
+                        message: 'Error',
+                        description: data.mensaje || 'No se pudo eliminar la distribución.',
+                        placement: 'topRight',
+                    });
+                }
+            } catch (error) {
+                notification.error({
+                    message: 'Error',
+                    description: 'Error en la eliminación: ' + error.message,
+                    placement: 'topRight',
+                });
+            }
+        } else if (action === "editar") {
+            // Al hacer clic en editar, guardas el registro y abres el modal
+            setFormularioEditar(record); // Guardar el registro a editar
+            setIsOpenUpdateModal(true);   // Abrir el modal de edición
         }
     };
+    
+
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-            <Menu.Item key="editar"><EditOutlined/></Menu.Item>
-            <Menu.Item key="eliminar"><DeleteOutlined/></Menu.Item>
+            <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
+            <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
         </Menu>
     );
+
+    const formatearHora = (hora) => {
+        return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
+    };
+    
 
     useEffect(() => {
         getDistribucion();
@@ -36,27 +97,40 @@ const PlanificacionAcademica = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log("Datos obtenidos:", data); // <- Añadir este log para ver los datos obtenidos
                 let Distribucion = data.data.map((value, index) => {
                     return {
                         index: index + 1,
-                        id: value?.id_disrtribucion,  // <- Asegúrate de que esto coincide con la clave en la respuesta
+                        id_distribucion: value?.id_distribucion,
                         educacion_global: value?.educacion_global_nombre,
                         carrera: value?.nombre_carrera,
                         id_usuario: value?.id_usuario,
-                        usuario: value?.coordinador,
                         materia: value?.materia,
                         nivel: value?.nivel,
                         paralelo: value?.paralelo,
                         dia: value?.dia,
-                        hora_inicio: value?.hora_inicio,
-                        hora_termina: value?.hora_termina,
+                        hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
+                        hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término
                         fecha_actualizacion: new Date(value?.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value?.usuarios_ultima_gestion,
                         estado: value?.estado,
+                        docente: value?.nombre_docente,
+                        cedula: value?.cedula_docente,
+                        job_descripcion: value?.job_descripcion,
+                        correo: value?.correo_docente,
+                        telefono: value?.telefono_docente,
+                        titulo_academico: value?.titulo_academico_docente,
                     };
                 });
+
+                // Filtrar datos según el filtro de docente
+                if (filterDocente) {
+                    Distribucion = Distribucion.filter(item => 
+                        `${item.docente} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}`.toLowerCase().includes(filterDocente.toLowerCase())
+                    );
+                }
+
                 setDataTable(Distribucion);
+                setFilteredData(Distribucion); // Actualizar también el estado filteredData
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
@@ -67,12 +141,16 @@ const PlanificacionAcademica = () => {
     }
 
     function handleCloseModal(){
-        setModalIsOpen(false)
+        setModalIsOpen(false);
+        setIsOpenUpdateModal(false);
     }
-    useEffect(()=>{
-        getDistribucion()
-    },[])
+
+    useEffect(() => {
+        getDistribucion();
+    }, [filterDocente]); // Agregar filterDocente como dependencia para actualizar la tabla al cambiar el filtro
+
     return (
+        <Spin spinning={loading} tip={mensajeLoading}>
         <>
         <Row style={{
             display:"flex",
@@ -85,13 +163,29 @@ const PlanificacionAcademica = () => {
             <Space style={{margin:"5px"}}>
                 <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
                     <Col>
-                        <Button icon={<PlusCircleOutlined/>} onClick={()=>{
-                            setModalIsOpen(true)
-                        }} type="primary">Crear una Distribucion de horarios</Button>
+                        <Button icon={<PlusCircleOutlined />} onClick={() => setModalIsOpen(true)} type="primary">
+                            Crear una Distribucion de horarios
+                        </Button>
                     </Col>
                     <Col>
-                        <Button icon={<SyncOutlined/>} onClick={()=>{}}>Descargar datos</Button>
+                        <Button icon={<SyncOutlined />} onClick={getDistribucion}>
+                            Descargar datos
+                        </Button>
                     </Col>
+                    <Col>
+                        <Input 
+                            placeholder="Filtrar por docente" 
+                            value={filterDocente} 
+                            onChange={(e) => setFilterDocente(e.target.value)} 
+                            allowClear 
+                        />
+                    </Col>
+                    <Col>
+                        <Exportar filteredData={filteredData} />
+                    </Col>
+                    <Col>
+                <ExportarHorarioPDF filteredData={filteredData} />
+            </Col>
                 </Row>
             </Space>
             <Table
@@ -115,20 +209,20 @@ const PlanificacionAcademica = () => {
                         align:"center"
                     },
                     {
-                        dataIndex:"id_usuario",
-                        title:"Usuario",
-                        width:50,
-                        align:"center"
-                    },
-                    {
                         dataIndex:"materia",
                         title:"Materias",
                         width:50,
                         align:"center"
                     },
                     {
+                        dataIndex:"docente",
+                        title:"Docente",
+                        width:50,
+                        align:"center"
+                    },
+                    {
                         dataIndex:"nivel",
-                        title:"Nivel",
+                        title:"Curso",
                         width:50,
                         align:"center"
                     },
@@ -176,10 +270,29 @@ const PlanificacionAcademica = () => {
                       }
                 ]}
                 dataSource={dataTable}
+                size="middle"
+                pagination={{
+                    pageSize:10,
+                    showTotal: total => `Total ${total} items`
+                }}
             />
         </Card>
+        <UpdateDistribucion
+            open={isOpenUpdateHorario}
+            handleCloseModal={handleCloseModal}
+            distribucion={formularioEditar} // Pasar la distribución seleccionada
+            getData={getDistribucion}
+            loading={setLoading}
+            mensaje={setMensajeLoading}
+        />
         <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
+        <Row style={{ marginTop: "20px" }}>
+            <Col span={24}>
+                <Calendario evetns={filteredData} />
+            </Col>
+        </Row>
         </>
+    </Spin>
     );
 }
 

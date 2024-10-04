@@ -9,48 +9,33 @@ import Title from "antd/es/skeleton/Title";
 const { Meta } = Card;
 const { Option } = Select;
 
-const Login = (props) => {
-  const autenticar = (values) => {
-    localStorage.setItem("autenticacion", true);
-    //Navigate("dashboard");
-    window.location.reload("dashboard");
+const Login = () => {
+  const navigate = useNavigate();
+  const url = "http://localhost:8000/api/istg/";
+
+  const onFinish = (values) => {
+    fetch(`${url}auth_login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(values)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.ok) {
+        localStorage.setItem("autenticacion", true);
+        navigate("/dashboard"); // Redirige al dashboard si la autenticación es exitosa
+      } else {
+        window.alert(data.message); // Muestra el mensaje de error
+      }
+    })
+    .catch((error) => {
+      window.alert("Hubo un error en la comunicación con el servidor.");
+      console.error("Error en la autenticación:", error);
+    });
   };
   
-  const onFinish = (values) => {
-    autenticar(values);
-    console.log('Valores del formulario:', values);
-  };  
-  const navigate = useNavigate();
-  const [rol,setRol] = useState([]);
-  
-  //const url = process.env.REACT_APP_BACKEND_HORARIOS;
-  const url = "http://127.0.0.1:8000/api/v1/horario/";
-  const getRoles = () => {
-    try {
-      fetch(`${url}show_roles`).then((response) => { return response.json() })
-        .then((data) => {
-          if (data.ok) {
-            if (data.data) {
-              let obj_arreglo_rol = [];
-              let roles = data.data.map((value, index) => {
-                obj_arreglo_rol.push({ value: value.descripcion });
-                return {
-                  label: value.descripcion,
-                  value: value.id_rol
-                }
-              })
-              setRol(roles);
-            }
-          }
-        }).catch((error)=>{window.alert("A ocurrido un error en la comunicacion del backend para obtener los roles");});
-    } catch (error) {
-      //window.alert("A ocurrido un error en la comunicacion para obtener los roles")
-    }
-  }
-
-  useEffect(() => {
-    getRoles();
-  }, []);
 
   return (
     <div className="body">
@@ -65,11 +50,11 @@ const Login = (props) => {
                 className="login-form"
               >
                 <Form.Item
-                  label="Usuario"
-                  name="usuario"
-                  rules={[{ required: true, message: 'Por favor, ingrese su usuario' }]}
+                  label="Correo"
+                  name="correo"
+                  rules={[{ required: true, message: 'Por favor, ingrese su correo' }]}
                 >
-                  <Input prefix={<UserOutlined />} placeholder="Usuario" />
+                  <Input prefix={<UserOutlined />} placeholder="Correo" />
                 </Form.Item>
                 <Form.Item
                   label="Contraseña"
@@ -77,16 +62,6 @@ const Login = (props) => {
                   rules={[{ required: true, message: 'Por favor, ingrese su contraseña' }]}
                 >
                   <Input.Password prefix={<LockOutlined />} placeholder="Contraseña" />
-                </Form.Item>
-                <Form.Item
-                  label="Rol"
-                  name="rol"
-                  rules={[{ required: true, message: 'Por favor, seleccione el rol' }]}
-                >
-                  <Select placeholder="Seleccione el rol">
-                    <Option value="admin">Administrador</Option>
-                    <Option value="user">Usuario</Option>
-                  </Select>
                 </Form.Item>
                 <Form.Item>
                   <Button
