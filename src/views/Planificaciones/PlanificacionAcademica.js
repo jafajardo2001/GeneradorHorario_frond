@@ -102,7 +102,7 @@ const PlanificacionAcademica = () => {
                         index: index + 1,
                         id_distribucion: value?.id_distribucion,
                         educacion_global: value?.educacion_global_nombre,
-                        carrera: value?.nombre_carrera,
+                        carrera: value?.nombre_carrera + " (" + value?.jornada_descripcion+ ")",
                         id_usuario: value?.id_usuario,
                         materia: value?.materia,
                         nivel: value?.nivel,

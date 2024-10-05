@@ -171,7 +171,7 @@ const NewPlanificacionAcademica = (props) => {
             if (data.data) {
                 let data_mapeada = data.data.map((value, index) => ({
                     value: value.id_carrera,
-                    label: value.nombre,
+                    label: `${value.nombre} (${value.descripcion_jornada})`,
                 }))
                 setCarrera(data_mapeada)
             }
