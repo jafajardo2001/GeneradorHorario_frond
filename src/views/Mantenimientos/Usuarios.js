@@ -72,6 +72,9 @@ const Usuarios = () => {
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
           job_descripcion: value.job_descripcion,
+           // Modificar aquí para incluir las carreras y sus jornadas
+           carreras: value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', '), // Incluir descripción de la jornada
+           
           estado: value.estado,
         }));
 
