@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewJornada from "../../components/NewJornada.js";
+import UpdateJornada from "../../components/UpdateJornada.js"
 
 const Jornada = () => {
     const { Title } = Typography;
@@ -68,6 +69,35 @@ const Jornada = () => {
             });
     }
 
+    const deleteJornada = (values) => {
+        console.log("Estoy entrando en la funcion de value");
+        console.log(values);
+
+        let request_backend = {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                id_jornada: values.id  // Asegúrate de que el backend espere este campo
+            })
+        };
+
+        fetch(`${url}delete_jornada/${values.id}`, request_backend)  // ID incluido en la URL
+            .then((data_request) => data_request.json())
+            .then((data) => {
+                if (data.ok) {
+                    mostrarNotificacion("success", "Operación realizada con éxito", "La jornada " + values.termino + " se eliminó con éxito");
+                } else if (data.ok === false) {
+                    mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
+                }
+            })
+            .finally(() => {
+                getJornada();
+            });
+    };
+
 
     const handleMenuClick = (action, record) => {
         console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
@@ -75,6 +105,8 @@ const Jornada = () => {
         if (action === "editar") {
             setIsOpenUpdateModal(true);
             setFormularioEditar(record);
+        } else if (action === "eliminar") {
+            deleteJornada(record);  // Llamar a deleteJornada cuando se selecciona "eliminar"
         }
     };
 
@@ -166,6 +198,7 @@ const Jornada = () => {
                     />
                 </Card>
                 <NewJornada open={isOpeNewJornada} handleCloseModal={handleCloseModal} getJornada={getJornada} />
+                <UpdateJornada open={isOpeUpdateJornada} handleCloseModal={handleCloseModal} formulario={formularioEditar} getJornada={getJornada} loading={setLoading} mensaje={setMensajeLoading} />
             </>
         </Spin>
     );
