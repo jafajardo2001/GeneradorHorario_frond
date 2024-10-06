@@ -22,7 +22,7 @@ const NewPlanificacionAcademica = (props) => {
     const [userSelect, setUserSelect] = useState({});
     const formulario = useRef(null);
     const [docentesFiltrados, setDocentesFiltrados] = useState([]);
-
+    const [isDocenteSelectEnabled, setIsDocenteSelectEnabled] = useState(false); // Estado para controlar si el select de docentes está habilitado
     const [informativo, setInformativo] = useState({})
     const [modalIsOpen, setIsOpen] = useState(props.open)
     const [user, setUser] = useState([]);
@@ -271,12 +271,12 @@ const NewPlanificacionAcademica = (props) => {
 
             if (response.ok && data.ok) {
                 // Mapeo de los docentes obtenidos
-                let docentesMapeados = data.data.map((docente) => ({
-                    value: docente.id_usuario, // ID del docente
-                    label: `${docente.nombre_completo} - ${docente.titulo_academico}` // Nombre completo y título académico
+                let data_mapeada = data.data.map((value) => ({
+                    value: value.id_usuario,
+                    label: value.nombre_completo + " - " + value.titulo_academico, // Nombre completo y título académico
                 }));
 
-                setUser(docentesMapeados); // Actualizar el estado con los docentes filtrados
+                setUser(data_mapeada); // Actualizar el estado con los docentes filtrados
             } else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
             }
@@ -292,39 +292,7 @@ const NewPlanificacionAcademica = (props) => {
 
 
 
-    async function showUser() {
-        try {
-            setLoading(true); // Indicar que los datos están cargando
-
-            let configuraciones = {
-                method: "GET",
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-
-            let response = await fetch(`${url}show_docentes`, configuraciones);
-            let data = await response.json();
-
-            if (response.ok && data.ok) {
-                let data_mapeada = data.data.map((value) => ({
-                    value: value.id_usuario,
-                    label: value.nombre_completo + "  " + value.titulo_academico, // Usando nombre_completo de la función showDocentes
-                }));
-                console.log('Data mapeada de usuarios:', data_mapeada); // Verificar datos mapeados
-                setUser(data_mapeada); // Establecer los datos mapeados en el estado user
-            } else {
-                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
-            }
-
-            setLoading(false); // Indicar que los datos han terminado de cargar
-            return true;
-        } catch (error) {
-            console.error("Error al obtener los datos de los docentes:", error);
-            setLoading(false); // Indicar que los datos han terminado de cargar incluso si hay error
-            return false;
-        }
-    }
+    
 
     async function createPlanificacionAcademica() {
         try {
@@ -403,7 +371,6 @@ const NewPlanificacionAcademica = (props) => {
             await showMaterias();
             await showCursos();
             await showParalelos();
-            await showUser();
             setLoading(false);
         };
 
@@ -445,20 +412,21 @@ const NewPlanificacionAcademica = (props) => {
                                     onChange={(value) => {
                                         setCarreraSelect(value); // Guardar la carrera seleccionada
                                         obtenerDocentesPorCarrera(value); // Llamar a la función para obtener los docentes filtrados
+                                        setIsDocenteSelectEnabled(true); // Activar el select de docentes
                                     }}
                                 />
                             </Form.Item>
 
                             <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
-                                <Select
-                                    showSearch
-                                    options={user} // Aquí se muestran los docentes filtrados
-                                    name="coor_carrera"
-                                    disabled={loading}
-                                    onChange={(value) => {
-                                        setUserSelect(value); // Guardar el docente seleccionado
-                                    }}
-                                />
+                            <Select
+                                showSearch
+                                options={user} // Aquí se muestran los docentes filtrados
+                                name="coor_carrera"
+                                disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
+                                onChange={(value) => {
+                                    setUserSelect(value); // Guardar el docente seleccionado
+                                }}
+                            />
                             </Form.Item>
 
 

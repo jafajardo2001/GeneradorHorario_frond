@@ -1,6 +1,6 @@
 import Card from "antd/es/card/Card";
 import React, { useState, useEffect } from "react";
-import { Button, Collapse, Input, Table, Typography, Menu, Dropdown, Select, Spin } from "antd";
+import { Button, Collapse, Input, Table, Typography, Menu, Dropdown, Spin, Modal } from "antd";
 import { FilterOutlined, UserOutlined, MenuOutlined, DeleteOutlined, EditOutlined, FolderViewOutlined } from "@ant-design/icons";
 import { Row, Col, Space } from "antd";
 import { UserAddOutlined, ClearOutlined, SearchOutlined, SyncOutlined } from "@ant-design/icons";
@@ -19,6 +19,8 @@ const Usuarios = () => {
   const [selectedUserData, setSelectedUserData] = useState(null); // Para almacenar los datos del usuario seleccionado
   const [filterUsuario, setFilterUsuario] = useState(""); // Nuevo estado para el filtro
   const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
+  const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false); // Estado para el modal de confirmación
+  const [userToDelete, setUserToDelete] = useState(null); // Almacena el ID del usuario a eliminar
   const url = "http://localhost:8000/api/istg/";
 
   const handleCloseModal = () => {
@@ -32,7 +34,8 @@ const Usuarios = () => {
       setSelectedUserData(record);  // Almacena los datos del usuario seleccionado
       setIsOpenUpdateModal(true);  // Abre el modal de edición
     } else if (action === "eliminar") {
-      // Lógica para eliminar el usuario
+      setUserToDelete(record.id); // Guarda el ID del usuario a eliminar
+      setIsConfirmDeleteVisible(true); // Abre el modal de confirmación
     }
     console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record.cedula}`);
   };
@@ -50,6 +53,35 @@ const Usuarios = () => {
       </Menu.Item>
     </Menu>
   );
+
+  const handleDeleteUsuario = () => {
+    setLoading(true);
+    fetch(`${url}delete_usuario/${userToDelete}`, {
+      method: 'PUT', // Cambia a PUT
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Error en la eliminación');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Puedes mostrar un mensaje de éxito
+        console.log(data.message);
+        getUser(); // Refresca la lista de usuarios
+      })
+      .catch((error) => {
+        console.error('Error al eliminar el usuario:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+        setIsConfirmDeleteVisible(false); // Cierra el modal de confirmación
+        setUserToDelete(null); // Reinicia el usuario a eliminar
+      });
+  };
 
   function getUser() {
     setLoading(true);
@@ -72,9 +104,7 @@ const Usuarios = () => {
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
           job_descripcion: value.job_descripcion,
-           // Modificar aquí para incluir las carreras y sus jornadas
-           carreras: value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', '), // Incluir descripción de la jornada
-           
+          carreras: value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', '),
           estado: value.estado,
         }));
 
@@ -97,7 +127,6 @@ const Usuarios = () => {
   return (
     <Spin spinning={loading} tip="Cargando...">
       <>
-
         <Row style={{ display: "flex", justifyContent: "center" }}>
           <Title level={3}>Mantenimiento de usuarios</Title>
         </Row>
@@ -139,7 +168,7 @@ const Usuarios = () => {
             columns={[
               {
                 dataIndex: "cedula",
-                title: "Cedula",
+                title: "Cédula",
                 width: 20,
               },
               {
@@ -159,7 +188,7 @@ const Usuarios = () => {
               },
               {
                 dataIndex: "telefono",
-                title: "Telefono",
+                title: "Teléfono",
                 width: 30,
               },
               {
@@ -174,7 +203,7 @@ const Usuarios = () => {
               },
               {
                 dataIndex: "titulo_academico",
-                title: "Titulo Academico",
+                title: "Título Académico",
                 width: 20,
               },
               {
@@ -199,6 +228,8 @@ const Usuarios = () => {
             scroll={{ x: 100 }}
           />
         </Card>
+
+        {/* Modal para crear un nuevo usuario */}
         <NewUsuario
           isOpen={isOpenModal}
           onCloseModal={handleCloseModal}
@@ -206,12 +237,24 @@ const Usuarios = () => {
           loading={setLoading}
           mensaje={setMensajeLoading}
         />
+
+        {/* Modal para actualizar un usuario */}
         <UpdateUsuario
           isOpen={isOpenUpdateUsuario}  // Abre el modal de edición
           onCloseModal={handleCloseModal}
           userId={selectedUserId}  // Pasa el ID del usuario seleccionado
           getUser={getUser}  // Refresca los datos después de editar
         />
+
+        {/* Modal de confirmación para eliminar */}
+        <Modal
+          title="Confirmar eliminación"
+          visible={isConfirmDeleteVisible}
+          onOk={handleDeleteUsuario}
+          onCancel={() => setIsConfirmDeleteVisible(false)}
+        >
+          <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+        </Modal>
       </>
     </Spin>
   );
