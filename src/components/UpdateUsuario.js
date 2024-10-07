@@ -8,14 +8,9 @@ const UpdateUsuario = (props) => {
   const [isTituloAcademico, setIsTituloAcademico] = useState([]);
   const [isJob, setIsJob] = useState([]);
   const [isCarreras, setIsCarreras] = useState([]);
-
-  // Estado para almacenar los datos del usuario
+  const [showCarreras, setShowCarreras] = useState(false); // Estado para controlar la visibilidad de carreras
   const [selectedUserData, setSelectedUserData] = useState(null);
-
-  // Estado para almacenar múltiples carreras seleccionadas
   const [selectedCarreras, setSelectedCarreras] = useState([]);
-
-  // Estado para el modal de confirmación de eliminación
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [selectedCareerToDelete, setSelectedCareerToDelete] = useState(null);
 
@@ -25,7 +20,7 @@ const UpdateUsuario = (props) => {
   useEffect(() => {
     setIsOpen(props.isOpen);
     if (props.userId) {
-      getUsuarioData(props.userId); // Cargar los datos del usuario
+      getUsuarioData(props.userId);
     }
     getRol();
     getTituloAcademico();
@@ -41,7 +36,6 @@ const UpdateUsuario = (props) => {
           const usuario = data.data;
           setSelectedUserData(usuario);
 
-          // Establecer valores iniciales en el formulario
           Formulario.current.setFieldsValue({
             cedula: usuario.cedula,
             nombres: usuario.nombres,
@@ -53,11 +47,13 @@ const UpdateUsuario = (props) => {
             tituloAcademico: { label: usuario.titulo_academico_descripcion, value: usuario.id_titulo_academico },
           });
 
-          // Convertir las carreras del usuario a un formato compatible con el select
+          // Establecer showCarreras basado en el perfil actual
+          setShowCarreras(usuario.rol_descripcion === 'Docente');
+
           setSelectedCarreras(usuario.carreras.map((carrera) => ({
-            label: `${carrera.nombre} - ${carrera.jornada ? carrera.jornada.descripcion : 'Sin jornada'}`,  // Mostrar carrera y jornada
+            label: `${carrera.nombre} - ${carrera.jornada ? carrera.jornada.descripcion : 'Sin jornada'}`,
             value: carrera.id_carrera,
-            id_jornada: carrera.jornada ? carrera.jornada.id_jornada : null,  // Guardar id_jornada si lo necesitas para otro proceso
+            id_jornada: carrera.jornada ? carrera.jornada.id_jornada : null,
           })));
         } else {
           notification.error({
@@ -75,7 +71,6 @@ const UpdateUsuario = (props) => {
       });
   }
 
-  // Funciones para cargar los datos de los selects
   function getRol() {
     fetch(`${url}show_roles`, { method: 'GET' })
       .then((response) => response.json())
@@ -127,8 +122,8 @@ const UpdateUsuario = (props) => {
       .then((data) => {
         let carreras = data.data.map((value) => ({
           label: `${value.nombre} (${value.descripcion_jornada})`,
-          value: value.id_carrera, // id de la carrera
-          id_jornada: value.id_jornada // id de la jornada
+          value: value.id_carrera,
+          id_jornada: value.id_jornada,
         }));
         setIsCarreras(carreras);
       })
@@ -137,41 +132,30 @@ const UpdateUsuario = (props) => {
       });
   }
 
-  // Función para manejar la selección de carreras
+  function handlePerfilChange(selectedPerfil) {
+    Formulario.current.setFieldsValue({ perfil: selectedPerfil });
+    setShowCarreras(selectedPerfil.label === 'Docente');
+  }
+
   function handleCarreraChange(selectedOptions) {
-    // Detectar si se ha eliminado una carrera
     if (selectedCarreras.length > (selectedOptions ? selectedOptions.length : 0)) {
       const removedCareer = selectedCarreras.find(c => !selectedOptions.includes(c));
       if (removedCareer) {
-        // Mostrar el modal de confirmación
         setSelectedCareerToDelete(removedCareer);
         setConfirmDeleteModal(true);
         return;
       }
     }
-    // Si no se está eliminando una carrera, actualizar normalmente
     setSelectedCarreras(selectedOptions || []);
   }
 
-  // Función para actualizar el usuario
   function updateUser(value) {
-    // Filtrar y mapear las carreras con sus jornadas
-    const carrerasJornadas = selectedCarreras.map(carrera => ({
-      id_carrera: carrera.value,   // id de la carrera
-      id_jornada: carrera.id_jornada // id de la jornada correspondiente
-    }));
-
-    console.log({
-      cedula: value.cedula,
-      nombres: value.nombres,
-      apellidos: value.apellidos,
-      correo: value.correo,
-      telefono: value.telefono,
-      id_rol: value.perfil.value,
-      id_titulo_academico: value.tituloAcademico.value,
-      id_job: value.job.value,
-      carreras_jornadas: carrerasJornadas,
-    });
+    const carrerasJornadas = showCarreras
+      ? selectedCarreras.map(carrera => ({
+        id_carrera: carrera.value,
+        id_jornada: carrera.id_jornada,
+      }))
+      : [];
 
     fetch(`${url}updateUsuario/${props.userId}`, {
       method: 'PUT',
@@ -215,7 +199,6 @@ const UpdateUsuario = (props) => {
       });
   }
 
-  // Función para manejar la eliminación confirmada de una carrera
   function handleDeleteCareer() {
     if (!selectedCareerToDelete) return;
 
@@ -223,38 +206,37 @@ const UpdateUsuario = (props) => {
     setSelectedCarreras(updatedCarreras);
 
     fetch(`${url}eliminarCarrera/${props.userId}`, {
-        method: 'PUT', // Cambiado a PUT para ser consistente
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_carrera: selectedCareerToDelete.value }),
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_carrera: selectedCareerToDelete.value }),
     })
-    .then(response => response.json())
-    .then(data => {
+      .then(response => response.json())
+      .then(data => {
         if (data.ok) {
-            notification.success({
-                message: 'Carrera eliminada',
-                description: 'La carrera se ha eliminado correctamente.',
-            });
+          notification.success({
+            message: 'Carrera eliminada',
+            description: 'La carrera se ha eliminado correctamente.',
+          });
         } else {
-            notification.error({
-                message: 'Error',
-                description: data.message || 'Hubo un problema al eliminar la carrera.',
-            });
-            setSelectedCarreras(prev => [...prev, selectedCareerToDelete]); // Revertir la eliminación
+          notification.error({
+            message: 'Error',
+            description: data.message || 'Hubo un problema al eliminar la carrera.',
+          });
+          setSelectedCarreras(prev => [...prev, selectedCareerToDelete]);
         }
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         console.error('Error eliminando carrera:', error);
         notification.error({
-            message: 'Error',
-            description: 'Error en el servidor al eliminar la carrera.',
+          message: 'Error',
+          description: 'Error en el servidor al eliminar la carrera.',
         });
-        setSelectedCarreras(prev => [...prev, selectedCareerToDelete]); // Revertir la eliminación
-    });
+        setSelectedCarreras(prev => [...prev, selectedCareerToDelete]);
+      });
 
     setConfirmDeleteModal(false);
     setSelectedCareerToDelete(null);
-}
-
+  }
 
   return (
     <>
@@ -288,41 +270,41 @@ const UpdateUsuario = (props) => {
               </Form.Item>
             </Col>
 
-            <Col span={24}>
+            <Col span={12}>
               <Form.Item
                 label="Ingrese los nombres"
-                name="nombres"
                 rules={[{ required: true, message: "El campo de nombres es requerido" }]}
+                name="nombres"
               >
                 <Input />
               </Form.Item>
             </Col>
 
-            <Col span={24}>
+            <Col span={12}>
               <Form.Item
                 label="Ingrese los apellidos"
-                name="apellidos"
                 rules={[{ required: true, message: "El campo de apellidos es requerido" }]}
+                name="apellidos"
               >
                 <Input />
               </Form.Item>
             </Col>
 
-            <Col span={24}>
+            <Col span={12}>
               <Form.Item
                 label="Ingrese el correo"
-                name="correo"
                 rules={[{ required: true, message: "El campo de correo es requerido" }]}
+                name="correo"
               >
                 <Input />
               </Form.Item>
             </Col>
 
-            <Col span={24}>
+            <Col span={12}>
               <Form.Item
-                label="Ingrese un número de teléfono"
-                name="telefono"
+                label="Ingrese el teléfono"
                 rules={[{ required: true, message: "El campo de teléfono es requerido" }]}
+                name="telefono"
               >
                 <Input />
               </Form.Item>
@@ -330,12 +312,12 @@ const UpdateUsuario = (props) => {
 
             <Col span={24}>
               <Form.Item label="Escoja el perfil" name="perfil">
-                <Select options={isRol} />
+                <Select options={isRol} onChange={handlePerfilChange} />
               </Form.Item>
             </Col>
 
             <Col span={24}>
-              <Form.Item label="Escoja las horas" name="job">
+              <Form.Item label="Escoja el trabajo" name="job">
                 <Select options={isJob} />
               </Form.Item>
             </Col>
@@ -346,30 +328,29 @@ const UpdateUsuario = (props) => {
               </Form.Item>
             </Col>
 
-            <Col span={24}>
-              <Form.Item label="Escoja la carrera">
-                <Select
-                  value={selectedCarreras}
-                  onChange={handleCarreraChange}
-                  options={isCarreras}
-                  isMulti
-                />
-              </Form.Item>
-            </Col>
+            {showCarreras && (
+              <Col span={24}>
+                <Form.Item label="Escoja la carrera">
+                  <Select
+                    value={selectedCarreras}
+                    onChange={handleCarreraChange}
+                    options={isCarreras}
+                    isMulti
+                  />
+                </Form.Item>
+              </Col>
+            )}
           </Row>
         </Form>
       </Modal>
 
-      {/* Modal de Confirmación para eliminar carrera */}
       <Modal
         title="Confirmar eliminación"
         visible={confirmDeleteModal}
-        onCancel={() => setConfirmDeleteModal(false)}
         onOk={handleDeleteCareer}
-        okText="Confirmar"
-        cancelText="Cancelar"
+        onCancel={() => setConfirmDeleteModal(false)}
       >
-        <p>¿Está seguro de que desea eliminar la carrera seleccionada? Esto también afectará la distribución académica.</p>
+        <p>¿Está seguro de que desea eliminar la carrera {selectedCareerToDelete?.label}?</p>
       </Modal>
     </>
   );
