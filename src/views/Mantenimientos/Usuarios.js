@@ -108,10 +108,18 @@ const Usuarios = () => {
           estado: value.estado,
         }));
 
+        // Filtrar datos 
+        if (filterUsuario) {
+          informacion = informacion.filter(item =>
+            `${item.cedula} ${item.nombres + item.apellidos} ${item.correo} ${item.titulo_academico} ${item.job_descripcion} ${item.carreras}`.toLowerCase().includes(filterUsuario.toLowerCase())
+          );
+        }
+
         setCantidadRegistro(informacion.length);
         setDataTabla(informacion);
         setFilteredData(informacion);  // Opcional si planeas usar este estado en el futuro
       })
+
       .catch((error) => {
         console.error('Error fetching data:', error);
       })
