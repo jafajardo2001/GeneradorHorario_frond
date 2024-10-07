@@ -1,16 +1,19 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Modal, Form, Col, Row, Input, notification } from "antd";
+import { Modal, Form, Input, Row, Col, Typography, notification, Select } from "antd";
 
 const UpdateCarrera = (props) => {
     const formRef = useRef(null);
     const url = "http://localhost:8000/api/istg/";
     const [id, setId] = useState(0);
+    const [isJornada, setIsJornada] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (formRef.current) {
             setId(props.formulario.id);
             formRef.current.setFieldsValue({
                 nombre: props.formulario.nombre,
+                id_jornada: props.formulario.jornada,
             });
         }
     }, [props.formulario]);
@@ -44,7 +47,34 @@ const UpdateCarrera = (props) => {
                 });
             });
     };
-
+    function getJornada() {
+        setLoading(true);
+        fetch(`${url}show_jornada`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let jornada = data.data.map((value) => {
+                    return {
+                        label: value.descripcion,  // Asignar la descripción como label
+                        value: value.id_jornada,   // Asignar el id_jornada como value
+                    };
+                });
+                setIsJornada(jornada);
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+    useEffect(() => {
+        getJornada();
+    }, []);
     return (
         <>
             <Modal
@@ -73,6 +103,20 @@ const UpdateCarrera = (props) => {
                             </Form.Item>
                         </Col>
                     </Row>
+                    <Col span={24}>
+                        <Form.Item
+                            label="Escoja las jornadas"
+                            name="id_jornada"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Debe seleccionar una jornada",
+                                },
+                            ]}
+                        >
+                            <Select options={isJornada} />
+                        </Form.Item>
+                    </Col>
                 </Form>
             </Modal>
         </>
