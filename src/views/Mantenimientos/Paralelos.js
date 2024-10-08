@@ -24,6 +24,7 @@ import {
   MenuOutlined,
 } from "@ant-design/icons";
 import NewParalelo from "../../components/NewParalelo.js";
+import UpdateParalelo from "../../components/UpdateParalelo.js";
 const Paralelos = () => {
   const { Title } = Typography;
   const [loading, setLoading] = useState(true);
@@ -126,6 +127,7 @@ const Paralelos = () => {
 
   function handleCloseModal() {
     setIsOpenNewModal(false);
+    setIsOpenUpdateModal(false);
   }
   const handleMenuClick = (action, record) => {
     console.log(
@@ -258,6 +260,7 @@ const Paralelos = () => {
         loading={setLoading}
         mensaje={setMensajeLoading}
       />
+      <UpdateParalelo open={isOpeUpdatePerfil} handleCloseModal={handleCloseModal} formulario={formularioEditar} getParalelos={getParalelos} loading={setLoading} mensaje={setMensajeLoading} />
     </>
   );
 };
