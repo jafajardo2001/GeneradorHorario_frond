@@ -121,21 +121,22 @@ const UpdateDistribucion = ({ open, handleCloseModal, distribucion, getData }) =
                 onFinish={onFinish}
                 layout="vertical"
             >
-                <Form.Item
-                    label="Educación Global"
-                    name="educacion_global"
-                    rules={[{ required: true, message: 'Por favor ingrese la educación global' }]}
-                >
-                    <Input />
-                </Form.Item>
+               <Form.Item
+    label="Educación Global"
+    name="educacion_global"
+    rules={[{ required: true, message: 'Por favor ingrese la educación global' }]}
+>
+    <Input disabled defaultValue="Contenido visible aquí" />
+</Form.Item>
 
-                <Form.Item
-                    label="Carrera"
-                    name="carrera"
-                    rules={[{ required: true, message: 'Por favor ingrese la carrera' }]}
-                >
-                    <Input />
-                </Form.Item>
+<Form.Item
+    label="Carrera"
+    name="carrera"
+    rules={[{ required: true, message: 'Por favor ingrese la carrera' }]}
+>
+    <Input disabled defaultValue="Contenido visible aquí" />
+</Form.Item>
+
 
                 <Form.Item
                     label="Materia"
