@@ -91,7 +91,7 @@ const TitulosAcademicos = () => {
       .then((data_request) => data_request.json())
       .then((data) => {
         if (data.ok) {
-          mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.termino + " se eliminó con éxito");
+          mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.descripcion + " se eliminó con éxito");
         } else if (data.ok === false) {
           mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
         }

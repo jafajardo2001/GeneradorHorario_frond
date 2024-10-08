@@ -101,7 +101,7 @@ const Usuarios = () => {
           apellidos: value.apellidos,
           correo: value.correo,
           telefono: value.telefono,
-          perfil: value.rol_descripcion,
+          perfil: value.rol_descripcion ||'Sin titulo academico',
           titulo_academico: value.titulo_academico_descripcion||'Sin titulo academico',
           job_descripcion: value.job_descripcion ||'Sin tiempo laboral',
           carreras: value.carreras.length > 0 
@@ -189,6 +189,11 @@ const Usuarios = () => {
               {
                 dataIndex: "apellidos",
                 title: "Apellidos",
+                width: 30,
+              },
+              {
+                dataIndex: "perfil",
+                title: "perfil",
                 width: 30,
               },
               {

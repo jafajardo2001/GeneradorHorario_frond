@@ -1,14 +1,17 @@
+
 import React, { useState, useEffect } from "react";
 import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewJob from "../../components/NewJob.js";
+import UpdateJob from "../../components/UpdateJob.js";
 
 const Tiempo = () => {
     const { Title } = Typography;
     const [loading,setLoading] = useState(true);
     const [mensajeLoading,setMensajeLoading] = useState("cargando...");
-    const [jobsData, setJobs] = useState([]);
+    const [jobsData, setJobsData] = useState([]);
     const [isOpeNewJob, setIsOpenNewModal] = useState(false);
+    const [isOpenUpdateModal, setIsOpenUpdateModal] = useState(false);
     const [formularioEditar, setFormularioEditar] = useState([]);
     const [filterDedicacion, setFilterDedicacion] = useState(""); // Nuevo estado para el filtro
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
@@ -23,10 +26,6 @@ const Tiempo = () => {
     useEffect(() => {
         getJobs();
     }, [filterDedicacion]);
-
-    function handleCloseModal() {
-        setIsOpenNewModal(false);
-    }
     
     function getJobs() {
         setLoading(true)
@@ -56,8 +55,8 @@ const Tiempo = () => {
               item.descripcion.toLowerCase().includes(filterDedicacion.toLowerCase())
           );
         }
-            setJobs(jobs);
-            setFilteredData(jobs);
+        setJobsData(jobs);
+        setFilteredData(jobs);
         })
         .catch((error) => {
          console.error("Error fetching data:", error); // Debugging line
@@ -65,26 +64,62 @@ const Tiempo = () => {
          setLoading(false)
         });
     }
+    
+    const deleteJob = (values) => {
+      console.log("Estoy entrando en la función de deleteJob");
+      console.log(values);
+    
+      let request_backend = {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          id_job: values.id
+        })
+      };
+    
+      fetch(`${url}delete_job/${values.id}`, request_backend)
+        .then((data_request) => data_request.json())
+        .then((data) => {
+          if (data.ok) {
+            mostrarNotificacion("success", "Operación realizada con éxito", "El trabajo se eliminó con éxito");
+          } else {
+            mostrarNotificacion("error", "Ha ocurrido un error", data.message || "No se pudo eliminar el trabajo.");
+          }
+        })
+        .finally(() => {
+          getJobs();
+        });
+    };
+    
+    
+    const menu = (record) => (
+      <Menu onClick={({ key }) => handleMenuClick(key, record)}>
+        <Menu.Item key="editar"><EditOutlined /></Menu.Item>
+        <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
+      </Menu>
+    );
 
     const handleMenuClick = (action, record) => {
         console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-        
-        if (action === "editar") {
-            setFormularioEditar(record);
+        if (action == "editar") {
+          setIsOpenUpdateModal(true);
+          setFormularioEditar(record);
+        }
+        else if (action === "eliminar") {
+          deleteJob(record);
         }
     };
 
-    const menu = (record) => (
-        <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-          <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-          <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
-        </Menu>
-    );
+    function handleCloseModal() {
+      setIsOpenNewModal(false);
+      setIsOpenUpdateModal(false);
+    }
 
     return (
-        <Spin spinning={loading} tip="Cargando...">
-        <>
-        
+        <Spin spinning={loading} tip={mensajeLoading}><>
           <Row style={{ display: "flex", justifyContent: "center" }}>
             <Title level={3}>Mantenimiento de Trabajo</Title>
           </Row>
@@ -100,7 +135,7 @@ const Tiempo = () => {
                 </Col>
                 <Col>
               <Input
-                placeholder="Filtrar por Perfil"
+                placeholder="Filtrar por Tiempo"
                 value={filterDedicacion}
                 onChange={(e) => setFilterDedicacion(e.target.value)}
                 allowClear
@@ -155,6 +190,7 @@ const Tiempo = () => {
             />
           </Card>
           <NewJob open={isOpeNewJob} handleCloseModal={handleCloseModal} getJobs={getJobs} />
+          <UpdateJob open={isOpenUpdateModal} handleCloseModal={handleCloseModal} formulario={formularioEditar} getJobs={getJobs} loading={setLoading} mensaje={setMensajeLoading}/>
         </>
       </Spin> 
     );

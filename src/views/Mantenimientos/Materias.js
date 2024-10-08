@@ -1,24 +1,19 @@
-import React,{useState,useEffect, useRef} from "react";
-import { Button, Col, Row,Form, Flex, Breadcrumb, Table, Popconfirm,Spin,Space,Modal,Input,notification } from "antd";
-import FormItem from "antd/es/form/FormItem";
-
-import { ToolOutlined, QuestionCircleOutlined, DeleteOutlined, EditOutlined, SyncOutlined,SaveOutlined,FileAddOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef } from "react";
+import { Button, Col, Row, Form, Flex, Breadcrumb, Table, Popconfirm, Spin, Space, Modal, Input, Select, notification } from "antd";
+import { ToolOutlined, QuestionCircleOutlined, DeleteOutlined, EditOutlined, SyncOutlined, SaveOutlined, FileAddOutlined } from '@ant-design/icons';
 
 const Materias = () => {
-
-  const [dataAsignatura,setDataAsignatura] = useState([]);
+  const [dataAsignatura, setDataAsignatura] = useState([]);
   const url = process.env.REACT_APP_BACKEND_HORARIOS;
-  //const url = "http://127.0.0.1:8000/api/v1/horario/";
   const { Column, ColumnGroup } = Table;
-  const [modalOpen,setModalOpen] = useState(false);
-  const [modalOpenEdit,setModalOpenEdit] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpenEdit, setModalOpenEdit] = useState(false);
   const [form] = Form.useForm();
-  const [loading,setLoading]= useState(true);
-  const [loadingButton,setLoadingButton]= useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadingButton, setLoadingButton] = useState(false);
   const formKeyRef = useRef(0);
-  const [modalOpenTitulo,setModalOpenTitulo] = useState(false);
-  const [dataMateriaEdit,setDataMateriaEdit] = useState({});
-  const [id_materia,setIdMateria] = useState(0);
+  const [dataMateriaEdit, setDataMateriaEdit] = useState({});
+  const [cursos, setCursos] = useState([]); // Estado para los cursos
   const [filterMateria, setFilterMateria] = useState(""); // Nuevo estado para el filtro
   const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
   const mostrarNotificacion = (tipo,titulo,mensaje) => {
@@ -28,7 +23,7 @@ const Materias = () => {
       placement: 'topRight',
     });
   };
-
+  
   const getAsignatura = () => {
     setLoading(true);
     fetch(`${url}show_data_asignatura/`)
@@ -42,8 +37,8 @@ const Materias = () => {
               key: numero,
               numero: numero + 1,
               id: value.id_materia,
-              id_materia: value.id_materia, // Guardar ID sin JSX
-              descripcion: value.descripcion, // Guardar descripción sin JSX
+              id_materia: value.id_materia, 
+              descripcion: value.descripcion,
               fecha_creacion: new Date(value.fecha_creacion).toLocaleDateString('es-ES', {
                 day: '2-digit',
                 month: '2-digit',
@@ -52,22 +47,18 @@ const Materias = () => {
               fecha_actualizacion: value.fecha_actualizacion
                 ? new Date(value.fecha_actualizacion).toLocaleDateString('es-ES')
                 : 'Este registro no tiene fecha de actualizacion',
-              estado: value.estado === 'A'
-                ? 'Activo'
-                : value.estado === 'I'
-                ? 'Inactivo'
-                : value.estado === 'E'
-                ? 'Eliminado'
-                : 'Otra condición',
+              
+              nemonico: value.nemonico,  // Incluye el nemónico
+              termino: value.termino     // Incluye el término
             }));
-  
+
             // Aplicar filtro en los datos sin JSX
             if (filterMateria) {
               data = data.filter((item) =>
                 item.descripcion.toLowerCase().includes(filterMateria.toLowerCase())
               );
             }
-  
+
             // Transformar datos a JSX para la tabla
             const dataConJSX = data.map((item) => ({
               ...item,
@@ -77,8 +68,10 @@ const Materias = () => {
               fecha_actualizacion: (
                 <label className="letra-pequeña1">{item.fecha_actualizacion}</label>
               ),
+              nemonico: <label className="letra-pequeña1">{item.nemonico}</label>,  // Añade a la vista
+              termino: <label className="letra-pequeña1">{item.termino}</label>,    // Añade a la vista
             }));
-  
+
             setDataAsignatura(dataConJSX);
             setFilteredData(dataConJSX);
           } else {
@@ -94,40 +87,79 @@ const Materias = () => {
       .catch(() => {
         mostrarNotificacion('error', 'A ocurrido un error', 'Error interno en el servidor');
       });
+};
+
+
+  
+  const showCursos = async () => {
+    try {
+      setLoading(true);
+      let configuraciones = {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+      let response = await fetch(`${url}show_nivel/`, configuraciones);
+      let data = await response.json();
+      if (data.data) {
+        let data_mapeada = data.data.map((value) => ({
+          value: value.id_nivel,
+          label: value.nemonico + " " + value.termino,
+        }));
+        setCursos(data_mapeada); // Actualizamos los cursos en el estado
+      }
+    } catch (error) {
+      mostrarNotificacion("error", "Error", "Error al cargar los cursos.");
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  
+
+  useEffect(() => {
+    showCursos(); // Llamamos a la función para cargar los cursos
+  }, []);
+
   const createAsignatura = (value) => {
     setLoadingButton(true);
-
+  
+    // Log para verificar los datos enviados
+    console.log("Datos a enviar:", {
+      descripcion: value.descripcion,
+      id_nivel: value.nivel
+    });
+  
     const request_op = {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(value),
+      body: JSON.stringify({
+        descripcion: value.descripcion,
+        id_nivel: value.nivel // Aseguramos que id_jornada se envíe
+      }),
       method: "POST",
-    }
-
+    };
+  
     fetch(`${url}create_asignatura/`, request_op)
-        .then((json_data) => json_data.json())
-        .then((info_request) => {
-            if (info_request.ok) {
-              mostrarNotificacion("success", "Operación exitosa", "La materia ha sido creada con éxito.");
-            } else {
-                // Asegúrate de que `info_request.msg_error` está correctamente definido en el backend.
-                mostrarNotificacion("error", "Error al crear materia", info_request.msg_error || 'Error desconocido.');
-            }
-          })
-          .catch((error) => {
-            mostrarNotificacion("error", "Error en la solicitud", error.message);
-          })
-          .finally(() => {
-            getAsignatura();
-            form.resetFields();
-            setModalOpen(false);
-            setLoadingButton(false);
-        });
-}
+      .then((json_data) => json_data.json())
+      .then((info_request) => {
+        if (info_request.ok) {
+          mostrarNotificacion("success", "Operación exitosa", "La materia ha sido creada con éxito.");
+        } else {
+          mostrarNotificacion("error", "Error al crear materia", info_request.msg_error || 'Error desconocido.');
+        }
+      })
+      .catch((error) => {
+        mostrarNotificacion("error", "Error en la solicitud", error.message);
+      })
+      .finally(() => {
+        getAsignatura();
+        form.resetFields();
+        setModalOpen(false);
+        setLoadingButton(false);
+      });
+  }
+  
 
 
 
@@ -138,7 +170,10 @@ const actualizarAsignatura = (value) => {
   let data_request = {
     method: "PUT",
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id_materia: dataMateriaEdit.id_materia, ...value }),
+    body: JSON.stringify({
+      descripcion: value.descripcion,
+      id_nivel: value.nivel // Asegúrate de enviar el id_nivel también
+    }),
   };
 
   fetch(`${url}update_asignatura/${dataMateriaEdit.id_materia}`, data_request)
@@ -149,7 +184,6 @@ const actualizarAsignatura = (value) => {
       if (data.ok) {
         mostrarNotificacion('success', 'Modificación exitosa', data.message);
       } else {
-        // Mostrar notificación de error si la descripción ya existe o cualquier otro error
         mostrarNotificacion('error', 'Error', data.message || 'Ha ocurrido un error.');
       }
     })
@@ -163,16 +197,18 @@ const actualizarAsignatura = (value) => {
     });
 };
 
+const handleEditarClick = (childrens) => {
+  setDataMateriaEdit({
+    key: childrens.key,
+    id_materia: childrens.id,
+    descripcion: childrens.descripcion.props.children,
+    id_nivel: childrens.id_nivel, // Asegúrate de que estás obteniendo el id del nivel
+    nivel: childrens.termino.props.children, // Agrega el término aquí
+  });
+  setModalOpenEdit(true);
+  formKeyRef.current += 1;
+};
 
-  const handleEditarClick = (childrens) => {
-    setDataMateriaEdit({
-        key: childrens.key,
-        id_materia: childrens.id, // Cambiado a id_materia para coincidir con la API
-        descripcion: childrens.descripcion.props.children // Asegúrate de que `descripcion` está correctamente pasado
-    });
-    setModalOpenEdit(true); // Asegúrate de que esto se esté llamando correctamente
-    formKeyRef.current += 1; // Esto es correcto para forzar la actualización del formulario
-  };
 
 
   const deleteTitulo = (values) => {
@@ -211,6 +247,7 @@ const actualizarAsignatura = (value) => {
 
   useEffect(()=>{
     getAsignatura();
+    showCursos();
   },[filterMateria])
   return (
     <Spin spinning={loading} tip="Cargando...">
@@ -228,7 +265,17 @@ const actualizarAsignatura = (value) => {
                   <Input style={{ width: 450 }}/>
                 </Form.Item>
               </Row>
-
+              <Col span={24}>
+                <Form.Item
+                  label="Escoja el curso"
+                  name="nivel"
+                  rules={[
+                    { required: true, message: "Debe seleccionar un curso" },
+                  ]}
+                >
+                  <Select options={cursos} />
+                </Form.Item>
+              </Col>
               <Row>
                 <Button htmlType="submit" style={{width:"100%"}} type="primary" icon={<SaveOutlined />} loading={loadingButton}>Crear Materia</Button>
               </Row>
@@ -243,7 +290,8 @@ const actualizarAsignatura = (value) => {
             <h2><FileAddOutlined />Editar Materia</h2>
           </Row>
           <Row>
-            <Form initialValues={dataMateriaEdit} onFinish={actualizarAsignatura} layout="vertical" autoComplete="on" align="left">
+          <Form initialValues={dataMateriaEdit} onFinish={actualizarAsignatura} layout="vertical" autoComplete="on" align="left">
+
               
               
               <Row>
@@ -251,7 +299,12 @@ const actualizarAsignatura = (value) => {
                   <Input style={{ width: 450 }}/>
                 </Form.Item>
               </Row>
-
+              <Form.Item label="Nivel" name="nivel" rules={[{ required: true, message: "Este campo es obligatorio" }]}>
+                <Select
+                  options={cursos}
+                  placeholder="Seleccione un curso"
+                />
+              </Form.Item>
               <Row>
                 <Button htmlType="submit" style={{width:"100%"}} type="primary" icon={<SaveOutlined />} loading={loadingButton}>Editar Materia</Button>
               </Row>
@@ -295,17 +348,18 @@ const actualizarAsignatura = (value) => {
                dataSource={dataAsignatura}
               >
               <ColumnGroup title="Registro" align="center">
-                <Column title="Descripción" dataIndex="descripcion" width={80} align="center" />
+                <Column title="Descripción" dataIndex="descripcion" width={50} align="center" />
+                <Column title="termino" dataIndex="termino" width={50} align="center" />
+
               </ColumnGroup>
               <ColumnGroup title="Campos de auditoria" bordered={true} align="center">
                 <Column title="fecha de creacion" dataIndex="fecha_creacion" width={90} align="center" />
                 <Column title="Fecha de actualizacion" dataIndex="fecha_actualizacion" width={90} align="center" />
-                <Column title="Estado registro" dataIndex="estado" width={100} align="center" />
               </ColumnGroup>
             <Column
             title="Acciones"
             fixed="right"
-            width={75}
+            width={60}
             dataIndex="acciones"
             align="center"
             
