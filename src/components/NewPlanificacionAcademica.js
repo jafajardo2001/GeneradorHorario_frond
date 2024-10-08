@@ -181,7 +181,7 @@ const NewPlanificacionAcademica = (props) => {
         }
     }
 
-    async function showMaterias() {
+    /*async function showMaterias() {
         try {
             setLoading(true)
             let configuraciones = {
@@ -203,7 +203,7 @@ const NewPlanificacionAcademica = (props) => {
         } catch (error) {
             return false
         }
-    }
+    }*/
 
     async function showCursos() {
         try {
@@ -226,6 +226,44 @@ const NewPlanificacionAcademica = (props) => {
             return true
         } catch (error) {
             return false
+        }
+    }
+
+    async function obtenerMateriasPorNivel(idNivel) {
+        try {
+            console.log("Obteniendo materias por nivel:", idNivel);
+            setLoading(true); // Indicador de carga
+
+            // Configuración de la petición
+            let configuraciones = {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            // Hacer la solicitud a la API, pasando el idNivel como parámetro
+            let response = await fetch(`${url}obtener_materias_por_nivel/${idNivel}`, configuraciones);
+            let data = await response.json();
+
+            if (response.ok && data.ok) {
+                // Mapeo de las materias obtenidas
+                let data_mapeada = data.data.map((value) => ({
+                    value: value.id_materia,
+                    label: value.descripcion,
+                }));
+
+                setAsignatura(data_mapeada); // Actualizar el estado con las materias filtradas
+            }
+            else {
+                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
+            }
+
+            setLoading(false); // Finalizar la carga
+        }
+        catch (error) {
+            console.error("Error al obtener las materias por nivel:", error);
+            setLoading(false); // Finalizar la carga en caso de error
         }
     }
 
@@ -292,7 +330,7 @@ const NewPlanificacionAcademica = (props) => {
 
 
 
-    
+
 
     async function createPlanificacionAcademica() {
         try {
@@ -368,7 +406,7 @@ const NewPlanificacionAcademica = (props) => {
             setLoading(true);
             await showInstituto();
             await showCarreras();
-            await showMaterias();
+            //await showMaterias();
             await showCursos();
             await showParalelos();
             setLoading(false);
@@ -418,15 +456,15 @@ const NewPlanificacionAcademica = (props) => {
                             </Form.Item>
 
                             <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
-                            <Select
-                                showSearch
-                                options={user} // Aquí se muestran los docentes filtrados
-                                name="coor_carrera"
-                                disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
-                                onChange={(value) => {
-                                    setUserSelect(value); // Guardar el docente seleccionado
-                                }}
-                            />
+                                <Select
+                                    showSearch
+                                    options={user} // Aquí se muestran los docentes filtrados
+                                    name="coor_carrera"
+                                    disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
+                                    onChange={(value) => {
+                                        setUserSelect(value); // Guardar el docente seleccionado
+                                    }}
+                                />
                             </Form.Item>
 
 
@@ -437,6 +475,24 @@ const NewPlanificacionAcademica = (props) => {
                                 bordered={false}
                                 scroll={{ x: 1000 }}
                                 columns={[
+                                    {
+                                        dataIndex: "curso",
+                                        title: "Cursos",
+                                        align: "center",
+                                        width: 25,
+                                        render: (text, record, index) => (
+                                            <Select
+                                                options={cursos}
+                                                defaultValue={"Escoja el curso"}
+                                                onChange={(value) => {
+                                                    const newData = [...dataSource];
+                                                    newData[index]["curso"] = value;
+                                                    setDataSource(newData);
+                                                    obtenerMateriasPorNivel(value); // Llamar a la función para obtener materias por nivel
+                                                }}
+                                            ></Select>
+                                        )
+                                    },
                                     {
                                         dataIndex: "materia",
                                         title: "Materias",
@@ -455,23 +511,6 @@ const NewPlanificacionAcademica = (props) => {
                                         )
                                     },
                                     {
-                                        dataIndex: "curso",
-                                        title: "Cursos",
-                                        align: "center",
-                                        width: 25,
-                                        render: (text, record, index) => (
-                                            <Select
-                                                options={cursos}
-                                                defaultValue={"Escoja el curso"}
-                                                onChange={(value) => {
-                                                    const newData = [...dataSource];
-                                                    newData[index]["curso"] = value;
-                                                    setDataSource(newData);
-                                                }}
-                                            ></Select>
-                                        )
-                                    },
-                                    {
                                         dataIndex: "paralelos",
                                         title: "Paralelos",
                                         align: "center",
@@ -481,7 +520,6 @@ const NewPlanificacionAcademica = (props) => {
                                                 style={{
                                                     width: "100%"
                                                 }}
-                                                mode="multiple"
                                                 options={paralelos}
                                                 onChange={(value) => {
                                                     const newData = [...dataSource];
@@ -495,9 +533,12 @@ const NewPlanificacionAcademica = (props) => {
                                         dataIndex: "dias",
                                         title: "Días",
                                         align: "center",
-                                        width: 350,
+                                        width: 50,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={dias}
                                                 value={record.dias || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
@@ -515,6 +556,9 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 450,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={hora_inicio}
                                                 value={record.hora_inicio || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
@@ -532,6 +576,9 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 450,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={hora_termina}
                                                 value={record.hora_termina || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
