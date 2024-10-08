@@ -76,6 +76,7 @@ const UpdateJornada = (props) => {
                                     message: "El campo de descripción de jornada es requerido",
                                 },
                             ]}
+                            name="descripcion"
                         >
                             <Input />
                         </Form.Item>

@@ -88,7 +88,7 @@ const Jornada = () => {
             .then((data_request) => data_request.json())
             .then((data) => {
                 if (data.ok) {
-                    mostrarNotificacion("success", "Operación realizada con éxito", "La jornada " + values.termino + " se eliminó con éxito");
+                    mostrarNotificacion("success", "Operación realizada con éxito", "La jornada " + values.descripcion + " se eliminó con éxito");
                 } else if (data.ok === false) {
                     mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
                 }

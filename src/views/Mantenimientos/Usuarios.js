@@ -104,7 +104,9 @@ const Usuarios = () => {
           perfil: value.rol_descripcion,
           titulo_academico: value.titulo_academico_descripcion,
           job_descripcion: value.job_descripcion,
-          carreras: value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', '),
+          carreras: value.carreras.length > 0 
+          ? value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', ')
+          : 'Sin carreras asignada',
           estado: value.estado,
         }));
 
