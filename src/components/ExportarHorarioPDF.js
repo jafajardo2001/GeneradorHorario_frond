@@ -53,14 +53,6 @@ const ExportarHorarioPDF  = ({ filteredData }) => {
 
             // Organizar los horarios por día y hora
             let distribucionHorarios = {};
-            let horasPorDia = {
-                'Lunes': 0,
-                'Martes': 0,
-                'Miércoles': 0,
-                'Jueves': 0,
-                'Viernes': 0,
-                'Sábado': 0
-            };
 
             filteredData.forEach(row => {
                 const horario = `${row.hora_inicio} - ${row.hora_termina}`;
@@ -78,11 +70,6 @@ const ExportarHorarioPDF  = ({ filteredData }) => {
                 }
                 distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
                     + row.nivel + row.paralelo;
-
-                const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
-                const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
-                const duracionHoras = (horaFin - horaInicio) / 3600000;
-                horasPorDia[diaNormalizado] += duracionHoras;
             });
 
             const tablaDistribucion = Object.keys(distribucionHorarios).map(horario => [
@@ -95,24 +82,10 @@ const ExportarHorarioPDF  = ({ filteredData }) => {
                 distribucionHorarios[horario]['Sábado'] || ''
             ]);
 
-            // Agregar la fila de totales
-            const tablaDistribucionConTotales = [
-                ...tablaDistribucion,
-                [
-                    'Total Horas por Día',
-                    `${horasPorDia['Lunes'].toFixed(2)} h`,
-                    `${horasPorDia['Martes'].toFixed(2)} h`,
-                    `${horasPorDia['Miércoles'].toFixed(2)} h`,
-                    `${horasPorDia['Jueves'].toFixed(2)} h`,
-                    `${horasPorDia['Viernes'].toFixed(2)} h`,
-                    `${horasPorDia['Sábado'].toFixed(2)} h`
-                ]
-            ];
-
             doc.autoTable({
                 startY: 60,  // Ajusta la posición de la tabla
                 head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
-                body: tablaDistribucionConTotales,
+                body: tablaDistribucion, // Usar solo tablaDistribucion
                 columnStyles: {
                     0: { cellWidth: 'auto' },
                     1: { cellWidth: 'auto' },
