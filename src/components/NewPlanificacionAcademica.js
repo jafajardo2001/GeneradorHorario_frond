@@ -181,7 +181,7 @@ const NewPlanificacionAcademica = (props) => {
         }
     }
 
-    
+
 
     async function showCursos() {
         try {
@@ -210,7 +210,7 @@ const NewPlanificacionAcademica = (props) => {
         try {
             console.log("Obteniendo materias por nivel:", idNivel);
             setLoading(true); // Indicador de carga
-    
+
             // Configuración de la petición
             let configuraciones = {
                 method: "GET",
@@ -218,24 +218,24 @@ const NewPlanificacionAcademica = (props) => {
                     'Content-Type': 'application/json',
                 }
             };
-    
+
             // Hacer la solicitud a la API, pasando el idNivel como parámetro
             let response = await fetch(`${url}obtener_materias_por_nivel/${idNivel}`, configuraciones);
             let data = await response.json();
-    
+
             if (response.ok && data.ok) {
                 // Mapeo de las materias obtenidas
                 let data_mapeada = data.data.map((value) => ({
                     value: value.id_materia,
                     label: value.descripcion,
                 }));
-    
+
                 setAsignatura(data_mapeada); // Actualizar el estado con las materias filtradas
             }
             else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
             }
-    
+
             setLoading(false); // Finalizar la carga
         }
         catch (error) {
@@ -243,7 +243,7 @@ const NewPlanificacionAcademica = (props) => {
             setLoading(false); // Finalizar la carga en caso de error
         }
     }
-    
+
     async function showParalelos() {
         try {
             setLoading(true)
@@ -307,7 +307,7 @@ const NewPlanificacionAcademica = (props) => {
 
 
 
-    
+
 
     async function createPlanificacionAcademica() {
         try {
@@ -402,7 +402,7 @@ const NewPlanificacionAcademica = (props) => {
                     display: "block"
                 }} />
                 <Steps
-                    size="small"
+                    size="medium"
                     items={pasos}
                     current={pasosCurret}
                 />
@@ -433,15 +433,15 @@ const NewPlanificacionAcademica = (props) => {
                             </Form.Item>
 
                             <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
-                            <Select
-                                showSearch
-                                options={user} // Aquí se muestran los docentes filtrados
-                                name="coor_carrera"
-                                disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
-                                onChange={(value) => {
-                                    setUserSelect(value); // Guardar el docente seleccionado
-                                }}
-                            />
+                                <Select
+                                    showSearch
+                                    options={user} // Aquí se muestran los docentes filtrados
+                                    name="coor_carrera"
+                                    disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
+                                    onChange={(value) => {
+                                        setUserSelect(value); // Guardar el docente seleccionado
+                                    }}
+                                />
                             </Form.Item>
 
 
@@ -458,19 +458,18 @@ const NewPlanificacionAcademica = (props) => {
                                         align: "center",
                                         width: 10,
                                         render: (text, record, index) => (
-                                            
-<Select
-  options={cursos} // Las opciones de los cursos
-  defaultValue={"Escoja el curso"}
-  onChange={(value) => {
-    const newData = [...dataSource];
-    newData[index]["curso"] = value;
-    setDataSource(newData);
 
-    obtenerMateriasPorNivel(value); // Llamar la función para obtener materias por el curso seleccionado
-  }}
-></Select>
+                                            <Select
+                                                options={cursos} // Las opciones de los cursos
+                                                defaultValue={"Escoja el curso"}
+                                                onChange={(value) => {
+                                                    const newData = [...dataSource];
+                                                    newData[index]["curso"] = value;
+                                                    setDataSource(newData);
 
+                                                    obtenerMateriasPorNivel(value); // Llamar la función para obtener materias por el curso seleccionado
+                                                }}
+                                            ></Select>
                                         )
                                     },
                                     {
@@ -480,14 +479,14 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 25,
                                         render: (text, record, index) => (
                                             <Select
-  options={asignatura} // Las materias filtradas se mostrarán aquí
-  defaultValue={"Escoja una asignatura"}
-  onChange={(value) => {
-    const newData = [...dataSource];
-    newData[index]["materia"] = value;
-    setDataSource(newData);
-  }}
-></Select>
+                                                options={asignatura} // Las materias filtradas se mostrarán aquí
+                                                defaultValue={"Escoja una asignatura"}
+                                                onChange={(value) => {
+                                                    const newData = [...dataSource];
+                                                    newData[index]["materia"] = value;
+                                                    setDataSource(newData);
+                                                }}
+                                            ></Select>
                                         )
                                     },
                                     {
@@ -517,6 +516,9 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 350,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={dias}
                                                 value={record.dias || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
@@ -534,6 +536,9 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 450,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={hora_inicio}
                                                 value={record.hora_inicio || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {
@@ -551,6 +556,9 @@ const NewPlanificacionAcademica = (props) => {
                                         width: 450,
                                         render: (text, record, index) => (
                                             <Select
+                                                style={{
+                                                    width: "100%"
+                                                }}
                                                 options={hora_termina}
                                                 value={record.hora_termina || undefined} // Utiliza el valor actual de la fila
                                                 onChange={(value) => {

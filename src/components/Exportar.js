@@ -115,11 +115,11 @@ const GenerarReporte = ({ filteredData }) => {
         let horasPorMateria = {};
         let horasMateriaExcluidas = {
             'Proyectos de Investigación': 0,
-            'Proyectos Comunitarios': 0,
+            'Práctica Servicios Comunitarios': 0,
             'Coordinación': 0,
             'Tutorías': 0,
             'Prácticas Laborales': 0,
-            'Gestoría Institucional': 0,
+            'Trabajo de Titulación': 0,
             'Preparación de Clases': 0,
             'Horas Clase': 0 // Asegúrate de incluir esta categoría
         };
@@ -151,10 +151,10 @@ const GenerarReporte = ({ filteredData }) => {
         const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
         const totalHorasPreparacionClases = horasMateriaExcluidas['Preparación de Clases'] || 0;
         const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Proyectos de Investigación'] || 0;
-        const totalHorasDirectorProyectos = horasMateriaExcluidas['Proyectos Comunitarios'] || 0;
+        const totalHorasDirectorProyectos = horasMateriaExcluidas['Práctica Servicios Comunitarios'] || 0;
         const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
         const totalHorasTutorPracticas = horasMateriaExcluidas['Prácticas Laborales'] || 0;
-        const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Gestoría Institucional'] || 0;
+        const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Trabajo de Titulación'] || 0;
 
         // Sumar las horas totales
         const totalDocencia = (parseFloat(totalHorasRestantes) + parseFloat(totalHorasTutorias) + parseFloat(totalHorasPreparacionClases)).toFixed(2);
@@ -228,18 +228,14 @@ const GenerarReporte = ({ filteredData }) => {
         img.src = '/logo-istg-2.png';  // Ruta del logo en la carpeta public
 
         img.onload = function () {
-            doc.addImage(img, 'PNG', 30, 10, 100, 20);  // Ajustar posición y tamaño del logo
-
-            // Agregar el resto del contenido después de cargar la imagen
-            doc.setFontSize(16);
-            doc.text("Distribución de la Jornada de Trabajo Semanal del Docente", 30, 50);
+            doc.addImage(img, 'PNG', 120, 7, 50, 12);  // Ajustar posición y tamaño del logo
 
             // Sección 1: Datos Generales
             const docente = filteredData[0]; // Usar el primer registro para los datos generales
             doc.autoTable({
-                startY: 30,
+                startY: 23,
                 head: [["1. DATOS GENERALES"]],
-                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                headStyles: { fillColor: [32, 149, 211], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
                 body: []
             });
 
@@ -284,7 +280,7 @@ const GenerarReporte = ({ filteredData }) => {
                     3: { cellWidth: 74 }  // Ajusta el ancho de las celdas de la cuarta columna
                 },
                 styles: {
-                    cellPadding: 1,
+                    cellPadding: 0.5,
                     fontSize: 8,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
@@ -294,9 +290,9 @@ const GenerarReporte = ({ filteredData }) => {
 
             // Sección 2: Resumen de Horas de Dedicación Semanal
             doc.autoTable({
-                startY: doc.previousAutoTable.finalY + 5,
+                startY: doc.previousAutoTable.finalY + 3,
                 head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
-                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                headStyles: { fillColor: [32, 149, 211], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
                 body: []
 
             });
@@ -304,6 +300,7 @@ const GenerarReporte = ({ filteredData }) => {
             doc.autoTable({
                 startY: doc.previousAutoTable.finalY,
                 head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
+                headStyles: { halign: 'center' },
                 body: [
                     [`Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}`],
                     [`Tutorías: ${totalHorasTutorias}`, `Director de Proyectos: ${totalHorasDirectorProyectos}`, '', '', ''],
@@ -319,7 +316,7 @@ const GenerarReporte = ({ filteredData }) => {
                     4: { cellWidth: 'auto' }
                 },
                 styles: {
-                    cellPadding: 1,
+                    cellPadding: 0.5,
                     fontSize: 8,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
@@ -398,15 +395,16 @@ const GenerarReporte = ({ filteredData }) => {
             ];
 
             doc.autoTable({
-                startY: doc.previousAutoTable.finalY + 5,
+                startY: doc.previousAutoTable.finalY + 3,
                 head: [["3. DISTRIBUTIVO DE LAS ACTIVIDADES DOCENTES"]],
-                headStyles: { fillColor: [0, 191, 255], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
+                headStyles: { fillColor: [32, 149, 211], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
                 body: []
             });
 
             doc.autoTable({
                 startY: doc.previousAutoTable.finalY,
                 head: [['Horario', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']],
+                headStyles: { halign: 'center' },
                 body: tablaDistribucionConTotales,
                 columnStyles: {
                     0: { cellWidth: 'auto' },
@@ -418,7 +416,7 @@ const GenerarReporte = ({ filteredData }) => {
                     6: { cellWidth: 'auto' }
                 },
                 styles: {
-                    cellPadding: 1,
+                    cellPadding: 0.3,
                     fontSize: 7,
                     overflow: 'linebreak',
                     lineColor: [0, 0, 0], // Color de las líneas de la tabla
@@ -427,12 +425,12 @@ const GenerarReporte = ({ filteredData }) => {
             });
 
             // Sección de firmas
-            const firmaY = doc.previousAutoTable.finalY + 50; // Aumenta el valor para mover más abajo
+            const firmaY = doc.previousAutoTable.finalY + 20; // Aumenta el valor para mover más abajo
 
             // Firmas en la parte inferior
             const firmaEspacio = 70; // Espacio entre cada firma
 
-            doc.setFontSize(10);
+            doc.setFontSize(8);
 
             // Firma izquierda (Coordinador Académico)
             doc.text("________________________", 25, firmaY); // Línea de subrayado
