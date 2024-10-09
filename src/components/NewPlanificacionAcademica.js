@@ -181,29 +181,7 @@ const NewPlanificacionAcademica = (props) => {
         }
     }
 
-    async function showMaterias() {
-        try {
-            setLoading(true)
-            let configuraciones = {
-                method: "GET",
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-            let response = await fetch(`${url}show_data_asignatura`, configuraciones);
-            let data = await response.json()
-            if (data.data) {
-                let data_mapeada = data.data.map((value, index) => ({
-                    value: value.id_materia,
-                    label: value.descripcion,
-                }))
-                setAsignatura(data_mapeada)
-            }
-            return true
-        } catch (error) {
-            return false
-        }
-    }
+    
 
     async function showCursos() {
         try {
@@ -228,7 +206,44 @@ const NewPlanificacionAcademica = (props) => {
             return false
         }
     }
-
+    async function obtenerMateriasPorNivel(idNivel) {
+        try {
+            console.log("Obteniendo materias por nivel:", idNivel);
+            setLoading(true); // Indicador de carga
+    
+            // Configuración de la petición
+            let configuraciones = {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+    
+            // Hacer la solicitud a la API, pasando el idNivel como parámetro
+            let response = await fetch(`${url}obtener_materias_por_nivel/${idNivel}`, configuraciones);
+            let data = await response.json();
+    
+            if (response.ok && data.ok) {
+                // Mapeo de las materias obtenidas
+                let data_mapeada = data.data.map((value) => ({
+                    value: value.id_materia,
+                    label: value.descripcion,
+                }));
+    
+                setAsignatura(data_mapeada); // Actualizar el estado con las materias filtradas
+            }
+            else {
+                console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
+            }
+    
+            setLoading(false); // Finalizar la carga
+        }
+        catch (error) {
+            console.error("Error al obtener las materias por nivel:", error);
+            setLoading(false); // Finalizar la carga en caso de error
+        }
+    }
+    
     async function showParalelos() {
         try {
             setLoading(true)
@@ -368,14 +383,13 @@ const NewPlanificacionAcademica = (props) => {
             setLoading(true);
             await showInstituto();
             await showCarreras();
-            await showMaterias();
             await showCursos();
             await showParalelos();
             setLoading(false);
         };
 
         fetchData();
-        
+
     }, [])
     return (
         <>
@@ -439,37 +453,41 @@ const NewPlanificacionAcademica = (props) => {
                                 scroll={{ x: 1000 }}
                                 columns={[
                                     {
-                                        dataIndex: "materia",
-                                        title: "Materias",
+                                        dataIndex: "curso",
+                                        title: "Cursos",
                                         align: "center",
                                         width: 10,
                                         render: (text, record, index) => (
-                                            <Select
-                                                options={asignatura}
-                                                defaultValue={"Escoja una asignatura"}
-                                                onChange={(value) => {
-                                                    const newData = [...dataSource];
-                                                    newData[index]["materia"] = value;
-                                                    setDataSource(newData);
-                                                }}
-                                            ></Select>
+                                            
+<Select
+  options={cursos} // Las opciones de los cursos
+  defaultValue={"Escoja el curso"}
+  onChange={(value) => {
+    const newData = [...dataSource];
+    newData[index]["curso"] = value;
+    setDataSource(newData);
+
+    obtenerMateriasPorNivel(value); // Llamar la función para obtener materias por el curso seleccionado
+  }}
+></Select>
+
                                         )
                                     },
                                     {
-                                        dataIndex: "curso",
-                                        title: "Cursos",
+                                        dataIndex: "materia",
+                                        title: "Materias",
                                         align: "center",
                                         width: 25,
                                         render: (text, record, index) => (
                                             <Select
-                                                options={cursos}
-                                                defaultValue={"Escoja el curso"}
-                                                onChange={(value) => {
-                                                    const newData = [...dataSource];
-                                                    newData[index]["curso"] = value;
-                                                    setDataSource(newData);
-                                                }}
-                                            ></Select>
+  options={asignatura} // Las materias filtradas se mostrarán aquí
+  defaultValue={"Escoja una asignatura"}
+  onChange={(value) => {
+    const newData = [...dataSource];
+    newData[index]["materia"] = value;
+    setDataSource(newData);
+  }}
+></Select>
                                         )
                                     },
                                     {
