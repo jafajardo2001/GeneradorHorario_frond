@@ -375,6 +375,7 @@ const NewPlanificacionAcademica = (props) => {
         };
 
         fetchData();
+        
     }, [])
     return (
         <>
