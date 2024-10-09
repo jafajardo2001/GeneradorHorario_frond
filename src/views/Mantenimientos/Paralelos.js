@@ -24,6 +24,7 @@ import {
   MenuOutlined,
 } from "@ant-design/icons";
 import NewParalelo from "../../components/NewParalelo.js";
+import UpdateParalelo from "../../components/UpdateParalelo.js"
 const Paralelos = () => {
   const { Title } = Typography;
   const [loading, setLoading] = useState(true);
@@ -53,38 +54,38 @@ const Paralelos = () => {
     };
 
     fetch(`${url}showParalelo`, configuraciones)
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      if (data.data) {
-        let Paralelo = data.data.map((value, index) => {
-          return {
-            id: value.id_paralelo,
-            numero: index + 1,
-            paralelo: value.paralelo,
-            ip_actualizacion: value.ip_actualizacion,
-            fecha_actualizacion: new Date(
-              value.fecha_actualizacion
-            ).toLocaleDateString(),
-            usuarios_ultima_gestion: value.usuarios_ultima_gestion,
-            estado: value.estado,
-          };
-        });
-        // Aplicar el filtro en el array 'Paralelo', no en 'data'
-        const filtered = Paralelo.filter((item) =>
-          item.paralelo.toLowerCase().includes(filterParalelo.toLowerCase())
-      );
-      setDataTabla(filtered); // Usa los datos filtrados para la tabla
-      setFilteredData(filtered); // Guarda los datos filtrados
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        if (data.data) {
+          let Paralelo = data.data.map((value, index) => {
+            return {
+              id: value.id_paralelo,
+              numero: index + 1,
+              paralelo: value.paralelo,
+              ip_actualizacion: value.ip_actualizacion,
+              fecha_actualizacion: new Date(
+                value.fecha_actualizacion
+              ).toLocaleDateString(),
+              usuarios_ultima_gestion: value.usuarios_ultima_gestion,
+              estado: value.estado,
+            };
+          });
+          // Aplicar el filtro en el array 'Paralelo', no en 'data'
+          const filtered = Paralelo.filter((item) =>
+            item.paralelo.toLowerCase().includes(filterParalelo.toLowerCase())
+          );
+          setDataTabla(filtered); // Usa los datos filtrados para la tabla
+          setFilteredData(filtered); // Guarda los datos filtrados
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   const deleteParalelo = (values) => {
@@ -126,6 +127,7 @@ const Paralelos = () => {
 
   function handleCloseModal() {
     setIsOpenNewModal(false);
+    setIsOpenUpdateModal(false);
   }
   const handleMenuClick = (action, record) => {
     console.log(
@@ -258,6 +260,7 @@ const Paralelos = () => {
         loading={setLoading}
         mensaje={setMensajeLoading}
       />
+      <UpdateParalelo open={isOpeUpdatePerfil} handleCloseModal={handleCloseModal} formulario={formularioEditar} getParalelos={getParalelos} loading={setLoading} mensaje={setMensajeLoading} />
     </>
   );
 };
