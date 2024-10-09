@@ -13,7 +13,7 @@ const UpdateCarrera = (props) => {
             setId(props.formulario.id);
             formRef.current.setFieldsValue({
                 nombre: props.formulario.nombre,
-                id_jornada: props.formulario.jornada,
+                id_jornada: props.formulario.id_jornada,
             });
         }
     }, [props.formulario]);

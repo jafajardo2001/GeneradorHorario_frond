@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input, } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input,Modal } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined, } from "@ant-design/icons";
 import NewCarrera from "../../components/NewCarrera.js";
 import UpdateCarrera from "../../components/UpdateCarrera.js";
@@ -47,7 +47,8 @@ const Carreras = () => {
                         id: value.id_carrera,
                         nombre: value.nombre,
                         estado: value.estado === "A" ? "Activo" : "Inactivo",
-                        jornada: value.descripcion_jornada, // Aquí agregas la jornada desde el backend
+                        jornada: value.descripcion_jornada,
+                        id_jornada: value.id_jornada, // Aquí agregas la jornada desde el backend
                     };
                 });
                 // Filtrar datos
@@ -68,18 +69,55 @@ const Carreras = () => {
 
 
     const handleMenuClick = (action, record) => {
-        console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-
+        console.log(`Se hizo clic en "${action}" para la carrera con ID ${record.id}`);
+    
         if (action === "editar") {
             setIsOpenUpdateModal(true);
             setFormularioEditar(record);
         }
+    
+        if (action === "eliminar") {
+            // Usar Modal de Ant Design para confirmar la eliminación
+            Modal.confirm({
+                title: 'Eliminar Carrera',
+                content: `¿Está seguro de que desea eliminar la carrera "${record.nombre}"? Esta acción no se puede deshacer.`,
+                okText: 'Eliminar',
+                cancelText: 'Cancelar',
+                onOk: () => deleteCarrera(record.id), // Llamar a la función para eliminar la carrera
+            });
+        }
     };
-
+    
+    // Función para eliminar la carrera
+    const deleteCarrera = async (id) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/istg/delete_carrera/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            const data = await response.json();
+    
+            if (response.ok) {
+                // Mostrar notificación de éxito
+                mostrarNotificacion('success', 'Eliminación exitosa', data.message);
+                getCarreras(); // Volver a cargar la lista de carreras
+            } else {
+                // Mostrar notificación de error
+                mostrarNotificacion('error', 'Error', data.message || 'No se pudo eliminar la carrera');
+            }
+        } catch (error) {
+            console.error("Error al eliminar la carrera:", error);
+            mostrarNotificacion('error', 'Error', 'Error interno en el servidor');
+        }
+    };
+    
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-            <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-            <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
+            <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
+            <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
         </Menu>
     );
 

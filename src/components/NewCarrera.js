@@ -58,8 +58,7 @@ const NewCarrera = (props) => {
                         description: data.message,
                     });
                 }
-                Formulario.current.resetFields();
-                props.handleCloseModal();
+                
             })
             .catch((error) => {
                 notification.error({

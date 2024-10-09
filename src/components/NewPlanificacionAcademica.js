@@ -353,6 +353,8 @@ const NewPlanificacionAcademica = (props) => {
                     title: "Operación Realizada con éxito",
                     subTitle: data.mensaje,
                 });
+                props.getData(); // Asegúrate de que props.getData esté disponible
+            props.handleCloseModal(); 
             } else if (data.mensaje_error.includes("límite de materias")) {  // Validar si el error es por límite
                 setInformativo({
                     status: "warning",
