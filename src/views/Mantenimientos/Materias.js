@@ -49,7 +49,8 @@ const Materias = () => {
                 : 'Este registro no tiene fecha de actualizacion',
 
               nemonico: value.nemonico,  // Incluye el nemónico
-              termino: value.termino     // Incluye el término
+              termino: value.termino,     // Incluye el término
+              id_nivel: value.id_nivel
             }));
 
             // Aplicar filtro en los datos sin JSX
@@ -166,13 +167,17 @@ const Materias = () => {
 
   const actualizarAsignatura = (value) => {
     setLoadingButton(true);
-
+// Log para verificar los datos enviados
+console.log("Datos a enviar:", {
+  descripcion: value.descripcion,
+  id_nivel: dataMateriaEdit.id_nivel
+});
     let data_request = {
       method: "PUT",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         descripcion: value.descripcion,
-        id_nivel: value.nivel // Asegúrate de enviar el id_nivel también
+        id_nivel: dataMateriaEdit.id_nivel // Asegúrate de enviar el id_nivel también
       }),
     };
 

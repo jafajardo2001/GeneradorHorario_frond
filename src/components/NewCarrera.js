@@ -26,6 +26,7 @@ const NewCarrera = (props) => {
                     };
                 });
                 setIsJornada(jornada);
+                
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
@@ -52,6 +53,7 @@ const NewCarrera = (props) => {
                         description: `La carrera "${value.nombre}" ha sido creada con éxito.`,
                     });
                     props.getCarreras();
+                props.handleCloseModal();
                 } else {
                     notification.error({
                         message: "Error",

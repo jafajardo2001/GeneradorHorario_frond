@@ -1,35 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { Button, Collapse, Input, Table, Typography, Menu, Dropdown, Row, Col, Space, Card, Spin, notification } from "antd";
-import { SyncOutlined, PlusCircleOutlined, ClearOutlined, SearchOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
-import NewCurso from "../../components/NewCurso.js"
-import UpdateCurso from "../../components/UpdateCurso.js"
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input, Modal } from "antd";
+import { SyncOutlined, PlusCircleOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
+import NewCurso from "../../components/NewCurso.js";
+import UpdateCurso from "../../components/UpdateCurso.js";
 
 const Cursos = () => {
   const { Title } = Typography;
   const [loading, setLoading] = useState(true);
-  const [mensajeLoading, setMensajeLoading] = useState("cargando...");
   const [isOpenModal, setIsOpen] = useState(false);
   const [isOpenUpdateModal, setIsOpenUpdateModal] = useState(false);
   const [cursoData, setCursoData] = useState([]);
   const [formularioEditar, setFormularioEditar] = useState([]);
-  const [filterCurso, setFilterCurso] = useState(""); // Nuevo estado para el filtro
-  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
+  const [filterCurso, setFilterCurso] = useState(""); 
   const url = "http://localhost:8000/api/istg/";
+
   useEffect(() => {
-    getCurso()
-  }, [filterCurso])
+    getCurso();
+  }, [filterCurso]);
+
   const mostrarNotificacion = (tipo, titulo, mensaje) => {
     notification[tipo]({
       message: titulo,
       description: mensaje,
     });
   };
-  function getCurso() {
-    setLoading(true)
+
+  const getCurso = () => {
+    setLoading(true);
     fetch(`${url}show_nivel`, { method: 'GET' })
-      .then((response) => {
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         let curso = data.data.map((value, index) => {
           return {
@@ -37,100 +36,101 @@ const Cursos = () => {
             numero: value.numero,
             nemonico: value.nemonico,
             termino: value.termino,
-            ip_actualizacion: value.ip_actualizacion,
+            estado: value.estado,
             fecha_actualizacion: new Date(value.fecha_actualizacion).toLocaleDateString(),
             usuarios_ultima_gestion: value.usuarios_ultima_gestion,
-            estado: value.estado
-          }
-        })
-        // Filtrar datos 
+          };
+        });
+
         if (filterCurso) {
           curso = curso.filter(item =>
-            `${item.numero} ${item.nemonico} ${item.perfil} ${item.termino}`.toLowerCase().includes(filterCurso.toLowerCase())
+            `${item.numero} ${item.nemonico} ${item.termino}`.toLowerCase().includes(filterCurso.toLowerCase())
           );
         }
+
         setCursoData(curso);
-        setFilteredData(curso); // Opcional si planeas usar este estado en el futuro
-
-      }).catch((error) => {
-        console.error("Error fetching data:", error); // Debugging line
-      }).finally(() => {
-        setLoading(false)
-      });
-
-  }
-  const deleteCurso = (values) => {
-    console.log("Estoy entrando en la funcion de value");
-    console.log(values);
-
-    let request_backend = {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        id_nivel: values.id  // Asegúrate de que el backend espere este campo
       })
-    };
-
-    fetch(`${url}delete_nivel/${values.id}`, request_backend)  // ID incluido en la URL
-      .then((data_request) => data_request.json())
-      .then((data) => {
-        if (data.ok) {
-          mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.termino + " se eliminó con éxito");
-        } else if (data.ok === false) {
-          mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
-        }
+      .catch((error) => {
+        console.error("Error fetching data:", error);
       })
       .finally(() => {
-        getCurso();
+        setLoading(false);
       });
   };
+
+  const checkDistribuciones = async (id) => {
+    try {
+      const response = await fetch(`${url}distribuciones_por_curso/${id}`);
+      const data = await response.json();
+
+      if (data.ok) {
+        return data.count > 0; // Retorna true si hay distribuciones
+      } else {
+        throw new Error(data.message || "Error desconocido");
+      }
+    } catch (error) {
+      mostrarNotificacion('error', 'Error', error.message);
+      return false; // Por defecto, si hay error, consideramos que no hay distribuciones
+    }
+  };
+
+  const handleMenuClick = async (action, record) => {
+    if (action === "eliminar") {
+      const hasDistribuciones = await checkDistribuciones(record.id); // Verificamos si hay distribuciones
+
+      const content = hasDistribuciones
+        ? `¿Está seguro de que desea eliminar el curso "${record.termino}"? Esta acción eliminará también las distribuciones asociadas.`
+        : `¿Está seguro de que desea eliminar el curso "${record.termino}"? Esta acción no afectará al sistema.`;
+
+      Modal.confirm({
+        title: 'Eliminar Curso',
+        content,
+        okText: 'Eliminar',
+        cancelText: 'Cancelar',
+        onOk: () => deleteCurso(record.id), // Eliminar curso si se confirma
+      });
+    } else if (action === "editar") {
+      setIsOpenUpdateModal(true);
+      setFormularioEditar(record);
+    }
+  };
+
+  const deleteCurso = (id) => {
+    fetch(`${url}delete_nivel/${id}`, { method: 'PUT' })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          mostrarNotificacion('success', 'Operación realizada con éxito', `El curso se eliminó con éxito.`);
+          getCurso(); // Recargar cursos después de eliminar
+        } else {
+          mostrarNotificacion('error', 'Error', data.message || 'No se pudo eliminar el curso.');
+        }
+      })
+      .catch((error) => {
+        mostrarNotificacion('error', 'Error', error.message);
+      });
+  };
+
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-      <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-      <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
+      <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
+      <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
     </Menu>
   );
 
-  const handleMenuClick = (action, record) => {
-    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-    if (action == "editar") {
-      setIsOpenUpdateModal(true)
-      setFormularioEditar(record)
-    }
-    else if (action === "eliminar") {
-      deleteCurso(record);  // Llamar a deleteParalelo cuando se selecciona "eliminar"
-    }
-  };
-
-  function handleCloseModal() {
-    setIsOpen(false)
-    setIsOpenUpdateModal(false)
-  }
-
   return (
-    <>
-      <Spin spinning={loading} tip={mensajeLoading}></Spin>
-      <Row style={{
-        display: "flex",
-        justifyContent: "center"
-      }}>
+    <Spin spinning={loading} tip="Cargando...">
+      <Row style={{ display: "flex", justifyContent: "center" }}>
         <Title level={3}>Mantenimiento de Cursos</Title>
       </Row>
       <Card bordered={false}>
-        <Space style={{
-          margin: "5px"
-        }} direction="vertical">
+        <Space style={{ margin: "5px" }}>
           <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
             <Col>
-              <Button icon={<PlusCircleOutlined />} onClick={() => { setIsOpen(true) }}>Crear un curso</Button>
+              <Button icon={<PlusCircleOutlined />} onClick={() => setIsOpen(true)}>Crear un curso</Button>
             </Col>
             <Col>
-              <Button icon={<SyncOutlined />} onClick={() => {
-                getCurso()
-              }}>Descargar datos</Button>
+              <Button icon={<SyncOutlined />} onClick={getCurso}>Descargar datos</Button>
             </Col>
             <Col>
               <Input
@@ -141,54 +141,23 @@ const Cursos = () => {
               />
             </Col>
           </Row>
-
         </Space>
         <Row>
           <Title level={5}>Cantidad : {cursoData.length}</Title>
         </Row>
         <Table
           size="small"
-          scroll={{ x: 100, y: 1500 }}
+          scroll={{ x: 100 }}
           columns={[
+            { title: 'N°', dataIndex: 'numero', width: 10, align: 'center' },
+            { title: 'Nemonico', dataIndex: 'nemonico', width: 10 },
+            { title: 'Termino', dataIndex: 'termino', width: 10 },
+            { title: 'Usuario Última Gestión', dataIndex: 'usuarios_ultima_gestion', width: 20, align: 'center' },
+            { title: 'Fecha Última Gestión', dataIndex: 'fecha_actualizacion', width: 20, align: 'center' },
+            { title: 'Estado', dataIndex: 'estado', width: 10, align: 'center' },
             {
-              dataIndex: 'numero',
-              title: 'numero',
-              width: 10,
-              align: 'center'
-            },
-            {
-              dataIndex: 'nemonico',
-              title: 'nemonico',
-              width: 10
-            },
-            {
-              dataIndex: 'termino',
-              title: 'termino',
-              width: 10
-            },
-            {
-              dataIndex: 'usuarios_ultima_gestion',
-              title: 'Usuario ultima gestion',
-              width: 20,
-              align: 'center'
-            },
-            {
-              dataIndex: 'fecha_actualizacion',
-              title: 'fecha ultima gestion',
-              width: 20,
-              align: 'center'
-
-            },
-            {
-              dataIndex: 'estado',
-              title: 'Estado',
-              width: 10,
-              align: 'center'
-
-            },
-            {
-              dataIndex: "accion",
               title: "Acciones",
+              dataIndex: "accion",
               align: 'center',
               width: 10,
               render: (_, record) => (
@@ -202,9 +171,10 @@ const Cursos = () => {
         />
       </Card>
 
-      <NewCurso open={isOpenModal} handleCloseModal={handleCloseModal} getCurso={getCurso} />
-      <UpdateCurso open={isOpenUpdateModal} handleCloseModal={handleCloseModal} formulario={formularioEditar} getCurso={getCurso} loading={setLoading} mensaje={setMensajeLoading} />
-    </>
+      <NewCurso open={isOpenModal} handleCloseModal={() => setIsOpen(false)} getCurso={getCurso} />
+      <UpdateCurso open={isOpenUpdateModal} handleCloseModal={() => setIsOpenUpdateModal(false)} formulario={formularioEditar} getCurso={getCurso} />
+    </Spin>
   );
-}
+};
+
 export default Cursos;

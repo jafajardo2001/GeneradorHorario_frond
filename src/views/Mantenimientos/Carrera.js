@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input,Modal } from "antd";
-import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined, } from "@ant-design/icons";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input, Modal } from "antd";
+import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewCarrera from "../../components/NewCarrera.js";
 import UpdateCarrera from "../../components/UpdateCarrera.js";
 
@@ -15,12 +15,14 @@ const Carreras = () => {
     const [filterCarrera, setFilterCarrera] = useState(""); // Nuevo estado para el filtro
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
     const url = "http://localhost:8000/api/istg/";
+    
     const mostrarNotificacion = (tipo, titulo, mensaje) => {
         notification[tipo]({
             message: titulo,
             description: mensaje,
         });
     };
+
     useEffect(() => {
         getCarreras();
     }, [filterCarrera]);
@@ -40,7 +42,6 @@ const Carreras = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log("API response data:", data); // Debugging line
                 let carrera = data.data.map((value, index) => {
                     return {
                         numero: index + 1,
@@ -48,9 +49,10 @@ const Carreras = () => {
                         nombre: value.nombre,
                         estado: value.estado === "A" ? "Activo" : "Inactivo",
                         jornada: value.descripcion_jornada,
-                        id_jornada: value.id_jornada, // Aquí agregas la jornada desde el backend
+                        id_jornada: value.id_jornada,
                     };
                 });
+
                 // Filtrar datos
                 if (filterCarrera) {
                     carrera = carrera.filter(item =>
@@ -61,12 +63,11 @@ const Carreras = () => {
                 setFilteredData(carrera);
             })
             .catch((error) => {
-                console.error("Error fetching data:", error); // Debugging line
+                console.error("Error fetching data:", error);
             }).finally(() => {
                 setLoading(false);
             });
     }
-
 
     const handleMenuClick = (action, record) => {
         console.log(`Se hizo clic en "${action}" para la carrera con ID ${record.id}`);
@@ -77,35 +78,51 @@ const Carreras = () => {
         }
     
         if (action === "eliminar") {
-            // Usar Modal de Ant Design para confirmar la eliminación
-            Modal.confirm({
-                title: 'Eliminar Carrera',
-                content: `¿Está seguro de que desea eliminar la carrera "${record.nombre}"? Esta acción no se puede deshacer.`,
-                okText: 'Eliminar',
-                cancelText: 'Cancelar',
-                onOk: () => deleteCarrera(record.id), // Llamar a la función para eliminar la carrera
-            });
+            // Verificar si hay distribuciones asociadas
+            fetch(`${url}distribuciones_por_carrera/${record.id}`) // Asegúrate de tener esta ruta que verifica si hay distribuciones
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.ok && data.count > 0) {
+                        // Si hay distribuciones asociadas
+                        Modal.confirm({
+                            title: 'Eliminar Carrera',
+                            content: `¿Está seguro de que desea eliminar la carrera "${record.nombre}"? Esto también inhabilitará las distribuciones asociadas.`,
+                            okText: 'Eliminar',
+                            cancelText: 'Cancelar',
+                            onOk: () => deleteCarrera(record.id),
+                        });
+                    } else {
+                        // Si no hay distribuciones
+                        Modal.confirm({
+                            title: 'Eliminar Carrera',
+                            content: `¿Está seguro de que desea eliminar la carrera "${record.nombre}"? Esta acción no afectará al sistema.`,
+                            okText: 'Eliminar',
+                            cancelText: 'Cancelar',
+                            onOk: () => deleteCarrera(record.id),
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al verificar distribuciones:", error);
+                });
         }
     };
-    
-    // Función para eliminar la carrera
+
     const deleteCarrera = async (id) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/istg/delete_carrera/${id}`, {
+            const response = await fetch(`${url}delete_carrera/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            
+
             const data = await response.json();
-    
+
             if (response.ok) {
-                // Mostrar notificación de éxito
                 mostrarNotificacion('success', 'Eliminación exitosa', data.message);
                 getCarreras(); // Volver a cargar la lista de carreras
             } else {
-                // Mostrar notificación de error
                 mostrarNotificacion('error', 'Error', data.message || 'No se pudo eliminar la carrera');
             }
         } catch (error) {
@@ -113,7 +130,7 @@ const Carreras = () => {
             mostrarNotificacion('error', 'Error', 'Error interno en el servidor');
         }
     };
-    
+
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
             <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
@@ -124,7 +141,6 @@ const Carreras = () => {
     return (
         <Spin spinning={loading} tip="Cargando...">
             <>
-
                 <Row style={{ display: "flex", justifyContent: "center" }}>
                     <Title level={3}>Mantenimiento de Carreras</Title>
                 </Row>

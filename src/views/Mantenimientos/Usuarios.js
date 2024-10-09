@@ -101,7 +101,7 @@ const Usuarios = () => {
           apellidos: value.apellidos,
           correo: value.correo,
           telefono: value.telefono,
-          perfil: value.rol_descripcion ||'Sin titulo academico',
+          perfil: value.rol_descripcion ||'Sin perfil',
           titulo_academico: value.titulo_academico_descripcion||'Sin titulo academico',
           job_descripcion: value.job_descripcion ||'Sin tiempo laboral',
           carreras: value.carreras.length > 0 
