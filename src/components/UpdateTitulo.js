@@ -1,70 +1,77 @@
-import React, { useEffect, useRef } from 'react';
-import { Modal, Form, Input, Button, notification } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import React, { useEffect } from "react";
+import { Modal, Form, Input, notification } from "antd";
 
-const UpdateTitulo = ({ open, handleCloseModal, getTitulos, formulario,loading,mensaje }) => {
+const UpdateTitulo = (props) => {
   const [form] = Form.useForm();
-  const form_ref = useRef(null)
   const url = "http://localhost:8000/api/istg/";
 
-  const mostrarNotificacion = (tipo, titulo, mensaje) => {
-    notification[tipo]({
-      message: titulo,
-      description: mensaje,
-    });
-  };
+  // Al abrir el modal, cargamos los datos del título que se está editando
+  useEffect(() => {
+    if (props.open && props.formulario) {
+      form.resetFields(); // Reseteamos los campos antes de cargar nuevos valores
+      form.setFieldsValue({
+        descripcion: props.formulario.descripcion,
+      });
+    }
+  }, [props.open, props.formulario, form]);
 
-  const onFinish = (values) => {
-    loading(true)
-    mensaje("Actualizando....")
-    handleCloseModal();
-    const request_backend = {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json'
-      },
+  const updateTitulo = (value) => {
+    fetch(`${url}update_titulo_academico/${props.formulario.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        id_titulo_academico: formulario.id,
-        descripcion: values.descripcion
-      })
-    };
-    fetch(`${url}update_titulo_academico/${formulario.id}`, request_backend)
+        descripcion: value.descripcion,
+      }),
+    })
       .then((response) => response.json())
       .then((data) => {
         if (data.ok) {
-          mostrarNotificacion("success", "Operación Realizada con éxito", data.mensaje);
+          notification.success({
+            message: 'Éxito',
+            description: data.message, // Cambiado de data.mensaje a data.message
+          });
+          props.getTitulos();
+          form.resetFields(); // Reseteamos los campos al terminar
+          props.handleCloseModal();
         } else {
-          mostrarNotificacion("error", "Error", data.mensaje);
+          notification.error({
+            message: 'Error',
+            description: data.message, // Cambiado de data.mensaje a data.message
+          });
         }
       })
-      .finally(() => {
-        getTitulos();
-        mensaje("Cargando....")
-      })
       .catch((error) => {
-        mensaje("Cargando....") 
-        loading(false)
-        mostrarNotificacion("error", "Error", error.mensaje);
+        notification.error({
+          message: 'Error',
+          description: 'Ocurrió un error inesperado.',
+        });
+        console.error('Ha ocurrido un error:', error);
       });
   };
-
   
+
   return (
-    <Modal title="Editar Título Académico" footer={null} open={open} onCancel={()=>{
-      handleCloseModal();
-      }}>
-      <Form form={form} onFinish={onFinish} ref={form_ref} layout="vertical" initialValues={{ descripcion: formulario.descripcion }} autoComplete="off">
+    <Modal
+      onCancel={() => {
+        form.resetFields();
+        props.handleCloseModal();
+      }}
+      onOk={() => {
+        form.submit();
+      }}
+      size="large"
+      okText="Guardar"
+      cancelText="Cancelar"
+      title="Actualizar Título Académico"
+      open={props.open}
+    >
+      <Form form={form} onFinish={updateTitulo} layout="vertical">
         <Form.Item
-          name="descripcion"
           label="Descripción"
-          rules={[{ required: true, message: 'La descripción es requerida' }]}
+          name="descripcion"
+          rules={[{ required: true, message: "El campo de descripción es requerido" }]}
         >
           <Input />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-            Editar Título Académico
-          </Button>
         </Form.Item>
       </Form>
     </Modal>

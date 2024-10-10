@@ -11,10 +11,8 @@ const TitulosAcademicos = () => {
   const [titulosData, setTitulos] = useState([]);
   const [isOpenNewTitulo, setIsOpenNewModal] = useState(false);
   const [isOpenUpdateTitulo, setIsOpenUpdateModal] = useState(false);
-  const [formularioEditar, setFormularioEditar] = useState([]);
+  const [formularioEditar, setFormularioEditar] = useState({});
   const [filterTitulo, setFilterTitulo] = useState(""); // Nuevo estado para el filtro
-  const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
-  const [api, contextHolder] = notification.useNotification();
   const url = "http://localhost:8000/api/istg/";
 
   useEffect(() => {
@@ -24,10 +22,11 @@ const TitulosAcademicos = () => {
   const handleCloseModal = () => {
     setIsOpenNewModal(false);
     setIsOpenUpdateModal(false);
+    setFormularioEditar({}); // Limpiar el formulario al cerrar
   };
 
   const mostrarNotificacion = (tipo, titulo, mensaje) => {
-    api[tipo]({
+    notification[tipo]({
       message: titulo,
       description: mensaje,
     });
@@ -63,7 +62,6 @@ const TitulosAcademicos = () => {
           }
 
           setTitulos(titulos);
-          setFilteredData(titulos);
         }
       })
       .catch(() => {
@@ -116,9 +114,10 @@ const TitulosAcademicos = () => {
       setIsOpenUpdateModal(true);
       setFormularioEditar(record);
     } else if (action === "eliminar") {
-      confirmDelete(record);  // Mostrar el modal de confirmación antes de eliminar
+      confirmDelete(record);
     }
   };
+  
 
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
@@ -129,7 +128,6 @@ const TitulosAcademicos = () => {
 
   return (
     <>
-      {contextHolder}
       <Spin spinning={loading} tip={mensajeLoading}>
         <Row style={{ display: "flex", justifyContent: "center" }}>
           <Title level={3}>Mantenimiento de Títulos Académicos</Title>
@@ -216,6 +214,6 @@ const TitulosAcademicos = () => {
       <UpdateTitulo open={isOpenUpdateTitulo} handleCloseModal={handleCloseModal} getTitulos={getTitulos} formulario={formularioEditar} loading={setLoading} mensaje={setMensajeLoading} />
     </>
   );
-}
+};
 
 export default TitulosAcademicos;
