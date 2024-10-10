@@ -271,7 +271,7 @@ const NewPlanificacionAcademica = (props) => {
     async function obtenerDocentesPorCarrera(idCarrera) {
         try {
             setLoading(true); // Indicador de carga
-
+    
             // Configuración de la petición
             let configuraciones = {
                 method: "GET",
@@ -279,29 +279,37 @@ const NewPlanificacionAcademica = (props) => {
                     'Content-Type': 'application/json',
                 }
             };
-
+    
             // Hacer la solicitud a la API, pasando el idCarrera como parámetro
             let response = await fetch(`${url}obtener_docentes_por_carrera/${idCarrera}`, configuraciones);
             let data = await response.json();
-
+    
+            console.log("Respuesta de la API:", data); // Agregar este log para verificar la respuesta
+    
             if (response.ok && data.ok) {
                 // Mapeo de los docentes obtenidos
                 let data_mapeada = data.data.map((value) => ({
                     value: value.id_usuario,
                     label: value.nombre_completo + " - " + value.titulo_academico, // Nombre completo y título académico
                 }));
-
+    
+                console.log("Docentes mapeados:", data_mapeada); // Log para verificar los docentes mapeados
+    
                 setUser(data_mapeada); // Actualizar el estado con los docentes filtrados
+                setIsDocenteSelectEnabled(data_mapeada.length > 0); // Actualizar habilitación del select
             } else {
                 console.error("Error en la respuesta del servidor:", data.message || "Error desconocido");
+                setIsDocenteSelectEnabled(false); // Desactivar el select si hay error
             }
-
+    
             setLoading(false); // Finalizar la carga
         } catch (error) {
             console.error("Error al obtener los docentes por carrera:", error);
             setLoading(false); // Finalizar la carga en caso de error
         }
     }
+    
+    
 
 
 
@@ -421,30 +429,35 @@ const NewPlanificacionAcademica = (props) => {
                             </Form.Item>
 
                             <Form.Item label="Escoja las carreras" labelCol={{ span: 5 }} name="carreras">
-                                <Select
-                                    showSearch
-                                    options={carrera}
-                                    name="carrera"
-                                    disabled={loading}
-                                    onChange={(value) => {
-                                        setCarreraSelect(value); // Guardar la carrera seleccionada
-                                        obtenerDocentesPorCarrera(value); // Llamar a la función para obtener los docentes filtrados
-                                        setIsDocenteSelectEnabled(true); // Activar el select de docentes
-                                    }}
-                                />
-                            </Form.Item>
+                            <Select
+                                showSearch
+                                options={carrera}
+                                name="carrera"
+                                disabled={loading}
+                                onChange={async (value) => {
+                                    setCarreraSelect(value); // Guardar la carrera seleccionada
+                                    await obtenerDocentesPorCarrera(value); // Llamar a la función para obtener los docentes filtrados
+                                    // Ya no es necesario aquí, ya que lo manejamos en obtenerDocentesPorCarrera
+                                }}
+                            />
+                        </Form.Item>
 
-                            <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
-                                <Select
-                                    showSearch
-                                    options={user} // Aquí se muestran los docentes filtrados
-                                    name="coor_carrera"
-                                    disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
-                                    onChange={(value) => {
-                                        setUserSelect(value); // Guardar el docente seleccionado
-                                    }}
-                                />
-                            </Form.Item>
+                        <Form.Item label="Escoja al docente de la carrera" labelCol={{ span: 5 }} name="coor_carrera">
+                            <Select
+                                showSearch
+                                options={user} // Aquí se muestran los docentes filtrados
+                                name="coor_carrera"
+                                disabled={loading || !isDocenteSelectEnabled} // Habilitar solo si se seleccionó una carrera
+                                onChange={(value) => {
+                                    setUserSelect(value); // Guardar el docente seleccionado
+                                }}
+                            >
+                                {user.length === 0 && (
+                                    <Select.Option value="" disabled>No hay docentes disponibles</Select.Option>
+                                )}
+                            </Select>
+                        </Form.Item>
+
 
 
                             <Button onClick={addRow} icon={<InsertRowRightOutlined />}>Agregar Fila</Button>
