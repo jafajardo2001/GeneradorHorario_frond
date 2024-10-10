@@ -13,6 +13,7 @@ import {
   Dropdown,
   Spin,
   notification,
+  Modal
 } from "antd";
 import {
   SyncOutlined,
@@ -88,72 +89,71 @@ const Paralelos = () => {
       });
   }
 
-  const deleteParalelo = (values) => {
-    console.log("Estoy entrando en la funcion de value");
-    console.log(values);
+  const checkDistribucionesParalelo = async (id) => {
+    try {
+      const response = await fetch(`${url}distribuciones_por_paralelo/${id}`);
+      const data = await response.json();
 
-    let request_backend = {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        id_paralelo: values.id, // Asegúrate de que el backend espere este campo
-      }),
-    };
-
-    fetch(`${url}delete_paralelo/${values.id}`, request_backend) // ID incluido en la URL
-      .then((data_request) => data_request.json())
-      .then((data) => {
-        if (data.ok) {
-          mostrarNotificacion(
-            "success",
-            "Operación realizada con éxito",
-            "El paralelo " + values.paralelo + " se eliminó con éxito"
-          );
-        } else if (data.ok === false) {
-          mostrarNotificacion(
-            "error",
-            "Ha ocurrido un error interno",
-            data.msg
-          );
-        }
-      })
-      .finally(() => {
-        getParalelos();
-      });
+      if (data.ok) {
+        return data.count > 0; // Retorna true si hay distribuciones
+      } else {
+        throw new Error(data.message || "Error desconocido");
+      }
+    } catch (error) {
+      mostrarNotificacion('error', 'Error', error.message);
+      return false; // Por defecto, si hay error, consideramos que no hay distribuciones
+    }
   };
 
-  function handleCloseModal() {
-    setIsOpenNewModal(false);
-    setIsOpenUpdateModal(false);
-  }
-  const handleMenuClick = (action, record) => {
-    console.log(
-      `Se hizo clic en "${action}" para el usuario con cédula ${record}`
-    );
-    if (action === "editar") {
+  const handleMenuClick = async (action, record) => {
+    console.log(`Se hizo clic en "${action}" para el paralelo con ID ${record.id}`);
+    if (action === "eliminar") {
+      const hasDistribuciones = await checkDistribucionesParalelo(record.id); // Verificamos si hay distribuciones
+
+      const content = hasDistribuciones
+        ? `¿Está seguro de que desea eliminar el paralelo "${record.paralelo}"? Esta acción eliminará también las distribuciones asociadas.`
+        : `¿Está seguro de que desea eliminar el paralelo "${record.paralelo}"? Esta acción no afectará al sistema.`;
+
+      Modal.confirm({
+        title: 'Eliminar Paralelo',
+        content,
+        okText: 'Eliminar',
+        cancelText: 'Cancelar',
+        onOk: () => deleteParalelo(record.id), // Eliminar paralelo si se confirma
+      });
+    } else if (action === "editar") {
       setIsOpenUpdateModal(true);
       setFormularioEditar(record);
-    } else if (action === "eliminar") {
-      deleteParalelo(record); // Llamar a deleteParalelo cuando se selecciona "eliminar"
     }
+  };
+
+  const deleteParalelo = (id) => {
+    fetch(`${url}delete_paralelo/${id}`, { method: 'PUT' })
+      .then(response => response.json())
+      .then(data => {
+        if (data.ok) {
+          mostrarNotificacion('success', 'Operación realizada con éxito', `El paralelo se eliminó con éxito.`);
+          getParalelos(); // Recargar paralelos después de eliminar
+        } else {
+          mostrarNotificacion('error', 'Error', data.message || 'No se pudo eliminar el paralelo.');
+        }
+      })
+      .catch((error) => {
+        mostrarNotificacion('error', 'Error', error.message);
+      });
   };
 
   const menu = (record) => (
     <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-      <Menu.Item key="editar">
-        <EditOutlined />
-      </Menu.Item>
-      <Menu.Item key="eliminar">
-        <DeleteOutlined />
-      </Menu.Item>
+      <Menu.Item key="editar"><EditOutlined /> Editar</Menu.Item>
+      <Menu.Item key="eliminar"><DeleteOutlined /> Eliminar</Menu.Item>
     </Menu>
   );
   useEffect(() => {
     getParalelos();
   }, [filterParalelo]);
+
+
   return (
     <>
       <Spin spinning={loading} tip={mensajeLoading}></Spin>
@@ -255,12 +255,12 @@ const Paralelos = () => {
       </Card>
       <NewParalelo
         open={OpenNewModal}
-        handleCloseModal={handleCloseModal}
+        handleCloseModal={() => setIsOpenNewModal(false)}
         getParalelos={getParalelos}
         loading={setLoading}
         mensaje={setMensajeLoading}
       />
-      <UpdateParalelo open={isOpeUpdatePerfil} handleCloseModal={handleCloseModal} formulario={formularioEditar} getParalelos={getParalelos} loading={setLoading} mensaje={setMensajeLoading} />
+      <UpdateParalelo open={isOpeUpdatePerfil} handleCloseModal={() => setIsOpenUpdateModal(false)} formulario={formularioEditar} getParalelos={getParalelos} loading={setLoading} mensaje={setMensajeLoading} />
     </>
   );
 };
