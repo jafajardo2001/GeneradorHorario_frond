@@ -69,7 +69,7 @@ const ExportarHorarioPDF  = ({ filteredData }) => {
                     };
                 }
                 distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
-                    + row.nivel + row.paralelo;
+                    + row.nivel +" " +row.paralelo;
             });
 
             const tablaDistribucion = Object.keys(distribucionHorarios).map(horario => [
