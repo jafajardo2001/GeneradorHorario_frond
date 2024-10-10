@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input, Modal } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewJornada from "../../components/NewJornada.js";
 import UpdateJornada from "../../components/UpdateJornada.js"
@@ -98,25 +98,35 @@ const Jornada = () => {
             });
     };
 
-
-    const handleMenuClick = (action, record) => {
-        console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
-
+    const confirmDelete = (record) => {
+        Modal.confirm({
+          title: '¿Eliminar la jornada?',
+          content: `¿Está seguro de que desea eliminar la jornada "${record.descripcion}"? Esta acción no se puede deshacer.`,
+          okText: 'Eliminar',
+          cancelText: 'Cancelar',
+          onOk: () => deleteJornada(record),
+        });
+      };
+      const handleMenuClick = (action, record) => {
         if (action === "editar") {
-            setIsOpenUpdateModal(true);
-            setFormularioEditar(record);
+          setIsOpenUpdateModal(true);
+          setFormularioEditar(record);
         } else if (action === "eliminar") {
-            deleteJornada(record);  // Llamar a deleteJornada cuando se selecciona "eliminar"
+          confirmDelete(record);  // Mostrar el modal de confirmación antes de eliminar
         }
-    };
+      };
 
 
-    const menu = (record) => (
-        <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-            <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-            <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
+      const menu = (record) => (
+        <Menu>
+          <Menu.Item key="editar" onClick={() => handleMenuClick("editar", record)}>
+            <EditOutlined /> Editar
+          </Menu.Item>
+          <Menu.Item key="eliminar" onClick={() => handleMenuClick("eliminar", record)}>
+            <DeleteOutlined /> Eliminar
+          </Menu.Item>
         </Menu>
-    );
+      );
 
     return (
         <Spin spinning={loading} tip="Cargando...">

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input } from "antd";
+import { Button, Row, Col, Space, Table, Typography, Menu, Dropdown, Card, Spin, notification, Input, Modal } from "antd";
 import { SyncOutlined, UserAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewJob from "../../components/NewJob.js";
 import UpdateJob from "../../components/UpdateJob.js";
@@ -93,12 +93,26 @@ const Tiempo = () => {
           getJobs();
         });
     };
+    const confirmDelete = (record) => {
+      Modal.confirm({
+        title: '¿Eliminar el tiempo laboral?',
+        content: `¿Está seguro de que desea eliminar el tiempo laboral "${record.descripcion}"? Esta acción no se puede deshacer.`,
+        okText: 'Eliminar',
+        cancelText: 'Cancelar',
+        onOk: () => deleteJob(record),
+      });
+    };
+  
     
     
     const menu = (record) => (
-      <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-        <Menu.Item key="editar"><EditOutlined /></Menu.Item>
-        <Menu.Item key="eliminar"><DeleteOutlined /></Menu.Item>
+      <Menu>
+        <Menu.Item key="editar" onClick={() => handleMenuClick("editar", record)}>
+          <EditOutlined /> Editar
+        </Menu.Item>
+        <Menu.Item key="eliminar" onClick={() => handleMenuClick("eliminar", record)}>
+          <DeleteOutlined /> Eliminar
+        </Menu.Item>
       </Menu>
     );
 
@@ -109,7 +123,7 @@ const Tiempo = () => {
           setFormularioEditar(record);
         }
         else if (action === "eliminar") {
-          deleteJob(record);
+          confirmDelete(record);
         }
     };
 

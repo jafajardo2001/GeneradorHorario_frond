@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Row, Col, Space, Table, Typography, Menu, Dropdown, Spin, Input, notification } from "antd";
+import { Button, Card, Row, Col, Space, Table, Typography, Menu, Dropdown, Spin, Input, notification, Modal } from "antd";
 import { SyncOutlined, FileAddOutlined, EditOutlined, DeleteOutlined, MenuOutlined } from "@ant-design/icons";
 import NewTitulo from "../../components/NewTitulo.js";
 import UpdateTitulo from "../../components/UpdateTitulo.js";
@@ -74,43 +74,50 @@ const TitulosAcademicos = () => {
       });
   };
 
-  const deleteTituloAcademico = (values) => {
-    console.log("Estoy entrando en la funcion de value");
-    console.log(values);
-    let request_backend = {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        id_titulo_academico: values.id  // Asegúrate de que el backend espere este campo
-      })
-    };
-    fetch(`${url}delete_titulo_academico/${values.id}`, request_backend)  // ID incluido en la URL
-      .then((data_request) => data_request.json())
-      .then((data) => {
-        if (data.ok) {
-          mostrarNotificacion("success", "Operación realizada con éxito", "El curso " + values.descripcion + " se eliminó con éxito");
-        } else if (data.ok === false) {
-          mostrarNotificacion("error", "Ha ocurrido un error interno", data.msg);
-        }
-      })
-      .finally(() => {
+  const deleteTituloAcademico = async (record) => {
+    try {
+      const request_backend = {
+        method: "PUT",
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          id_titulo_academico: record.id  // Asegúrate de que el backend espere este campo
+        })
+      };
+
+      const response = await fetch(`${url}delete_titulo_academico/${record.id}`, request_backend);  // ID incluido en la URL
+      const data = await response.json();
+
+      if (data.ok) {
+        mostrarNotificacion("success", "Operación realizada con éxito", `El título académico "${record.descripcion}" se eliminó con éxito.`);
         getTitulos();
-      });
+      } else {
+        mostrarNotificacion("error", "Ha ocurrido un error", data.message || 'Error desconocido.');
+      }
+    } catch (error) {
+      mostrarNotificacion("error", "Error", "Error interno en el servidor");
+    }
   };
 
+  const confirmDelete = (record) => {
+    Modal.confirm({
+      title: '¿Eliminar título académico?',
+      content: `¿Está seguro de que desea eliminar el título académico "${record.descripcion}"? Esta acción no se puede deshacer.`,
+      okText: 'Eliminar',
+      cancelText: 'Cancelar',
+      onOk: () => deleteTituloAcademico(record),
+    });
+  };
 
   const handleMenuClick = (action, record) => {
-    console.log(`Se hizo clic en "${action}" para el usuario con cédula ${record}`);
     if (action === "editar") {
       setIsOpenUpdateModal(true);
       setFormularioEditar(record);
     } else if (action === "eliminar") {
-      deleteTituloAcademico(record);
+      confirmDelete(record);  // Mostrar el modal de confirmación antes de eliminar
     }
-    // Agregar lógica de eliminación si es necesario
   };
 
   const menu = (record) => (

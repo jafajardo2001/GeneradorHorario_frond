@@ -252,9 +252,11 @@ function UpdateDistribucion(props) {
                         <Select
                             placeholder="Seleccione una carrera"
                             onChange={(value) => {
+                                
                                 setCarreraSelect(value);
                                 filterDocentes(value); // Llama a la función para filtrar docentes por carrera
                             }}
+                            disabled={true}
                         >
                             {carrera.map(c => (
                                 !isNumber(c.label) && ( // Solo mostrar si no es número
