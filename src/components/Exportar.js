@@ -87,6 +87,7 @@ const GenerarReporte = ({ filteredData }) => {
                         id_usuario: value?.id_usuario,
                         materia: value?.materia,
                         nivel: value?.nivel,
+
                         paralelo: value?.paralelo,
                         dia: value?.dia,
                         hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
@@ -362,7 +363,7 @@ const GenerarReporte = ({ filteredData }) => {
                     };
                 }
                 distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
-                    + row.nivel + row.paralelo;
+                    + row.niveln + " "+ "(" + row.paralelo + ")";
 
                 const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
                 const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);

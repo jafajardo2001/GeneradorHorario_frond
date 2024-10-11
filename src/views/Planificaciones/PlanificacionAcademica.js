@@ -110,6 +110,8 @@ const PlanificacionAcademica = () => {
 
                         materia: value?.materia,
                         nivel: value?.nivel + " " + value?.termino_nivel+ "",
+                        niveln: value?.nivel ,
+
                         paralelo: value?.paralelo,
                         id_paralelo: value?.idparalelo,
 
