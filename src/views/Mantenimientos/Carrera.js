@@ -15,7 +15,7 @@ const Carreras = () => {
     const [filterCarrera, setFilterCarrera] = useState(""); // Nuevo estado para el filtro
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
     const url = "http://localhost:8000/api/istg/";
-    
+
     const mostrarNotificacion = (tipo, titulo, mensaje) => {
         notification[tipo]({
             message: titulo,
@@ -52,11 +52,10 @@ const Carreras = () => {
                         id_jornada: value.id_jornada,
                     };
                 });
-
                 // Filtrar datos
                 if (filterCarrera) {
                     carrera = carrera.filter(item =>
-                        item.nombre.toLowerCase().includes(filterCarrera.toLowerCase())
+                        `${item.nombre} ${item.jornada}`.toLowerCase().includes(filterCarrera.toLowerCase())
                     );
                 }
                 setCarreras(carrera);
@@ -71,12 +70,12 @@ const Carreras = () => {
 
     const handleMenuClick = (action, record) => {
         console.log(`Se hizo clic en "${action}" para la carrera con ID ${record.id}`);
-    
+
         if (action === "editar") {
             setIsOpenUpdateModal(true);
             setFormularioEditar(record);
         }
-    
+
         if (action === "eliminar") {
             // Verificar si hay distribuciones asociadas
             fetch(`${url}distribuciones_por_carrera/${record.id}`) // Asegúrate de tener esta ruta que verifica si hay distribuciones

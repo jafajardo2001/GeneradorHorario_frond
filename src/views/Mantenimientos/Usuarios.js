@@ -113,7 +113,7 @@ const Usuarios = () => {
         // Filtrar datos 
         if (filterUsuario) {
           informacion = informacion.filter(item =>
-            `${item.cedula} ${item.nombres + item.apellidos} ${item.correo} ${item.titulo_academico} ${item.job_descripcion} ${item.carreras} ${item.perfil}`.toLowerCase().includes(filterUsuario.toLowerCase())
+            `${item.cedula} ${item.nombres + item.apellidos} ${item.correo} ${item.titulo_academico} ${item.job_descripcion} ${item.carreras} ${item.perfil} ${item.usuarios} ${item.telefono} ${item.titulo_academico} ${item.job_descripcion}`.toLowerCase().includes(filterUsuario.toLowerCase())
           );
         }
 

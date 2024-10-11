@@ -3,7 +3,7 @@ import { Typography, Row, Card, Space, Col, Button, Table, Dropdown, Menu, Spin,
 import NewPlanificacionAcademica from "../../components/NewPlanificacionAcademica";
 import UpdateDistribucion from "../../components/UpdateDistribucion";
 import Exportar from "../../components/Exportar";
-import ExportarHorarioPDF  from "../../components/ExportarHorarioPDF";
+import ExportarHorarioPDF from "../../components/ExportarHorarioPDF";
 import { DeleteOutlined, EditOutlined, MenuOutlined, PlusCircleOutlined, SyncOutlined } from "@ant-design/icons";
 import Calendario from "../Mantenimientos/Calendario"; // Importar el calendario
 
@@ -17,30 +17,30 @@ const PlanificacionAcademica = () => {
     const [filterDocente, setFilterDocente] = useState(""); // Nuevo estado para el filtro
     const [filteredData, setFilteredData] = useState([]); // Inicializado como un array vacío
     const [formularioEditar, setFormularioEditar] = useState([]);
-    const [mensajeLoading,setMensajeLoading] = useState("cargando...");
-    
+    const [mensajeLoading, setMensajeLoading] = useState("cargando...");
+
     const handleMenuClick = async (action, record) => {
         console.log(`Acción: ${action}, Registro:`, record);
-    
+
         if (action === "eliminar") {
             try {
                 if (!record.id_distribucion) {
                     console.error('ID de distribución no encontrado en el registro');
                     return;
                 }
-    
+
                 const response = await fetch(`${url}horario/delete_distribucion/${record.id_distribucion}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     }
                 });
-    
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Error: ${response.status} - ${errorText}`);
                 }
-    
+
                 const data = await response.json();
                 if (data.ok) {
                     notification.success({
@@ -69,7 +69,7 @@ const PlanificacionAcademica = () => {
             setIsOpenUpdateModal(true);   // Abrir el modal de edición
         }
     };
-    
+
 
     const menu = (record) => (
         <Menu onClick={({ key }) => handleMenuClick(key, record)}>
@@ -81,7 +81,7 @@ const PlanificacionAcademica = () => {
     const formatearHora = (hora) => {
         return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
     };
-    
+
 
     useEffect(() => {
         getDistribucion();
@@ -102,15 +102,15 @@ const PlanificacionAcademica = () => {
                         index: index + 1,
                         id_distribucion: value?.id_distribucion,
                         educacion_global: value?.educacion_global_nombre,
-                        carrera: value?.nombre_carrera + " (" + value?.jornada_descripcion+ ")"||'Sin perfil',
+                        carrera: value?.nombre_carrera + " (" + value?.jornada_descripcion + ")" || 'Sin perfil',
                         id_docente: value?.id_usuario,
                         id_nivel: value?.idnivel,
                         id_materia: value?.idmateria,
                         id_carrera: value?.idcarrera,
 
                         materia: value?.materia,
-                        nivel: value?.nivel + " " + value?.termino_nivel+ "",
-                        niveln: value?.nivel ,
+                        nivel: value?.nivel + " " + value?.termino_nivel + "",
+                        niveln: value?.nivel,
 
                         paralelo: value?.paralelo,
                         id_paralelo: value?.idparalelo,
@@ -132,8 +132,8 @@ const PlanificacionAcademica = () => {
 
                 // Filtrar datos según el filtro de docente
                 if (filterDocente) {
-                    Distribucion = Distribucion.filter(item => 
-                        `${item.docente} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}`.toLowerCase().includes(filterDocente.toLowerCase())
+                    Distribucion = Distribucion.filter(item =>
+                        `${item.docente + "," + item.carrera} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel + "," + item.materia + "," + item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}  ${item.correo} ${item.job_descripcion} ${item.titulo_academico} ${item.telefono} ${item.hora_inicio} ${item.hora_termina}`.toLowerCase().includes(filterDocente.toLowerCase())
                     );
                 }
 
@@ -148,7 +148,7 @@ const PlanificacionAcademica = () => {
             });
     }
 
-    function handleCloseModal(){
+    function handleCloseModal() {
         setModalIsOpen(false);
         setIsOpenUpdateModal(false);
     }
@@ -159,148 +159,148 @@ const PlanificacionAcademica = () => {
 
     return (
         <Spin spinning={loading} tip={mensajeLoading}>
-        <>
-        <Row style={{
-            display:"flex",
-            justifyContent:"center"
-        }}>
-            <Title level={3}>Distribucion Horario</Title>
-        </Row>
-        <Card bordered={false}>
-        
-            <Space style={{margin:"5px"}}>
-                <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
-                    <Col>
-                        <Button icon={<PlusCircleOutlined />} onClick={() => setModalIsOpen(true)} type="primary">
-                            Crear una Distribucion de horarios
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Button icon={<SyncOutlined />} onClick={getDistribucion}>
-                            Descargar datos
-                        </Button>
-                    </Col>
-                    <Col>
-                        <Input 
-                            placeholder="Filtrar por docente" 
-                            value={filterDocente} 
-                            onChange={(e) => setFilterDocente(e.target.value)} 
-                            allowClear 
-                        />
-                    </Col>
-                    <Col>
-                        <Exportar filteredData={filteredData} />
-                    </Col>
-                    <Col>
-                <ExportarHorarioPDF filteredData={filteredData} />
-            </Col>
+            <>
+                <Row style={{
+                    display: "flex",
+                    justifyContent: "center"
+                }}>
+                    <Title level={3}>Distribucion Horario</Title>
                 </Row>
-            </Space>
-            <Table
-                columns={[
-                    {
-                        dataIndex:"index",
-                        title:"Nº",
-                        width:10,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"educacion_global",
-                        title:"Instituto",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"carrera",
-                        title:"Carrera",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"materia",
-                        title:"Materias",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"docente",
-                        title:"Docente",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"nivel",
-                        title:"Curso",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"paralelo",
-                        title:"Paralelos",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"dia",
-                        title:"Dias",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"hora_inicio",
-                        title:"Hora de Inicio",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:"hora_termina",
-                        title:"Hora de Fin",
-                        width:50,
-                        align:"center"
-                    },
-                    {
-                        dataIndex:'fecha_actualizacion',
-                        title:'fecha ultima gestion',
-                        width:25,
-                        align:'center'
-        
-                      },
-                      {
-                        dataIndex: "accion",
-                        title: "Acciones",
-                        align:'center',
-                        width: 25,
-                        render: (_, record) => (
-                          <Dropdown overlay={menu(record)} trigger={['click']}>
-                            <Button><MenuOutlined/></Button>
-                          </Dropdown>
-                        ),
-                      }
-                ]}
-                dataSource={dataTable}
-                size="middle"
-                pagination={{
-                    pageSize:10,
-                    showTotal: total => `Total ${total} items`
-                }}
-            />
-        </Card>
-        <UpdateDistribucion
-            open={isOpenUpdateHorario}
-            handleCloseModal={handleCloseModal}
-            distribucion={formularioEditar} // Pasar la distribución seleccionada
-            getData={getDistribucion}
-            loading={setLoading}
-            mensaje={setMensajeLoading}
-        />
-        <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion}/>
-        <Row style={{ marginTop: "20px" }}>
-            <Col span={24}>
-                <Calendario evetns={filteredData} />
-            </Col>
-        </Row>
-        </>
-    </Spin>
+                <Card bordered={false}>
+
+                    <Space style={{ margin: "5px" }}>
+                        <Row gutter={{ xs: 8, sm: 24, md: 150, lg: 24 }}>
+                            <Col>
+                                <Button icon={<PlusCircleOutlined />} onClick={() => setModalIsOpen(true)} type="primary">
+                                    Crear una Distribucion de horarios
+                                </Button>
+                            </Col>
+                            <Col>
+                                <Button icon={<SyncOutlined />} onClick={getDistribucion}>
+                                    Descargar datos
+                                </Button>
+                            </Col>
+                            <Col>
+                                <Input
+                                    placeholder="Filtrar por docente"
+                                    value={filterDocente}
+                                    onChange={(e) => setFilterDocente(e.target.value)}
+                                    allowClear
+                                />
+                            </Col>
+                            <Col>
+                                <Exportar filteredData={filteredData} />
+                            </Col>
+                            <Col>
+                                <ExportarHorarioPDF filteredData={filteredData} />
+                            </Col>
+                        </Row>
+                    </Space>
+                    <Table
+                        columns={[
+                            {
+                                dataIndex: "index",
+                                title: "Nº",
+                                width: 10,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "educacion_global",
+                                title: "Instituto",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "carrera",
+                                title: "Carrera",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "materia",
+                                title: "Materias",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "docente",
+                                title: "Docente",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "nivel",
+                                title: "Curso",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "paralelo",
+                                title: "Paralelos",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "dia",
+                                title: "Dias",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "hora_inicio",
+                                title: "Hora de Inicio",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "hora_termina",
+                                title: "Hora de Fin",
+                                width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: 'fecha_actualizacion',
+                                title: 'fecha ultima gestion',
+                                width: 25,
+                                align: 'center'
+
+                            },
+                            {
+                                dataIndex: "accion",
+                                title: "Acciones",
+                                align: 'center',
+                                width: 25,
+                                render: (_, record) => (
+                                    <Dropdown overlay={menu(record)} trigger={['click']}>
+                                        <Button><MenuOutlined /></Button>
+                                    </Dropdown>
+                                ),
+                            }
+                        ]}
+                        dataSource={dataTable}
+                        size="middle"
+                        pagination={{
+                            pageSize: 10,
+                            showTotal: total => `Total ${total} items`
+                        }}
+                    />
+                </Card>
+                <UpdateDistribucion
+                    open={isOpenUpdateHorario}
+                    handleCloseModal={handleCloseModal}
+                    distribucion={formularioEditar} // Pasar la distribución seleccionada
+                    getData={getDistribucion}
+                    loading={setLoading}
+                    mensaje={setMensajeLoading}
+                />
+                <NewPlanificacionAcademica open={modalIsOpen} handleCloseModal={handleCloseModal} getData={getDistribucion} />
+                <Row style={{ marginTop: "20px" }}>
+                    <Col span={24}>
+                        <Calendario evetns={filteredData} />
+                    </Col>
+                </Row>
+            </>
+        </Spin>
     );
 }
 

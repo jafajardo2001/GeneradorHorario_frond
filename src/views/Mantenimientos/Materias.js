@@ -48,7 +48,7 @@ const Materias = () => {
 
             if (filterMateria) {
               data = data.filter((item) =>
-                item.descripcion.toLowerCase().includes(filterMateria.toLowerCase())
+                `${item.descripcion} ${item.termino} ${item.nemonico}`.toLowerCase().includes(filterMateria.toLowerCase())
               );
             }
 
