@@ -111,6 +111,8 @@ const PlanificacionAcademica = () => {
                         materia: value?.materia,
                         nivel: value?.nivel + " " + value?.termino_nivel+ "",
                         paralelo: value?.paralelo,
+                        id_paralelo: value?.idparalelo,
+
                         dia: value?.dia,
                         hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
                         hora_termina: formatearHora(value?.hora_termina), // Formatear la hora de término

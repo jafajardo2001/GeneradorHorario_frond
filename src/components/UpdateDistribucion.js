@@ -10,6 +10,9 @@ function UpdateDistribucion(props) {
     const [docentes, setDocentes] = useState([]); // Lista de docentes
     const [materias, setMaterias] = useState([]); // Lista de materias
     const [carrera, setCarrera] = useState([]); // Lista de carreras
+    const [paralelos, setParalelo] = useState([]); // Lista de carreras
+    const [paraleloSelect, setParaleloSelect] = useState(null); // Curso seleccionado
+
     const [cursoSelect, setCursoSelect] = useState(null); // Curso seleccionado
     const [carreraSelect, setCarreraSelect] = useState(null); // Carrera seleccionada
     const [mensajeLoading, setMensajeLoading] = useState("Cargando...");
@@ -90,7 +93,27 @@ function UpdateDistribucion(props) {
             });
         }
     }
+    async function fetchParalelos() {
+        try {
+            const response = await fetch(`${url}showParalelo`);
+            const data = await response.json();
 
+            if (response.ok && data.ok) {
+                const data_mapeada = data.data.map((value) => ({
+                    value: value.id_paralelo,
+                    label: value.paralelo,
+                }));
+                setParalelo(data_mapeada);
+            } else {
+                throw new Error(data.message || "Error desconocido");
+            }
+        } catch (error) {
+            notification.error({
+                message: 'Error al cargar paralelos',
+                description: error.message,
+            });
+        }
+    }
     // Cargar docentes correspondientes a la carrera seleccionada
     async function filterDocentes(idCarrera) {
         try {
@@ -158,14 +181,15 @@ function UpdateDistribucion(props) {
     // Cargar datos cuando se edita la distribución
     useEffect(() => {
         setLoading(true);
-        Promise.all([fetchMaterias(), fetchCursos(), fetchCarreras()])
+        Promise.all([fetchMaterias(), fetchCursos(), fetchCarreras(),fetchParalelos()])
             .then(() => {
                 if (props.distribucion) {
                     form.setFieldsValue({
                         educacion_global: props.distribucion.educacion_global,
                         carrera: props.distribucion.id_carrera, // Se asigna el ID de la carrera
                         materia: props.distribucion.id_materia, // Se asigna el ID de la materia
-                        docente: props.distribucion.id_docente, // Se asigna el ID del docente
+                        docente: props.distribucion.id_docente,
+                        paralelo: props.distribucion.id_paralelo, // Se asigna el ID del docente
                         nivel: props.distribucion.id_nivel, // Se asigna el ID del curso
                         dia: props.distribucion.dia,
                         hora_inicio: moment(props.distribucion.hora_inicio, "HH:mm"),
@@ -194,7 +218,9 @@ function UpdateDistribucion(props) {
                     hora_termina: values.hora_termina.format("HH:mm"),
                     id_materia: parseInt(values.materia, 10),
                     id_nivel: values.nivel, // Agregar el ID del curso
-                    id_docente: values.docente, // Agregar el ID del docente
+                    id_docente: values.docente,
+                    id_paralelo: values.paralelo,
+
                     id_carrera: values.carrera,
                 }),
             });
@@ -301,6 +327,28 @@ function UpdateDistribucion(props) {
                                 !isNumber(materia.label) && ( // Solo mostrar si no es número
                                     <Option key={materia.value} value={materia.value}>
                                         {materia.label}
+                                    </Option>
+                                )
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    
+                    <Form.Item
+                        label="Paralelo"
+                        name="paralelo"
+                        rules={[{ required: true, message: 'Por favor ingrese un paralelo' }]}
+                    >
+                        <Select
+                            placeholder="Seleccione un paralelo"
+                            value={paraleloSelect} // Preselección del curso
+                            onChange={(value) => {
+                                setParaleloSelect(value);
+                            }}
+                        >
+                            {paralelos.map(paralelo => (
+                                !isNumber(paralelo.label) && ( // Solo mostrar si no es número
+                                    <Option key={paralelo.value} value={paralelo.value}>
+                                        {paralelo.label}
                                     </Option>
                                 )
                             ))}
