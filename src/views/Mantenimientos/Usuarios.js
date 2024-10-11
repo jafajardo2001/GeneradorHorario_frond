@@ -101,19 +101,19 @@ const Usuarios = () => {
           apellidos: value.apellidos,
           correo: value.correo,
           telefono: value.telefono,
-          perfil: value.rol_descripcion ||'Sin perfil',
-          titulo_academico: value.titulo_academico_descripcion||'Sin titulo academico',
-          job_descripcion: value.job_descripcion ||'Sin tiempo laboral',
-          carreras: value.carreras.length > 0 
-          ? value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', ')
-          : 'Sin carreras asignada',
+          perfil: value.rol_descripcion || 'Sin perfil',
+          titulo_academico: value.titulo_academico_descripcion || 'Sin titulo academico',
+          job_descripcion: value.job_descripcion || 'Sin tiempo laboral',
+          carreras: value.carreras.length > 0
+            ? value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', ')
+            : 'Sin carreras asignada',
           estado: value.estado,
         }));
 
         // Filtrar datos 
         if (filterUsuario) {
           informacion = informacion.filter(item =>
-            `${item.cedula} ${item.nombres + item.apellidos} ${item.correo} ${item.titulo_academico} ${item.job_descripcion} ${item.carreras}`.toLowerCase().includes(filterUsuario.toLowerCase())
+            `${item.cedula} ${item.nombres + item.apellidos} ${item.correo} ${item.titulo_academico} ${item.job_descripcion} ${item.carreras} ${item.perfil}`.toLowerCase().includes(filterUsuario.toLowerCase())
           );
         }
 
