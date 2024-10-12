@@ -14,30 +14,39 @@ import Jornada from "./views/Mantenimientos/Jornada";
 import NewEducacionGlobal from "./views/Formularios/NewEducacionGlobal";
 import Aside from "./components/Aside";
 import PlanificacionAcademica from "./views/Planificaciones/PlanificacionAcademica";
-import Login from "./views/externos/Login";
-function App() {
+import Login from "./views/externos/Login"; // Asegúrate de que la ruta sea correcta
+import LogoutButton from "./components/LogoutButton";
 
+function App() {
   return (
     <Router>
-      <Routes><Route path="/" element={<Login />} /></Routes>
-      <Aside>
-        <Routes>
-          <Route path="/Mantenimientos/usuarios" element={<Usuarios />} />
-          <Route path="/Mantenimientos/perfiles" element={<Perfiles />} />
-          <Route path="/Mantenimientos/tiempojob" element={<Tiempojob />} />
-          <Route path="/Mantenimientos/jornada" element={<Jornada />} />
-          <Route path="/Mantenimientos/carrera" element={<Carrera />} />
-          <Route path="/Mantenimientos/cursos" element={<Cursos />} />
-          <Route path="/Mantenimientos/paralelos" element={<Paralelos />} />
-          <Route path="/Mantenimientos/educacionGobal" element={<EducacionGlobal />} />
-          <Route path="/Mantenimientos/materias" element={<Materias />} />
-          <Route path="/Mantenimientos/tituloacademico" element={<TitulosAcademicos />} />
-          <Route path="/Mantenimientos/calendario" element={<Calendario />} />
-          <Route path="/Mantenimientos/horarios" element={<Horarios />} />
-          <Route path="/Formulario/crearEducacionGobal" element={<NewEducacionGlobal />} />
-          <Route path="/Planificaciones/PlanificacionAcademia" element={<PlanificacionAcademica />} />
-        </Routes>
-      </Aside>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route 
+          path="/*" // Ruta base para el resto de la app
+          element={
+            <Aside>
+              <Routes>
+                <Route path="/Mantenimientos/usuarios" element={<Usuarios />} />
+                <Route path="/Mantenimientos/perfiles" element={<Perfiles />} />
+                <Route path="/Mantenimientos/tiempojob" element={<Tiempojob />} />
+                <Route path="/Mantenimientos/jornada" element={<Jornada />} />
+                <Route path="/Mantenimientos/carrera" element={<Carrera />} />
+                <Route path="/Mantenimientos/cursos" element={<Cursos />} />
+                <Route path="/Mantenimientos/paralelos" element={<Paralelos />} />
+                <Route path="/Mantenimientos/educacionGlobal" element={<EducacionGlobal />} />
+                <Route path="/Mantenimientos/materias" element={<Materias />} />
+                <Route path="/Mantenimientos/tituloacademico" element={<TitulosAcademicos />} />
+                <Route path="/Mantenimientos/calendario" element={<Calendario />} />
+                <Route path="/Mantenimientos/horarios" element={<Horarios />} />
+                <Route path="/Formulario/crearEducacionGlobal" element={<NewEducacionGlobal />} />
+                <Route path="/Planificaciones/PlanificacionAcademica" element={<PlanificacionAcademica />} />
+                <Route path="/logout" element={<LogoutButton />} />
+              </Routes>
+            </Aside>
+          } 
+        />
+      </Routes>
     </Router>
   );
 }
