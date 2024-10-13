@@ -44,6 +44,9 @@ const Materias = () => {
               nemonico: value.nemonico,
               termino: value.termino,
               id_nivel: value.id_nivel,
+              estado: value?.estado === 'A' ? 'Activo' : 'Inactivo',
+
+
             }));
 
             if (filterMateria) {
@@ -288,8 +291,10 @@ const Materias = () => {
                 <Column title="Término" dataIndex="termino" width={50} align="center" />
               </ColumnGroup>
               <ColumnGroup title="Campos de auditoría" bordered align="center">
-                <Column title="Fecha de Creación" dataIndex="fecha_creacion" width={90} align="center" />
-                <Column title="Fecha de Actualización" dataIndex="fecha_actualizacion" width={90} align="center" />
+                <Column title="Fecha de Creación" dataIndex="fecha_creacion" width={50} align="center" />
+                <Column title="Fecha de Actualización" dataIndex="fecha_actualizacion" width={50} align="center" />
+                <Column title="Estado" dataIndex="estado" width={40} align="center" />
+
               </ColumnGroup>
               <Column
                 title="Acciones"

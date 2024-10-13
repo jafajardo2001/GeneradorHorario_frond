@@ -107,7 +107,7 @@ const Usuarios = () => {
           carreras: value.carreras.length > 0
             ? value.carreras.map(carrera => `${carrera.nombre} (${carrera.jornada_descripcion || 'Sin jornada'})`).join(', ')
             : 'Sin carreras asignada',
-          estado: value.estado,
+          estado: value.estado === 'A' ? 'Activo' : 'Inactivo',
         }));
 
         // Filtrar datos 

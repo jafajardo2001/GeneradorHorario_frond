@@ -49,7 +49,8 @@ const Jornada = () => {
                         ip_actualizacion: value.ip_actualizacion,
                         fecha_actualizacion: new Date(value.fecha_actualizacion).toLocaleDateString(),
                         usuarios_ultima_gestion: value.usuarios_ultima_gestion,
-                        estado: value.estado,
+                        estado: value.estado === 'A' ? 'Activo' : 'Inactivo',
+
                     };
                 });
                 // Filtrar datos 

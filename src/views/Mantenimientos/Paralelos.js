@@ -70,7 +70,7 @@ const Paralelos = () => {
                 value.fecha_actualizacion
               ).toLocaleDateString(),
               usuarios_ultima_gestion: value.usuarios_ultima_gestion,
-              estado: value.estado,
+              estado: value.estado === 'A' ? 'Activo' : 'Inactivo',
             };
           });
           // Aplicar el filtro en el array 'Paralelo', no en 'data'

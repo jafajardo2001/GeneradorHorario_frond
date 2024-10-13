@@ -49,9 +49,12 @@ const Aside = ({ children }) => {
       getItem('Jornada', '14', '', '', '/Mantenimientos/jornada'),
       getItem('Carrera', '13', '', '', '/Mantenimientos/carrera'),
       getItem('Usuarios', '4', '', '', '/Mantenimientos/usuarios'),
+      getItem('Periodo Electivo', '7', '', '', '/Mantenimientos/PeriodoElectivo'),
+
       getItem('Cursos', '5', '', '', '/Mantenimientos/cursos'),
       getItem('Materias', '8', '', '', '/Mantenimientos/materias'),
       getItem('Paralelos', '6', '', '', '/Mantenimientos/paralelos'),
+
       getItem('TitulosAcademicos', '9', '', '', '/Mantenimientos/tituloacademico'),
     ]),
     getItem('Planificaciones', 'subPlanificaciones', <FormOutlined />, [

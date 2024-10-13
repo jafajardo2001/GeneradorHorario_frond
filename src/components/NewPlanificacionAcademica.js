@@ -15,6 +15,9 @@ const NewPlanificacionAcademica = (props) => {
     const [asignatura, setAsignatura] = useState([]);
     const [cursos, setCursos] = useState([]);
     const [paralelos, setParalelos] = useState([]);
+    const [periodoelectivo, setPeriodoElectivo] = useState([]);
+    const [periodoelectivoSelect, setPeriodoElectivoSelect] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [dataSource, setDataSource] = useState([]);
     const [institucionSelect, setInstitucionSelect] = useState([])
@@ -267,7 +270,29 @@ const NewPlanificacionAcademica = (props) => {
             return false
         }
     }
-
+    async function showPeriodoElectivo() {
+        try {
+            setLoading(true)
+            let configuraciones = {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            let response = await fetch(`${url}show_data_periodo_electivo`, configuraciones);
+            let data = await response.json()
+            if (data.data) {
+                let data_mapeada = data.data.map((value, index) => ({
+                    value: value.id_periodo,
+                    label: value.anio + " " + value.periodo,
+                }))
+                setPeriodoElectivo(data_mapeada)
+            }
+            return true
+        } catch (error) {
+            return false
+        }
+    }
     async function obtenerDocentesPorCarrera(idCarrera) {
         try {
             setLoading(true); // Indicador de carga
@@ -329,10 +354,11 @@ const NewPlanificacionAcademica = (props) => {
                         id_usuario: userSelect,  // Asegúrate de que este valor es el esperado
                         id_instituto: institucionSelect,
                         id_carrera: carreraSelect,
+                        id_periodo: periodoelectivoSelect,
+
                         id_materia: element.materia,
                         id_curso: element.curso,
                         id_paralelo: valor,
-                        id_periodo_electivo: 1,
                         dia: element.dias,
                         hora_inicio: element.hora_inicio,
                         hora_termina: element.hora_termina,
@@ -393,6 +419,7 @@ const NewPlanificacionAcademica = (props) => {
             setLoading(true);
             await showInstituto();
             await showCarreras();
+            await showPeriodoElectivo();
             await showCursos();
             await showParalelos();
             setLoading(false);
@@ -457,7 +484,13 @@ const NewPlanificacionAcademica = (props) => {
                                 )}
                             </Select>
                         </Form.Item>
-
+                        <Form.Item label="Escoja el periodo electivo" labelCol={{ span: 5 }} name="periodo">
+                                <Select
+                                    onChange={(value) => {
+                                        setPeriodoElectivoSelect(value)
+                                    }}
+                                    options={periodoelectivo} name="periodo" disabled={loading}/>
+                            </Form.Item>
 
 
                             <Button onClick={addRow} icon={<InsertRowRightOutlined />}>Agregar Fila</Button>

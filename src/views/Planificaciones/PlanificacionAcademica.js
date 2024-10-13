@@ -111,9 +111,10 @@ const PlanificacionAcademica = () => {
                         materia: value?.materia,
                         nivel: value?.nivel + " " + value?.termino_nivel + "",
                         niveln: value?.nivel,
-
+                        periodo_electivo: value?.anio + "-" + value?.periodo + ""|| '',
+                        id_periodo: value?.idperiodo,
                         paralelo: value?.paralelo,
-                        id_paralelo: value?.idparalelo,
+                        id_paralelo: value?.idperiodo,
 
                         dia: value?.dia,
                         hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
@@ -208,6 +209,13 @@ const PlanificacionAcademica = () => {
                                 dataIndex: "educacion_global",
                                 title: "Instituto",
                                 width: 50,
+                                align: "center"
+                            },
+                            {
+                                dataIndex: "periodo_electivo",
+                                title: "periodo electivo",
+                                
+                                width: 60,
                                 align: "center"
                             },
                             {
