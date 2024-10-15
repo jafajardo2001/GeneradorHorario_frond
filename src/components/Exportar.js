@@ -271,7 +271,7 @@ const GenerarReporte = ({ filteredData }) => {
                         { content: 'CARRERA:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
                         docente.carrera,
                         { content: 'PERÍODO ACADÉMICO:', styles: { halign: 'left', fillColor: [240, 240, 240] } },
-                        '2023-S2'
+                        docente.periodo_electivo
                     ]
                 ],
                 columnStyles: {

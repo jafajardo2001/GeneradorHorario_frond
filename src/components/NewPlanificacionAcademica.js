@@ -375,7 +375,9 @@ const NewPlanificacionAcademica = (props) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     data: arregloUnido,
-                    id_usuario: userSelect // Incluye el ID del usuario aquí
+                    id_usuario: userSelect,
+                    id_periodo: periodoelectivoSelect
+                    // Incluye el ID del usuario aquí
                 })
             });
 

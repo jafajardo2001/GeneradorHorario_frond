@@ -134,7 +134,7 @@ const PlanificacionAcademica = () => {
                 // Filtrar datos según el filtro de docente
                 if (filterDocente) {
                     Distribucion = Distribucion.filter(item =>
-                        `${item.docente + "," + item.carrera} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel + "," + item.materia + "," + item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}  ${item.correo} ${item.job_descripcion} ${item.titulo_academico} ${item.telefono} ${item.hora_inicio} ${item.hora_termina}`.toLowerCase().includes(filterDocente.toLowerCase())
+                        `${item.docente + "," + item.carrera + "," + item.periodo_electivo} ${item.job_descripcion} ${item.correo} ${item.titulo_academico} ${item.materia} ${item.paralelo} ${item.nivel + "," + item.materia + "," + item.paralelo} ${item.nivel} ${item.cedula} ${item.dia} ${item.carrera}${item.periodo_electivo}  ${item.correo} ${item.job_descripcion} ${item.titulo_academico} ${item.telefono} ${item.hora_inicio} ${item.hora_termina}`.toLowerCase().includes(filterDocente.toLowerCase())
                     );
                 }
 
