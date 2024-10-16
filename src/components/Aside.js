@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { SettingOutlined, DesktopOutlined, FormOutlined } from "@ant-design/icons";
+import { SettingOutlined, DesktopOutlined, FormOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Breadcrumb, Layout, theme, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Content, Footer, Header } from "antd/es/layout/layout";
+import Logout from './Logout'
 
 const { SubMenu } = Menu;
 
@@ -61,6 +62,7 @@ const Aside = ({ children }) => {
       getItem('Planificacion Academica', '11', '', '', '/Planificaciones/PlanificacionAcademia'),
     ]),
     getItem('Configuraciones', '12', <SettingOutlined />, '', '/settings'),
+    getItem(<Logout />, '/logout', <LogoutOutlined />),
   ];
 
   return (
