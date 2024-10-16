@@ -9,6 +9,7 @@ const GenerarReporte = ({ filteredData }) => {
     const [filterDocente, setFilterDocente] = useState("");
     const [coordinador, setCoordinador] = useState({});
     const [coordinador2, setCoordinador2] = useState({});
+    const [gestorth, setGestorth] = useState({});
 
     const formatearHora = (hora) => {
         return hora.slice(0, 5); // Esto corta los primeros 5 caracteres (HH:MM)
@@ -58,6 +59,33 @@ const GenerarReporte = ({ filteredData }) => {
 
                 if (informaciondos.length > 0) {
                     setCoordinador2(informaciondos[0]); // Almacenas el primer coordinador
+                }
+            })
+            .catch((error) => {
+                console.error('Error fetching data:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    function getUser3() {
+        setLoading(true);
+        fetch(`${url}show_gestorth`, { method: 'GET' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                let informaciondos = data.data.map((value) => ({
+                    id: value.id_usuario,
+                    nombre_completo: value.nombre_completo,
+                }));
+
+                if (informaciondos.length > 0) {
+                    setGestorth(informaciondos[0]); // Almacenas el primer coordinador
                 }
             })
             .catch((error) => {
@@ -300,12 +328,13 @@ const GenerarReporte = ({ filteredData }) => {
 
             doc.autoTable({
                 startY: doc.previousAutoTable.finalY,
-                head: [['Docencia', 'Investigación', 'Prácticas Preprofesionales', 'Gestión Administrativa', 'Total de Horas']],
+                head: [['2.1 Docencia', '2.2 Investigación', '2.3 Prácticas Preprofesionales', '2.4 Gestión Administrativa', 'Total de Horas']],
                 headStyles: { halign: 'center' },
                 body: [
-                    [`Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Tutor de Prácticas: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, `Total: ${totalGeneral}`],
-                    [`Tutorías: ${totalHorasTutorias}`, `Director de Proyectos: ${totalHorasDirectorProyectos}`, '', '', ''],
-                    [`Preparación de Clases: ${totalHorasPreparacionClases}`, `Coordinación: ${totalHorasCoordinacion}`, '', '', ''], // Fila vacía eliminada
+                    [`Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, `Coordinación: ${totalHorasCoordinacion}`, `Total de Horas: ${totalGeneral}`], 
+                    [`Tutorías: ${totalHorasTutorias}`, `Trabajos de Titulación: ${totalHorasGestoriaInstitucional}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, ''],
+                    [`Preparación de Clases: ${totalHorasPreparacionClases}`,  '', '', '', ''], // Fila vacía eliminada
+                    [`Otras Actividades de Docencia: ${totalHorasExcluidas}`, '', '', '', ''],
                     [`Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}`]
                 ],
 
@@ -362,8 +391,8 @@ const GenerarReporte = ({ filteredData }) => {
                         'Sábado': ''
                     };
                 }
-                distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia + " "
-                    + row.niveln + " "+ "(" + row.paralelo + ")";
+                distribucionHorarios[horario][diaNormalizado] += (distribucionHorarios[horario][diaNormalizado] ? ', ' : '') + row.materia 
+                + " " + row.niveln + " " + row.paralelo;
 
                 const horaInicio = new Date(`1970-01-01T${row.hora_inicio}:00`);
                 const horaFin = new Date(`1970-01-01T${row.hora_termina}:00`);
@@ -385,13 +414,13 @@ const GenerarReporte = ({ filteredData }) => {
             const tablaDistribucionConTotales = [
                 ...tablaDistribucion,
                 [
-                    'Total Horas por Día',
-                    `${horasPorDia['Lunes'].toFixed(2)} h`,
-                    `${horasPorDia['Martes'].toFixed(2)} h`,
-                    `${horasPorDia['Miércoles'].toFixed(2)} h`,
-                    `${horasPorDia['Jueves'].toFixed(2)} h`,
-                    `${horasPorDia['Viernes'].toFixed(2)} h`,
-                    `${horasPorDia['Sábado'].toFixed(2)} h`
+                    ' ',
+                    `Total de Horas: ${horasPorDia['Lunes'].toFixed(1)} h`,
+                    `Total de Horas: ${horasPorDia['Martes'].toFixed(1)} h`,
+                    `Total de Horas: ${horasPorDia['Miércoles'].toFixed(1)} h`,
+                    `Total de Horas: ${horasPorDia['Jueves'].toFixed(1)} h`,
+                    `Total de Horas: ${horasPorDia['Viernes'].toFixed(1)} h`,
+                    `Total de Horas: ${horasPorDia['Sábado'].toFixed(1)} h`,
                 ]
             ];
 
@@ -434,25 +463,32 @@ const GenerarReporte = ({ filteredData }) => {
             doc.setFontSize(8);
 
             // Firma izquierda (Coordinador Académico)
-            doc.text("________________________", 25, firmaY); // Línea de subrayado
+            doc.text("________________________", 50, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(coordinador2.nombre_completo || '', 25, firmaY + 5); // Nombre del coordinador académico
-            doc.text(`COORDINADOR ACADÉMICO`, 25, firmaY + 10); // Coordinador académico etiqueta
-            doc.setFont("normal");
+            doc.text(coordinador2.nombre_completo || '', 50, firmaY + 5); // Nombre del coordinador académico
+            doc.text(`Coordinador Académico`, 50, firmaY + 10); // Coordinador académico etiqueta
+            doc.setFont("bold");
 
             // Firma central (Coordinador de Carrera)
-            doc.text("________________________", 125, firmaY); // Línea de subrayado
+            doc.text("________________________", 100, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(coordinador.nombre_completo || '', 125, firmaY + 5); // Nombre del coordinador de carrera
-            doc.text(`COORDINADOR DE CARRERA`, 125, firmaY + 10); // Coordinador de carrera etiqueta
-            doc.setFont("normal");
+            doc.text(coordinador.nombre_completo || '', 100, firmaY + 5); // Nombre del coordinador de carrera
+            doc.text(`Coordinador de Carrera`, 100, firmaY + 10); // Coordinador de carrera etiqueta
+            doc.setFont("bold");
+
+            // Firma central (Gestor de Talento Humano)
+            doc.text("________________________", 150, firmaY); // Línea de subrayado
+            doc.setFont('bold');
+            doc.text(gestorth.nombre_completo || '', 150, firmaY + 5); // Nombre del coordinador de carrera
+            doc.text(`Gestora de la Unidad de Talento Humano`, 150, firmaY + 10); // Coordinador de carrera etiqueta
+            doc.setFont("bold");
 
             // Firma derecha (Docente)
-            doc.text("________________________", 225, firmaY); // Línea de subrayado
+            doc.text("________________________", 215, firmaY); // Línea de subrayado
             doc.setFont('bold');
-            doc.text(`${docente.docente}`, 225, firmaY + 5); // Nombre del docente
-            doc.text(`DOCENTE`, 225, firmaY + 10); // Docente etiqueta
-            doc.setFont("normal");
+            doc.text(`${docente.docente}`, 215, firmaY + 5); // Nombre del docente
+            doc.text(`Docente`, 215, firmaY + 10); // Docente etiqueta
+            doc.setFont("bold");
 
 
             doc.save('reporte.pdf');
@@ -463,6 +499,7 @@ const GenerarReporte = ({ filteredData }) => {
         getDistribucion();
         getUser();
         getUser2();
+        getUser3();
     }, [filterDocente]);
 
     return (
