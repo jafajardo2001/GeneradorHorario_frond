@@ -233,7 +233,7 @@ const Materias = () => {
                 </Form.Item>
               </Row>
               <Col span={24}>
-                <Form.Item label="Escoja el periodo" name="nivel" rules={[{ required: true, message: "Debe seleccionar un periodo" }]}>
+                <Form.Item label="Escoja el nivel" name="nivel" rules={[{ required: true, message: "Debe seleccionar un periodo" }]}>
                   <Select options={cursos} />
                 </Form.Item>
               </Col>

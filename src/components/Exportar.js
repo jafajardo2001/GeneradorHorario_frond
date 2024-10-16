@@ -85,7 +85,7 @@ const GenerarReporte = ({ filteredData }) => {
                 }));
 
                 if (informaciondos.length > 0) {
-                    setGestorth(informaciondos[0]); // Almacenas el primer coordinador
+                    setGestorth(informaciondos[0]); // Almacenas el primer gestor
                 }
             })
             .catch((error) => {
@@ -149,19 +149,30 @@ const GenerarReporte = ({ filteredData }) => {
             'Tutorías': 0,
             'Prácticas Laborales': 0,
             'Trabajo de Titulación': 0,
+            'Gestoría Institucional': 0,
             'Preparación de Clases': 0,
             'Horas Clase': 0 // Asegúrate de incluir esta categoría
         };
+        let horasOtrasDocencia = 0;
+
+        // Define las actividades que se consideran como "Otras Actividades de Docencia"
+        const otrasActividadesDocenciaList = [
+            'apoyo a tics',
+            'ayudar a direccion',
+            // Agrega más actividades según tus necesidades
+        ];
 
         datos.forEach(item => {
             const horasPorClase = item.hora_termina && item.hora_inicio ?
                 (new Date(`1970-01-01T${item.hora_termina}:00`) - new Date(`1970-01-01T${item.hora_inicio}:00`)) / 3600000 : 0;
 
-            // Manejo de categorías excluidas
+            const materiaLower = item.materia.toLowerCase();
+
             if (item.materia in horasMateriaExcluidas) {
                 horasMateriaExcluidas[item.materia] += horasPorClase;
+            } else if (otrasActividadesDocenciaList.includes(materiaLower)) {
+                horasOtrasDocencia += horasPorClase;
             } else {
-                // Manejo de horas clase
                 if (!horasPorMateria[item.materia]) {
                     horasPorMateria[item.materia] = 0;
                 }
@@ -169,47 +180,49 @@ const GenerarReporte = ({ filteredData }) => {
             }
         });
 
-        // Calcular el total de horas para las materias excluidas
         const totalHorasExcluidas = Object.values(horasMateriaExcluidas).reduce((acc, horas) => acc + horas, 0).toFixed(2);
-
-        // Calcular el total de horas para las materias restantes
         const totalHorasRestantes = Object.values(horasPorMateria).reduce((acc, horas) => acc + horas, 0).toFixed(2);
+        const totalHorasOtrasDocencia = horasOtrasDocencia.toFixed(2);
 
-        // Calcular las sumas por columna
-        const totalHorasClase = totalHorasRestantes['Horas Clase'] || 0;
+        // Calcular las sumas por columna incluyendo "Otras Actividades de Docencia"
+        const totalHorasClase = horasMateriaExcluidas['Horas Clase'] || 0;
         const totalHorasTutorias = horasMateriaExcluidas['Tutorías'] || 0;
         const totalHorasPreparacionClases = horasMateriaExcluidas['Preparación de Clases'] || 0;
         const totalHorasDirectorInvestigacion = horasMateriaExcluidas['Proyectos de Investigación'] || 0;
         const totalHorasDirectorProyectos = horasMateriaExcluidas['Práctica Servicios Comunitarios'] || 0;
         const totalHorasCoordinacion = horasMateriaExcluidas['Coordinación'] || 0;
         const totalHorasTutorPracticas = horasMateriaExcluidas['Prácticas Laborales'] || 0;
-        const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Trabajo de Titulación'] || 0;
+        const totalHorasGestoriaInstitucional = horasMateriaExcluidas['Gestoría Institucional'] || 0;
+        const totalHorasTrabajodeTitulación = horasMateriaExcluidas['Trabajo de Titulación'] || 0;
 
-        // Sumar las horas totales
-        const totalDocencia = (parseFloat(totalHorasRestantes) + parseFloat(totalHorasTutorias) + parseFloat(totalHorasPreparacionClases)).toFixed(2);
-        const totalInvestigacion = (parseFloat(totalHorasDirectorInvestigacion) + parseFloat(totalHorasDirectorProyectos) + parseFloat(totalHorasCoordinacion)).toFixed(2);
-        const totalPracticas = (parseFloat(totalHorasTutorPracticas)).toFixed(2);
-        const totalGestion = (parseFloat(totalHorasGestoriaInstitucional)).toFixed(2);
+        // Sumar las horas totales incluyendo "Otras Actividades de Docencia"
+        const totalDocencia = (parseFloat(totalHorasRestantes) + parseFloat(totalHorasTutorias) + parseFloat(totalHorasPreparacionClases) + parseFloat(totalHorasOtrasDocencia)).toFixed(2);
+        const totalInvestigacion = (parseFloat(totalHorasDirectorInvestigacion) + parseFloat(totalHorasTrabajodeTitulación)).toFixed(2);
+        const totalPracticas = (parseFloat(totalHorasTutorPracticas) + parseFloat(totalHorasDirectorProyectos)).toFixed(2);
+        const totalGestion = (parseFloat(totalHorasGestoriaInstitucional) + parseFloat(totalHorasCoordinacion)).toFixed(2);
         const totalGeneral = (parseFloat(totalDocencia) + parseFloat(totalInvestigacion) + parseFloat(totalPracticas) + parseFloat(totalGestion)).toFixed(2);
 
         return {
-            horasPorMateria: horasPorMateria,
-            horasMateriaExcluidas: horasMateriaExcluidas,
-            totalHorasExcluidas: totalHorasExcluidas,
-            totalHorasRestantes: totalHorasRestantes,
-            totalHorasClase: totalHorasClase,
-            totalHorasTutorias: totalHorasTutorias,
-            totalHorasPreparacionClases: totalHorasPreparacionClases,
-            totalHorasDirectorInvestigacion: totalHorasDirectorInvestigacion,
-            totalHorasDirectorProyectos: totalHorasDirectorProyectos,
-            totalHorasCoordinacion: totalHorasCoordinacion,
-            totalHorasTutorPracticas: totalHorasTutorPracticas,
-            totalHorasGestoriaInstitucional: totalHorasGestoriaInstitucional,
-            totalDocencia: totalDocencia,
-            totalInvestigacion: totalInvestigacion,
-            totalPracticas: totalPracticas,
-            totalGestion: totalGestion,
-            totalGeneral: totalGeneral
+            horasPorMateria,
+            horasMateriaExcluidas,
+            horasOtrasDocencia,
+            totalHorasExcluidas,
+            totalHorasRestantes,
+            totalHorasOtrasDocencia,
+            totalHorasClase,
+            totalHorasTutorias,
+            totalHorasPreparacionClases,
+            totalHorasDirectorInvestigacion,
+            totalHorasDirectorProyectos,
+            totalHorasCoordinacion,
+            totalHorasTutorPracticas,
+            totalHorasTrabajodeTitulación,
+            totalHorasGestoriaInstitucional,
+            totalDocencia,
+            totalInvestigacion,
+            totalPracticas,
+            totalGestion,
+            totalGeneral
         };
     };
 
@@ -226,13 +239,16 @@ const GenerarReporte = ({ filteredData }) => {
         const {
             horasPorMateria,
             horasMateriaExcluidas,
+            horasOtrasDocencia,
             totalHorasExcluidas,
             totalHorasRestantes,
+            totalHorasOtrasDocencia,
             totalHorasClase,
             totalHorasTutorias,
             totalHorasPreparacionClases,
             totalHorasDirectorInvestigacion,
             totalHorasDirectorProyectos,
+            totalHorasTrabajodeTitulación,
             totalHorasCoordinacion,
             totalHorasTutorPracticas,
             totalHorasGestoriaInstitucional,
@@ -323,7 +339,6 @@ const GenerarReporte = ({ filteredData }) => {
                 head: [["2. RESUMEN DE HORAS DE DEDICACIÓN SEMANAL"]],
                 headStyles: { fillColor: [32, 149, 211], halign: 'center', fontStyle: 'bold', textColor: [255, 255, 255] },
                 body: []
-
             });
 
             doc.autoTable({
@@ -332,9 +347,9 @@ const GenerarReporte = ({ filteredData }) => {
                 headStyles: { halign: 'center' },
                 body: [
                     [`Horas Clase: ${totalHorasRestantes}`, `Director de Investigación: ${totalHorasDirectorInvestigacion}`, `Director de Proyectos Comunitarios: ${totalHorasDirectorProyectos}`, `Coordinación: ${totalHorasCoordinacion}`, `Total de Horas: ${totalGeneral}`], 
-                    [`Tutorías: ${totalHorasTutorias}`, `Trabajos de Titulación: ${totalHorasGestoriaInstitucional}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, ''],
-                    [`Preparación de Clases: ${totalHorasPreparacionClases}`,  '', '', '', ''], // Fila vacía eliminada
-                    [`Otras Actividades de Docencia: ${totalHorasExcluidas}`, '', '', '', ''],
+                    [`Tutorías: ${totalHorasTutorias}`, `Trabajos de Titulación: ${totalHorasTrabajodeTitulación}`, `Tutor de Prácticas Laborales: ${totalHorasTutorPracticas}`, `Gestoría Institucional: ${totalHorasGestoriaInstitucional}`, ''],
+                    [`Preparación de Clases: ${totalHorasPreparacionClases}`,  '', '', '', ''],
+                    [`Otras Actividades de Docencia: ${totalHorasOtrasDocencia}`, '', '', '', ''], // Actualizado aquí
                     [`Total: ${totalDocencia}`, `Total: ${totalInvestigacion}`, `Total: ${totalPracticas}`, `Total: ${totalGestion}`]
                 ],
 
@@ -414,7 +429,7 @@ const GenerarReporte = ({ filteredData }) => {
             const tablaDistribucionConTotales = [
                 ...tablaDistribucion,
                 [
-                    ' ',
+                    'Totales',
                     `Total de Horas: ${horasPorDia['Lunes'].toFixed(1)} h`,
                     `Total de Horas: ${horasPorDia['Martes'].toFixed(1)} h`,
                     `Total de Horas: ${horasPorDia['Miércoles'].toFixed(1)} h`,
@@ -464,32 +479,31 @@ const GenerarReporte = ({ filteredData }) => {
 
             // Firma izquierda (Coordinador Académico)
             doc.text("________________________", 50, firmaY); // Línea de subrayado
-            doc.setFont('bold');
+            doc.setFont('helvetica', 'bold');
             doc.text(coordinador2.nombre_completo || '', 50, firmaY + 5); // Nombre del coordinador académico
             doc.text(`Coordinador Académico`, 50, firmaY + 10); // Coordinador académico etiqueta
-            doc.setFont("bold");
+            doc.setFont("helvetica", "normal");
 
             // Firma central (Coordinador de Carrera)
             doc.text("________________________", 100, firmaY); // Línea de subrayado
-            doc.setFont('bold');
+            doc.setFont('helvetica', 'bold');
             doc.text(coordinador.nombre_completo || '', 100, firmaY + 5); // Nombre del coordinador de carrera
             doc.text(`Coordinador de Carrera`, 100, firmaY + 10); // Coordinador de carrera etiqueta
-            doc.setFont("bold");
+            doc.setFont("helvetica", "normal");
 
             // Firma central (Gestor de Talento Humano)
             doc.text("________________________", 150, firmaY); // Línea de subrayado
-            doc.setFont('bold');
-            doc.text(gestorth.nombre_completo || '', 150, firmaY + 5); // Nombre del coordinador de carrera
-            doc.text(`Gestora de la Unidad de Talento Humano`, 150, firmaY + 10); // Coordinador de carrera etiqueta
-            doc.setFont("bold");
+            doc.setFont('helvetica', 'bold');
+            doc.text(gestorth.nombre_completo || '', 150, firmaY + 5); // Nombre del gestor de talento humano
+            doc.text(`Gestora de la Unidad de Talento Humano`, 150, firmaY + 10); // Gestora de talento humano etiqueta
+            doc.setFont("helvetica", "normal");
 
             // Firma derecha (Docente)
             doc.text("________________________", 215, firmaY); // Línea de subrayado
-            doc.setFont('bold');
+            doc.setFont('helvetica', 'bold');
             doc.text(`${docente.docente}`, 215, firmaY + 5); // Nombre del docente
             doc.text(`Docente`, 215, firmaY + 10); // Docente etiqueta
-            doc.setFont("bold");
-
+            doc.setFont("helvetica", "normal");
 
             doc.save('reporte.pdf');
         };
