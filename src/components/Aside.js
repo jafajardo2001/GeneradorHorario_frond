@@ -4,9 +4,6 @@ import { SettingOutlined, DesktopOutlined, FormOutlined } from "@ant-design/icon
 import { Breadcrumb, Layout, theme, Menu } from "antd";
 import Sider from "antd/es/layout/Sider";
 import { Content, Footer, Header } from "antd/es/layout/layout";
-import LogoutButton from './LogoutButton';
-import { LogoutOutlined } from '@ant-design/icons';  
-
 
 const { SubMenu } = Menu;
 
@@ -64,7 +61,6 @@ const Aside = ({ children }) => {
       getItem('Planificacion Academica', '11', '', '', '/Planificaciones/PlanificacionAcademia'),
     ]),
     getItem('Configuraciones', '12', <SettingOutlined />, '', '/settings'),
-    getItem(<LogoutButton />, 'logout', <LogoutOutlined />),
   ];
 
   return (

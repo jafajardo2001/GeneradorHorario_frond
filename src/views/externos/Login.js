@@ -12,34 +12,30 @@ const { Option } = Select;
 const Login = () => {
   const navigate = useNavigate();
   const url = "http://localhost:8000/api/istg/";
-  const [loading, setLoading] = useState(false);
 
   const onFinish = (values) => {
-      setLoading(true);
-      fetch(`${url}auth_login`, {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json"
-          },
-          body: JSON.stringify(values)
-      })
-      .then(response => response.json())
-      .then(data => {
-          setLoading(false);
-          if (data.ok) {
-              localStorage.setItem("token", data.token); // Asegúrate de que el token sea correcto
-              navigate("/dashboard"); // Asegúrate de que la ruta de destino sea la correcta
-          } else {
-              console.error(data.message);
-              window.alert(data.message);
-          }
-      })
-      .catch((error) => {
-          setLoading(false);
-          window.alert("Hubo un error en la comunicación con el servidor.");
-          console.error("Error en la autenticación:", error);
-      });
+    fetch(`${url}auth_login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(values)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.ok) {
+        localStorage.setItem("autenticacion", true);
+        navigate("/dashboard"); // Redirige al dashboard si la autenticación es exitosa
+      } else {
+        window.alert(data.message); // Muestra el mensaje de error
+      }
+    })
+    .catch((error) => {
+      window.alert("Hubo un error en la comunicación con el servidor.");
+      console.error("Error en la autenticación:", error);
+    });
   };
+  
 
   return (
     <div className="body">

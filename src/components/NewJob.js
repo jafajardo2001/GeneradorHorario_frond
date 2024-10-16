@@ -16,8 +16,8 @@ const NewPerfil = (props) => {
       .then((data) => {
         if (data.ok) {
           notification.success({
-            message: "Tiempo Laboral Creado",
-            description: `El tiempo Laboral "${value.descripcion}" ha sido creado con éxito.`,
+            message: "Tiempo de dedicacion Creado",
+            description: `El tiempo de dedicacion "${value.descripcion}" ha sido creado con éxito.`,
           });
           props.getJobs();
         } else {
