@@ -10,7 +10,7 @@ function UpdateDistribucion(props) {
   const [docentes, setDocentes] = useState([]);
   const [materias, setMaterias] = useState([]);
   const [carrera, setCarrera] = useState([]);
-  const [paralelos, setParalelo] = useState([]);
+  const [paralelo, setParalelo] = useState([]);
   const [form] = Form.useForm(); 
   const url = "http://localhost:8000/api/istg/";
   
@@ -105,11 +105,11 @@ function UpdateDistribucion(props) {
     try {
       const response = await fetch(`${url}showParalelo`);
       const data = await response.json();
-
+      
       if (response.ok && data.ok) {
         const paralelosMapeados = data.data.map((value) => ({
-          value: value.id_paralelo,
-          label: value.paralelo, // Usamos la descripción "paralelo"
+          value: Number(value.id_paralelo),      // Asegura que el tipo coincida
+          label: value.paralelo,              // Cambia 'descripcion' al campo correcto
         }));
         setParalelo(paralelosMapeados);
       }
@@ -155,7 +155,8 @@ function UpdateDistribucion(props) {
           id_materia: parseInt(values.materia, 10),
           id_periodo: props.distribucion.id_periodo,
           id_docente: values.docente,
-          id_paralelo: values.paralelo, // Usar el ID del paralelo, no la descripción
+          id_paralelo: values.paralelo,
+          id_nivel: values.nivel, // Usar el ID del paralelo, no la descripción
           id_carrera: values.carrera,
         }),
       });
@@ -242,7 +243,7 @@ function UpdateDistribucion(props) {
             rules={[{ required: true, message: 'Por favor seleccione un paralelo' }]}
           >
             <Select>
-              {paralelos.map(paralelo => (
+              {paralelo.map(paralelo => (
                 <Option key={paralelo.value} value={paralelo.value}>
                   {paralelo.label} {/* Mostrar el texto del paralelo */}
                 </Option>
