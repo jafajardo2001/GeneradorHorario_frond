@@ -114,7 +114,7 @@ const PlanificacionAcademica = () => {
                         periodo_electivo: value?.anio + "-" + value?.periodo + ""|| '',
                         id_periodo: value?.idperiodo,
                         paralelo: value?.paralelo,
-                        id_paralelo: value?.idperiodo,
+                        id_paralelo: value?.idparalelo,
 
                         dia: value?.dia,
                         hora_inicio: formatearHora(value?.hora_inicio), // Formatear la hora de inicio
